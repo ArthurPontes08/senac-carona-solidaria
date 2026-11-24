@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # [Project name]
 
 **English** · [Português (Brasil)](README.pt-BR.md)
@@ -84,3 +85,7 @@ Describe how the repository is organized. Adjust the example below to the team's
 - **Repository:**
 - **Deploy (if any):**
 - **Board / GitHub project (if any):**
+=======
+# senac-carona-solidaria
+Community carpooling MVP for Senac Canoas students and staff, matching routes and schedules with AI support.
+>>>>>>> ad54fb1ce0daf3ad1b2b91af1f475a725dfca81a
