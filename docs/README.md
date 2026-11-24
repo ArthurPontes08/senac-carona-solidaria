@@ -40,53 +40,63 @@ The application allows students and staff from Senac Canoas to offer and find ri
 
 ## Stack
 
-Java will be used for the back-end (Python as a "plan B"), JavaScript, HTML, and CSS for the front-end. We have not yet chosen which database we will use.
+Java 17 with Spring Boot (Spring Web) and Maven are used for the back-end, and pure HTML5, CSS3, and Vanilla JavaScript are used for the front-end. We have not yet chosen which database we will use.
 
 ## Folder structure
 
-Describe the repository organization. Adjust the example below to the team's choices.
-
 ```text
 /
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── assets/
 ├── backend/
+│   └── src/main/java/com/senac/carona/
+│       ├── controller/CaronaController.java
+│       ├── model/Carona.java
+│       ├── service/CaronaService.java
+│       └── CaronaApplication.java
 ├── frontend/
+│   ├── css/style.css
+│   ├── js/api.js
+│   ├── js/main.js
+│   └── index.html
 └── docs/
-  ├── README.md
-  ├── README.pt-BR.md
-  ├── DECISIONS.md
-  ├── DECISIONS.pt-BR.md
-  ├── AI_LOG.md
-  ├── AI_LOG.pt-BR.md
+    ├── README.md
+    ├── README.pt-BR.md
+    ├── DECISIONS.md
+    ├── DECISIONS.pt-BR.md
+    ├── AI_LOG.md
+    └── AI_LOG.pt-BR.md
 ```
 
 ## How to run
 
-TO BE DEFINED
-
 ### Prerequisites
-
-(language versions, package managers, database, etc.) TO BE DEFINED
+- Java 17 (JDK)
+- Maven (or the included `./mvnw` wrapper)
+- Modern web browser (Chrome, Edge, Firefox)
 
 ### Back-end
-
 ```bash
-# commands to install dependencies and start the back-end
+cd backend
+./mvnw spring-boot:run
 ```
+The API will be available at `http://localhost:8080`.
 
 ### Front-end
-
-```bash
-# commands to install dependencies and start the front-end
-```
+Open the `frontend/index.html` file directly in your browser or use the **Live Server** extension in VS Code.
 
 ## CI/CD
 
-(describe the GitHub Actions pipeline: what runs on each PR and on each push to `main` — at minimum build, lint, and tests) TO BE DEFINED
+The repository uses **GitHub Actions** (`.github/workflows/ci.yml`), which runs automatically on every Pull Request and push to `main`. It executes two jobs (`backend-ci` and `frontend-ci`) covering:
+1. **Build:** Compiles the Java project (`./mvnw clean compile`) and validates front-end entry files.
+2. **Lint:** Runs code style and syntax checks.
+3. **Tests:** Runs automated unit/layer tests (`./mvnw test`).
 
 ## Deploy
 
-(where the application is published, if applicable; or indicate that automatic deployment has not yet been configured) TO BE DEFINED
+Automatic cloud deployment is not configured; the MVP runs locally for demonstration purposes.
 
 ## Links
 

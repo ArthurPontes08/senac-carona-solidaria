@@ -28,12 +28,6 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 
 ## Registro
 
-### 24/11/2026 — Autenticação JWT (exemplo)
-
-- **Prompt principal:** "Gere um middleware de autenticação JWT em Node.js/Express, com tratamento de token expirado e uma rota protegida de exemplo."
-- **O que a IA gerou:** um middleware e um exemplo de rota, com uma dependência desatualizada e sem validação de variáveis de ambiente.
-- **O que o time aproveitou:** a estrutura do middleware e o fluxo de verificação do token.
-- **O que o time corrigiu ou rejeitou, e por quê:** atualizamos a biblioteca, movemos o segredo para variável de ambiente e incluímos testes. O exemplo de rota foi reescrito para se adequar ao nosso modelo de usuário.
 
 ### [data] — [tarefa ou trecho]
 
@@ -41,3 +35,16 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **O que a IA gerou:**
 - **O que o time aproveitou:**
 - **O que o time corrigiu ou rejeitou, e por quê:**
+
+
+## Ferramentas
+- Gemini (Google AI)
+
+## Registro
+
+### 24/11/2026 — Estruturação inicial de pastas do Back-end, Front-end e CI/CD
+- **Prompt principal:** "Ajude a organizar a estrutura de pastas e arquivos para um back-end Spring Boot (módulo de caronas), um front-end em HTML/CSS/JS puro e uma pipeline de CI no GitHub Actions com build, lint e testes."
+- **O que a IA gerou:** Passo a passo para criar os arquivos em camadas do back-end (`Carona.java`, `CaronaService.java`, `CaronaController.java`), os arquivos modulares do front-end (`index.html`, `css/style.css`, `js/api.js`, `js/main.js`) e o arquivo `.github/workflows/ci.yml`, além do fluxo de branches e commits.
+- **O que o time aproveitou:** A hierarquia completa de pastas, a separação das chamadas de API (`api.js`) da manipulação de tela (`main.js`) no front-end e a estrutura do workflow de CI no GitHub Actions.
+- **O que o time corrigiu ou rejeitou, and why:** Rejeitamos o uso de React no front-end e o deploy em nuvem (Render/Docker) neste momento, optando por JS puro e execução local para adequar o escopo ao prazo de uma semana do hackathon e à familiaridade do time.
+

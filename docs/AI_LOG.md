@@ -14,7 +14,7 @@ Copy the template below whenever you need a new entry.
 
 ## Tools
 
-- (e.g. ChatGPT, GitHub Copilot, Cursor, other)
+- Gemini (Google AI)
 
 ## Entry template
 
@@ -28,16 +28,9 @@ Copy the template below whenever you need a new entry.
 
 ## Log
 
-### 24/11/2026 — JWT authentication (example)
+### 24/11/2026 — Back-end, Front-end, and CI/CD project scaffolding
 
-- **Main prompt:** "Generate a JWT authentication middleware in Node.js/Express, with expired-token handling and a sample protected route."
-- **What the AI generated:** a middleware and a sample route, with an outdated dependency and no validation of environment variables.
-- **What the team kept:** the middleware structure and the token verification flow.
-- **What the team corrected or rejected, and why:** we updated the library, moved the secret to an environment variable and added tests. The sample route was rewritten to fit our user model.
-
-### [date] — [task or section]
-
-- **Main prompt:**
-- **What the AI generated:**
-- **What the team kept:**
-- **What the team corrected or rejected, and why:**
+- **Main prompt:** "Help organize the folder and file structure for a Spring Boot back-end (carpooling module), a vanilla HTML/CSS/JS front-end, and a GitHub Actions CI pipeline with build, lint, and tests."
+- **What the AI generated:** Step-by-step instructions for creating layered back-end files (`Carona.java`, `CaronaService.java`, `CaronaController.java`), modular front-end files (`index.html`, `css/style.css`, `js/api.js`, `js/main.js`), and the `.github/workflows/ci.yml` configuration file, along with Git branch/commit workflows.
+- **What the team kept:** The complete folder hierarchy, separation of front-end API calls (`api.js`) from DOM manipulation (`main.js`), and the GitHub Actions CI workflow structure.
+- **What the team corrected or rejected, and why:** We rejected using React for the front-end and cloud deployment (Render/Docker) for now, opting for Vanilla JS and local execution to fit the one-week hackathon timeline and team familiarity.
