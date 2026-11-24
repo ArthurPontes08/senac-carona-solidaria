@@ -5,7 +5,7 @@
 ## Equipe
 
 - **Turma:** TDS | turmas mistas 6570, 6756 e 6863
-- **Tech Lead:** Arthur 
+- **Tech Lead:** Arthur
 - **Responsável pela apresentação:** João
 - **Integrantes:**
   - Arthur | GitHub
@@ -28,65 +28,76 @@ O usuário pode cadastrar-se, oferecer ou procurar caronas, visualizar opções 
 
 A aplicação permite que alunos e funcionários do Senac Canoas ofereçam e encontrem caronas entre pessoas da comunidade, possibilitando a publicação e busca de trajetos, solicitação e aprovação de vagas, além do gerenciamento das caronas em um único ambiente. O MVP contempla cadastro de usuários, publicação de ofertas, busca, solicitações, aprovação ou recusa, cancelamentos e acompanhamento das caronas, priorizando um fluxo simples, funcional e seguro.
 
-O que não entra no MVP:
+**O que não entra no MVP:**
 - Pagamentos
-- Rastreamento em tempo real 
-- MarketPlace de transporte
-- Sistema complexo de avaliações 
-- Denúncias avançadas 
-- Chat Interno completo
+- Rastreamento em tempo real
+- Marketplace de transporte
+- Sistema complexo de avaliações
+- Denúncias avançadas
+- Chat interno completo
 - Algoritmo sofisticado de rotas
 - Caronas abertas para pessoas de fora da comunidade Senac
 
 ## Stack
 
-Será usado Java para back-end (Python como "plano b"), JavaScript, html e css para o front-end. Ainda não escolhemos qual banco de dados vamos utilizar.
+Java 17 com Spring Boot (Spring Web) e Maven são utilizados no back-end, e HTML5, CSS3 e JavaScript puro no front-end. Ainda não escolhemos qual banco de dados vamos utilizar.
 
 ## Estrutura de pastas
 
-Descrevam a organização do repositório. Ajustem o exemplo abaixo à escolha do time.
-
 ```text
 /
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── assets/
 ├── backend/
+│   └── src/main/java/com/senac/carona/
+│       ├── controller/CaronaController.java
+│       ├── model/Carona.java
+│       ├── service/CaronaService.java
+│       └── CaronaApplication.java
 ├── frontend/
+│   ├── css/style.css
+│   ├── js/api.js
+│   ├── js/main.js
+│   └── index.html
 └── docs/
-  ├── README.md
-  ├── README.pt-BR.md
-  ├── DECISIONS.md
-  ├── DECISIONS.pt-BR.md
-  ├── AI_LOG.md
-  ├── AI_LOG.pt-BR.md
+    ├── README.md
+    ├── README.pt-BR.md
+    ├── DECISIONS.md
+    ├── DECISIONS.pt-BR.md
+    ├── AI_LOG.md
+    └── AI_LOG.pt-BR.md
 ```
 
 ## Como rodar
 
-A DEFINIR
-
 ### Pré-requisitos
-
-(versões de linguagem, gerenciadores de pacote, banco de dados etc.) A DEFINIR
+- Java 17 (JDK)
+- Maven (ou o wrapper `./mvnw` incluso no projeto)
+- Navegador web atualizado (Chrome, Edge, Firefox)
 
 ### Back-end
-
 ```bash
-# comandos para instalar dependências e subir o back-end
+cd backend
+./mvnw spring-boot:run
 ```
+A API ficará disponível em `http://localhost:8080`.
 
 ### Front-end
-
-```bash
-# comandos para instalar dependências e subir o front-end
-```
+Abra o arquivo `frontend/index.html` diretamente no navegador ou utilize a extensão **Live Server** no VS Code.
 
 ## CI/CD
 
-(descrevam a pipeline de GitHub Actions: o que roda em cada PR e em cada push na `main` — no mínimo build, lint e testes) A DEFINIR
+O repositório utiliza **GitHub Actions** (`.github/workflows/ci.yml`), executado automaticamente em todo Pull Request e em todo push na `main`. A pipeline roda dois jobs (`backend-ci` e `frontend-ci`) contemplando:
+1. **Build:** Compila o projeto Java (`./mvnw clean compile`) e valida os arquivos principais do front-end.
+2. **Lint:** Executa verificações de estilo e sintaxe de código.
+3. **Testes:** Roda os testes automatizados por camada (`./mvnw test`).
 
 ## Deploy
 
-(onde a aplicação está publicada, se houver; ou indique que o deploy automático ainda não foi configurado) A DEFINIR
+O deploy automático em nuvem não foi configurado; o MVP é executado localmente para fins de demonstração.
+
 ## Links
 
 - **Repositório:**

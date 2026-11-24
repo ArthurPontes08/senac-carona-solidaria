@@ -25,8 +25,18 @@ Copy the template below whenever you need a new entry.
 - **Alternatives considered:** Java with Spring Boot; Python with FastAPI.
 - **Rationale:** the team is already more familiar with JavaScript, and a one-week deadline favors a stack everyone can contribute to from day one.
 
-## [date] — [decision title]
 
-- **Decision:**
-- **Alternatives considered:**
-- **Rationale:**
+## 24/11/2026 — Back-end stack choice (Java + Spring Boot)
+- **Decision:** Use Java 17 with Spring Boot (Spring Web) and Maven for the back-end API, structured in layers (`controller`, `service`, `model`).
+- **Alternatives considered:** Node.js with Express; Python with FastAPI.
+- **Rationale:** The team already has familiarity with Java from the technical course, and Spring Boot provides an embedded server (Tomcat) and built-in JUnit testing support, speeding up development and CI validation.
+
+## 24/11/2026 — Front-end stack choice (HTML, CSS, and Vanilla JavaScript)
+- **Decision:** Use pure HTML5, CSS3, and Vanilla JavaScript (`index.html`, `css/style.css`, `js/api.js`, `js/main.js`) for the web front-end.
+- **Alternatives considered:** React with Vite.
+- **Rationale:** Given the one-week deadline and the team's current learning curve with React, Vanilla JS avoids build complexity, simplifies integration with the REST API via `fetch`, and makes unit testing and linting easier in the CI pipeline.
+
+## 24/11/2026 — CI Pipeline setup with GitHub Actions
+- **Decision:** Configure a GitHub Actions workflow (`.github/workflows/ci.yml`) triggered on every Pull Request and push to `main`, covering build, lint, and automated tests for both back-end and front-end.
+- **Alternatives considered:** Running checks manually before merging PRs.
+- **Rationale:** Ensures code quality, prevents broken code from reaching `main`, and fulfills the project's mandatory CI/CD requirements from day one.
