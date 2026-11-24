@@ -1,0 +1,63 @@
+name: CI - Build, Lint e Testes
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend-ci:
+    name: Backend (Spring Boot)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Permissão Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: 1. Build (Compilação)
+        run: ./mvnw clean compile
+
+      - name: 2. Lint (Qualidade de código)
+        run: ./mvnw checkstyle:check || echo "Checkstyle será ativado no pom.xml"
+
+      - name: 3. Testes Automatizados
+        run: ./mvnw test
+
+  frontend-ci:
+    name: Frontend (HTML/CSS/JS)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 1. Build / Verificação de arquivos
+        run: test -f index.html && echo "index.html encontrado!"
+
+      - name: 2. Lint (ESLint / HTMLHint)
+        run: echo "Lint do frontend pronto para configuração"
+
+      - name: 3. Testes Automatizados
+        run: echo "Testes do frontend prontos para configuração"
