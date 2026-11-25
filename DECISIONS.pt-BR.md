@@ -40,3 +40,13 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **Alternativas consideradas:** Rodar verificações manualmente antes de aprovar PRs.
 - **Motivo:** Garante a qualidade do código, impede que código quebrado entre na `main` e atende aos requisitos obrigatórios de CI/CD desde o início do projeto.
 
+## 25/11/2026 — Validações e testes do back-end
+- **Decisão:** Manter o MVP em memória e implementar validações defensivas, transições sincronizadas de estado, testes unitários e respostas HTTP centralizadas.
+- **Alternativas consideradas:** Introduzir JPA e banco de dados imediatamente.
+- **Motivo:** A implementação em memória preserva a demonstração local do hackathon e deve ser substituída pelo módulo de banco após a aprovação do esquema e das entidades JPA.
+
+## 25/11/2026 — Responsabilidade do back-end e regras de estado da API
+- **Decisão:** Arthur manterá estáveis o serviço em memória e o contrato REST para integração; banco de dados e frontend usarão as rotas e os estados documentados.
+- **Alternativas consideradas:** Adicionar autenticação ou persistência antes de Lívia e João concluírem seus módulos.
+- **Motivo:** O prazo favorece um contrato estável do MVP. O back-end agora valida datas e horários, solicitações duplicadas, vagas disponíveis, transições e cancelamento da carona; persistência e autenticação permanecem temas de integração.
+
