@@ -8,9 +8,21 @@
 - **Tech Lead:** Arthur
 - **Presentation lead:** João
 - **Members:**
-  - Arthur | GitHub
-  - Lívia | GitHub
-  - João Cenerelli | GitHub
+  - João Cenerelli | Front-end with HTML, CSS, and JavaScript, responsible for UI/UX | GitHub
+  - Arthur | Back-end | GitHub
+  - Lívia | Database | GitHub
+
+### Detailed responsibilities
+
+- **João Cenerelli:** responsible for the complete front-end implementation with HTML, CSS, and JavaScript and for the product's UI/UX. This choice reflects João's stronger knowledge of these technologies and the need to maintain a consistent visual interface.
+- **Arthur:** responsible for the complete back end, including the API, business rules, services, and integration with the front end.
+- **Lívia:** responsible for the database, including entity modeling, relationships, queries, and integration of data with the back end.
+
+The areas will be reviewed collaboratively, but this division defines each member's primary responsibility during MVP development.
+
+All project documentation will be produced by the three team members simultaneously using Google Docs for real-time collaborative editing. Completed texts will be recorded in the repository in both English and Portuguese.
+
+The desktop version will have visual priority. Responsiveness will be implemented only if time remains after completing the essential MVP flow.
 
 ## Theme / area
 

@@ -40,3 +40,18 @@ Copy the template below whenever you need a new entry.
 - **Decision:** Configure a GitHub Actions workflow (`.github/workflows/ci.yml`) triggered on every Pull Request and push to `main`, covering build, lint, and automated tests for both back-end and front-end.
 - **Alternatives considered:** Running checks manually before merging PRs.
 - **Rationale:** Ensures code quality, prevents broken code from reaching `main`, and fulfills the project's mandatory CI/CD requirements from day one.
+
+## 24/11/2026 — Detailed division of team responsibilities
+- **Decision:** João Cenerelli will be responsible for the HTML, CSS, and JavaScript front-end implementation and for UI/UX. Arthur will be responsible for the complete back end. Lívia will be responsible for the database, including modeling, relationships, and queries.
+- **Alternatives considered:** Splitting work by complete features; alternating front-end and back-end responsibilities; or distributing all tasks without clearly assigned primary owners.
+- **Rationale:** The division considers the team's current strengths and uses João's front-end expertise, Arthur's back-end expertise, and Lívia's database expertise. It reduces context switching, preserves interface consistency, and improves delivery predictability within the one-week deadline. The division does not prevent collaboration: integrations, reviews, and technical decisions will continue to be made by the whole group.
+
+## 24/11/2026 — Collaborative documentation
+- **Decision:** All project documentation will be written simultaneously by the three team members in Google Docs.
+- **Alternatives considered:** Splitting individual documents among team members or assigning all documentation to one person.
+- **Rationale:** Google Docs allows every member to see others' changes in real time and makes comments and joint reviews easier. It also prevents mismatches between the Portuguese and English documents.
+
+## 24/11/2026 — Desktop interface priority
+- **Decision:** Prioritize the desktop version of the front end and implement responsiveness only if sufficient time remains after completing the essential MVP flow.
+- **Alternatives considered:** Starting with full responsiveness across every screen size or building desktop and mobile simultaneously.
+- **Rationale:** A desktop-first implementation allows the team to deliver a complete, testable visual flow within the one-week deadline. Responsiveness will be added later so that it does not compromise mandatory MVP features.

@@ -40,3 +40,18 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **Alternativas consideradas:** Rodar verificações manualmente antes de aprovar PRs.
 - **Motivo:** Garante a qualidade do código, impede que código quebrado entre na `main` e atende aos requisitos obrigatórios de CI/CD desde o início do projeto.
 
+## 24/11/2026 — Divisão detalhada das responsabilidades do time
+- **Decisão:** João Cenerelli ficará responsável pela implementação do front-end em HTML, CSS e JavaScript e pela UI/UX. Arthur ficará responsável pelo back-end completo. Lívia ficará responsável pelo banco de dados, incluindo modelagem, relacionamentos e consultas.
+- **Alternativas consideradas:** Dividir o trabalho por funcionalidades completas; alternar responsabilidades entre front-end e back-end; ou distribuir todas as tarefas sem responsáveis principais definidos.
+- **Motivo:** A divisão considera os pontos fortes atuais do time e aproveita o domínio de João no front-end, o domínio de Arthur no back-end e o domínio de Lívia no banco de dados. Isso reduz trocas de contexto, preserva a consistência da interface e aumenta a previsibilidade das entregas no prazo de uma semana. A divisão não impede colaboração: integrações, revisões e decisões técnicas continuam sendo feitas pelo grupo.
+
+## 24/11/2026 — Colaboração na documentação
+- **Decisão:** Toda a documentação do projeto será escrita pelos três integrantes de forma simultânea no Google Docs.
+- **Alternativas consideradas:** Dividir documentos únicos entre integrantes ou designar uma única pessoa para toda a documentação.
+- **Motivo:** O Google Docs permite que todos vejam as alterações dos demais em tempo real, facilita alinhamentos, comentários e revisões conjuntas e evita conflitos de informações entre os documentos em português e inglês.
+
+## 24/11/2026 — Prioridade da interface desktop
+- **Decisão:** Priorizar a versão desktop do front-end e implementar responsividade somente se houver tempo suficiente após concluir o fluxo essencial do MVP.
+- **Alternativas consideradas:** Começar pela responsividade completa em todos os tamanhos de tela ou construir desktop e mobile simultaneamente.
+- **Motivo:** A implementação desktop permite entregar primeiro um fluxo visual completo e testável dentro do prazo de uma semana. Responsividade será adicionada como etapa posterior, sem comprometer as funcionalidades indispensáveis do MVP.
+

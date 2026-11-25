@@ -15,6 +15,7 @@ Copy the template below whenever you need a new entry.
 ## Tools
 
 - Gemini (Google AI)
+- GitHub Copilot using Copilot SDK in VS Code
 
 ## Entry template
 
@@ -34,3 +35,15 @@ Copy the template below whenever you need a new entry.
 - **What the AI generated:** Step-by-step instructions for creating layered back-end files (`Carona.java`, `CaronaService.java`, `CaronaController.java`), modular front-end files (`index.html`, `css/style.css`, `js/api.js`, `js/main.js`), and the `.github/workflows/ci.yml` configuration file, along with Git branch/commit workflows.
 - **What the team kept:** The complete folder hierarchy, separation of front-end API calls (`api.js`) from DOM manipulation (`main.js`), and the GitHub Actions CI workflow structure.
 - **What the team corrected or rejected, and why:** We rejected using React for the front-end and cloud deployment (Render/Docker) for now, opting for Vanilla JS and local execution to fit the one-week hackathon timeline and team familiarity.
+
+### 24/11/2026 — Documentation optimization for the team responsibility division
+- **Main prompt:** Organize the team's technical division in the README and both briefings, provide a detailed rationale for the decision, and record the use of AI in the documentation.
+- **What the AI generated:** A bilingual responsibilities section in the README and briefings, a detailed entry in `DECISIONS.md` and `DECISIONS.pt-BR.md`, and a record of this usage in `AI_LOG.md` and `AI_LOG.pt-BR.md`.
+- **What the team kept:** AI was used to accelerate writing, organize the text more clearly, and keep the English version aligned with the Portuguese version. It also helped turn a short decision into a complete rationale covering the team's strengths and the goal of reducing rework.
+- **What the team corrected or rejected, and why:** Before recording the division, the team confirmed the names and responsible areas. Generic text was expanded and reviewed to reflect the project's reality without assigning work that had not been agreed upon. AI supported writing and organization; the final responsibility decision was defined and approved by the team.
+
+### 24/11/2026 — Technical division, collaborative documentation, and desktop priority update
+- **Main prompt:** Update the documentation to assign Arthur complete responsibility for the back end, Lívia responsibility for the database, and João responsibility for the front end/UI/UX; record that all documentation will be produced simultaneously by the three members in Google Docs; and record that the desktop version will be prioritized, with responsiveness added only if time remains.
+- **What the AI generated:** Revised responsibility sections in the bilingual README and briefing files, updated technical decisions in `DECISIONS.md` and `DECISIONS.pt-BR.md`, and organized documentation of this update in the bilingual AI log.
+- **What the team kept:** The team used AI to keep terminology and content consistent across all document versions. It also made the alternatives considered and the reasons for decisions about responsibility, collaborative documentation, and desktop priority explicit.
+- **What the team corrected or rejected, and why:** The team confirmed Arthur's back-end responsibility and Lívia's database responsibility before the final documentation. They also confirmed that Google Docs will be used for real-time collaborative editing and that responsiveness is optional rather than guaranteed. AI assisted with optimizing and standardizing the documentation; the team reviewed and approved all final decisions.
