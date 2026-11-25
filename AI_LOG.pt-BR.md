@@ -28,6 +28,12 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 
 ## Registro
 
+### 25/11/2026 — Implementação de validações e testes no back-end
+- **Prompt principal:** "Leia a documentação do projeto e implemente melhorias no back-end para validação, consistência, testes e revisão."
+- **O que a IA gerou:** Validações defensivas, operações sincronizadas de estado, tratamento HTTP centralizado de exceções, testes JUnit e atualização da documentação.
+- **O que o time aproveitou:** Mantemos a arquitetura Java 17/Spring Boot e o escopo em memória até a integração com o banco.
+- **O que o time corrigiu ou rejeitou, e por quê:** Mantivemos apenas código compilável localmente e removemos artefatos gerados em `target/`; persistência e autenticação continuam separadas para não misturar responsabilidades do banco e do frontend.
+
 
 ### [data] — [tarefa ou trecho]
 

@@ -40,3 +40,8 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **Alternativas consideradas:** Rodar verificações manualmente antes de aprovar PRs.
 - **Motivo:** Garante a qualidade do código, impede que código quebrado entre na `main` e atende aos requisitos obrigatórios de CI/CD desde o início do projeto.
 
+## 25/11/2026 — Validações e testes do back-end
+- **Decisão:** Manter o MVP em memória e implementar validações defensivas, transições sincronizadas de estado, testes unitários e respostas HTTP centralizadas.
+- **Alternativas consideradas:** Introduzir JPA e banco de dados imediatamente.
+- **Motivo:** A implementação em memória preserva a demonstração local do hackathon e deve ser substituída pelo módulo de banco após a aprovação do esquema e das entidades JPA.
+

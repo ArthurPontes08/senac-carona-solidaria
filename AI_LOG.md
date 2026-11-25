@@ -28,6 +28,12 @@ Copy the template below whenever you need a new entry.
 
 ## Log
 
+### 25/11/2026 — Back-end validation and test implementation
+- **Main prompt:** "Review the project documentation and implement backend improvements for validation, consistency, tests and review readiness."
+- **What the AI generated:** Defensive validation, synchronized state operations, centralized HTTP exception handling, JUnit tests and documentation updates.
+- **What the team kept:** The Java 17/Spring Boot architecture and the in-memory MVP scope pending database integration.
+- **What the team corrected or rejected, and why:** The team retained code that could be compiled locally and removed generated `target/` artifacts; database persistence and authentication remain separate responsibilities to avoid mixing frontend/database work.
+
 ### 24/11/2026 — Back-end, Front-end, and CI/CD project scaffolding
 
 - **Main prompt:** "Help organize the folder and file structure for a Spring Boot back-end (carpooling module), a vanilla HTML/CSS/JS front-end, and a GitHub Actions CI pipeline with build, lint, and tests."
