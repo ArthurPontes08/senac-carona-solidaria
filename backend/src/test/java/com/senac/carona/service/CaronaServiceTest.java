@@ -53,4 +53,34 @@ class CaronaServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> service.solicitarVaga(1L, 1L, null));
     }
+
+    @Test
+    void naoPermiteConfirmacaoDeOutroUsuario() {
+        CaronaService service = new CaronaService();
+        SolicitacaoCarona solicitacao = service.solicitarVaga(1L, 3L, null);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.responderSolicitacao(solicitacao.getId(), 2L, "CONFIRMAR"));
+    }
+
+    @Test
+    void naoPermiteConfirmacaoRepetida() {
+        CaronaService service = new CaronaService();
+        SolicitacaoCarona solicitacao = service.solicitarVaga(1L, 3L, null);
+        service.responderSolicitacao(solicitacao.getId(), 1L, "CONFIRMAR");
+
+        assertThrows(IllegalStateException.class,
+                () -> service.responderSolicitacao(solicitacao.getId(), 1L, "CONFIRMAR"));
+    }
+
+    @Test
+    void cancelarCaronaCancelaSolicitacoesAtivas() {
+        CaronaService service = new CaronaService();
+        SolicitacaoCarona solicitacao = service.solicitarVaga(1L, 3L, null);
+
+        service.cancelarCarona(1L, 1L);
+
+        assertEquals("CANCELADA", solicitacao.getStatus());
+        assertEquals("CANCELADA", service.buscarCaronaPorId(1L).orElseThrow().getStatus());
+    }
 }

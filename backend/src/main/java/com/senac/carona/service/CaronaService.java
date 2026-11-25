@@ -17,6 +17,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class CaronaService {
+    public static final String STATUS_ABERTA = "ABERTA";
+    public static final String STATUS_LOTADA = "LOTADA";
+    public static final String STATUS_CANCELADA = "CANCELADA";
+    public static final String SOLICITACAO_PENDENTE = "PENDENTE";
+    public static final String SOLICITACAO_CONFIRMADA = "CONFIRMADA";
+    public static final String SOLICITACAO_RECUSADA = "RECUSADA";
+    public static final String SOLICITACAO_CANCELADA = "CANCELADA";
 
     private final List<Usuario> usuarios = new ArrayList<>();
     private final List<Carona> caronas = new ArrayList<>();
@@ -29,6 +36,7 @@ public class CaronaService {
     private static final DateTimeFormatter HORARIO_FORMATO = DateTimeFormatter.ofPattern("HH:mm");
 
     public CaronaService() {
+        String hoje = LocalDate.now().format(DATA_FORMATO);
         Usuario arthur = cadastrarUsuario(new Usuario(null, "Arthur Pontes",
                 "arthur.pontes@senacrs.com.br", "ALUNO", "OFERECE",
                 "Mathias Velho", "(51) 99999-1111"));
@@ -43,12 +51,12 @@ public class CaronaService {
 
         publicarCarona(new Carona(null, arthur.getId(), null, null,
                 "Mathias Velho - Canoas", "Senac Canoas",
-                "2026-11-25", "18:15", "Passarela Estação Mathias Velho",
+                hoje, "18:15", "Passarela Estação Mathias Velho",
                 3, "ABERTA", "Saída pontual rumo às aulas"));
 
         publicarCarona(new Carona(null, livia.getId(), null, null,
                 "Centro - Canoas", "Senac Canoas",
-                "2026-11-25", "18:45", "Em frente à Praça da Emancipação",
+                hoje, "18:45", "Em frente à Praça da Emancipação",
                 2, "ABERTA", "Trajeto direto sem paradas extras"));
     }
 
@@ -58,6 +66,15 @@ public class CaronaService {
         }
         if (usuario.getNome() == null || usuario.getNome().isBlank()) {
             throw new IllegalArgumentException("Nome é obrigatório.");
+        }
+        if (usuario.getNome().trim().length() > 120) {
+            throw new IllegalArgumentException("Nome deve ter no máximo 120 caracteres.");
+        }
+        if (usuario.getBairroOrigem() == null || usuario.getBairroOrigem().isBlank()) {
+            throw new IllegalArgumentException("Bairro/região de origem é obrigatório.");
+        }
+        if (usuario.getBairroOrigem().trim().length() > 120) {
+            throw new IllegalArgumentException("Bairro/região deve ter no máximo 120 caracteres.");
         }
         String email = usuario.getEmailSenac() == null ? "" : usuario.getEmailSenac().trim().toLowerCase(Locale.ROOT);
         if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]*senac[A-Za-z0-9.-]*\\.[A-Za-z]{2,}$")) {
@@ -78,6 +95,9 @@ public class CaronaService {
         }
         if (usuario.getTelefone() == null || usuario.getTelefone().isBlank()) {
             throw new IllegalArgumentException("Telefone é obrigatório.");
+        }
+        if (!usuario.getTelefone().matches("^[0-9()+ -]{8,25}$")) {
+            throw new IllegalArgumentException("Telefone inválido.");
         }
         usuario.setEmailSenac(email);
         usuario.setId(usuarioSeq.getAndIncrement());
@@ -115,7 +135,10 @@ public class CaronaService {
             throw new IllegalArgumentException("Data e horário são obrigatórios.");
         }
         try {
-            LocalDate.parse(novaCarona.getData().trim(), DATA_FORMATO);
+            LocalDate data = LocalDate.parse(novaCarona.getData().trim(), DATA_FORMATO);
+            if (data.isBefore(LocalDate.now())) {
+                throw new IllegalArgumentException("Não é permitido publicar carona em data passada.");
+            }
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("Data inválida. Use o formato AAAA-MM-DD.");
         }
@@ -126,6 +149,13 @@ public class CaronaService {
         }
         if (novaCarona.getVagasTotais() <= 0) {
             throw new IllegalArgumentException("A carona deve ter pelo menos 1 vaga.");
+        }
+        if (novaCarona.getVagasTotais() > 8) {
+            throw new IllegalArgumentException("Uma carona pode ter no máximo 8 vagas.");
+        }
+        if (novaCarona.getOrigem().trim().length() > 150
+                || novaCarona.getDestino().trim().length() > 150) {
+            throw new IllegalArgumentException("Origem e destino devem ter no máximo 150 caracteres.");
         }
         if ("BUSCA".equalsIgnoreCase(motorista.getPerfil())) {
             throw new IllegalArgumentException("Este usuário está configurado apenas para buscar caronas.");
@@ -155,6 +185,19 @@ public class CaronaService {
         }
         return caronas.stream()
                 .filter(c -> !"CANCELADA".equalsIgnoreCase(c.getStatus()))
+                .filter(c -> {
+                    try {
+                        LocalDate dia = LocalDate.parse(c.getData(), DATA_FORMATO);
+                        if (dia.isBefore(LocalDate.now())) return false;
+                        if (dia.isEqual(LocalDate.now())) {
+                            LocalTime horario = LocalTime.parse(c.getHorario(), HORARIO_FORMATO);
+                            return horario.isAfter(LocalTime.now());
+                        }
+                        return true;
+                    } catch (DateTimeParseException e) {
+                        return false;
+                    }
+                })
                 .filter(c -> data == null || data.isBlank() || c.getData().equalsIgnoreCase(data.trim()))
                 .filter(c -> {
                     if (regiao == null || regiao.isBlank()) return true;
@@ -180,6 +223,19 @@ public class CaronaService {
         }
         Carona carona = buscarCaronaPorId(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
+
+        try {
+            LocalDate dia = LocalDate.parse(carona.getData(), DATA_FORMATO);
+            if (dia.isBefore(LocalDate.now())) {
+                throw new IllegalStateException("Não é possível solicitar vaga em uma carona passada.");
+            }
+            if (dia.isEqual(LocalDate.now())
+                    && !LocalTime.parse(carona.getHorario(), HORARIO_FORMATO).isAfter(LocalTime.now())) {
+                throw new IllegalStateException("Não é possível solicitar vaga após o horário da carona.");
+            }
+        } catch (DateTimeParseException e) {
+            throw new IllegalStateException("Esta carona possui data ou horário inválido.");
+        }
 
         if (!"ABERTA".equalsIgnoreCase(carona.getStatus()) || carona.getVagasDisponiveis() <= 0) {
             throw new IllegalStateException("Esta carona não possui vagas disponíveis no momento.");
@@ -216,6 +272,11 @@ public class CaronaService {
     }
 
     public synchronized SolicitacaoCarona responderSolicitacao(Long solicitacaoId, String acao) {
+        return responderSolicitacao(solicitacaoId, null, acao);
+    }
+
+    public synchronized SolicitacaoCarona responderSolicitacao(
+            Long solicitacaoId, Long motoristaId, String acao) {
         if (solicitacaoId == null || solicitacaoId <= 0) {
             throw new IllegalArgumentException("SolicitacaoId é obrigatório.");
         }
@@ -226,6 +287,9 @@ public class CaronaService {
 
         Carona carona = buscarCaronaPorId(sol.getCaronaId())
                 .orElseThrow(() -> new IllegalArgumentException("Carona vinculada não encontrada."));
+        if (motoristaId != null && !motoristaId.equals(carona.getMotoristaId())) {
+            throw new IllegalArgumentException("Apenas o motorista desta carona pode responder à solicitação.");
+        }
 
         String decisao = acao == null ? "" : acao.toUpperCase().trim();
 
@@ -278,6 +342,33 @@ public class CaronaService {
         }
 
         return sol;
+    }
+
+    public synchronized Carona cancelarCarona(Long caronaId, Long motoristaId) {
+        if (caronaId == null || caronaId <= 0) {
+            throw new IllegalArgumentException("CaronaId é obrigatório.");
+        }
+        if (motoristaId == null || motoristaId <= 0) {
+            throw new IllegalArgumentException("MotoristaId é obrigatório.");
+        }
+        Carona carona = buscarCaronaPorId(caronaId)
+                .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
+        if (!motoristaId.equals(carona.getMotoristaId())) {
+            throw new IllegalArgumentException("Apenas o motorista desta carona pode cancelá-la.");
+        }
+        if (STATUS_CANCELADA.equalsIgnoreCase(carona.getStatus())) {
+            throw new IllegalStateException("Esta carona já está cancelada.");
+        }
+        carona.setStatus(STATUS_CANCELADA);
+        solicitacoes.stream()
+                .filter(s -> s.getCaronaId().equals(caronaId))
+                .filter(s -> SOLICITACAO_PENDENTE.equalsIgnoreCase(s.getStatus())
+                        || SOLICITACAO_CONFIRMADA.equalsIgnoreCase(s.getStatus()))
+                .forEach(s -> {
+                    s.setStatus(SOLICITACAO_CANCELADA);
+                    s.setTelefoneMotoristaLiberado(null);
+                });
+        return carona;
     }
 
     public synchronized MinhasCaronasResponse minhasCaronas(Long usuarioId) {

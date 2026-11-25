@@ -25,13 +25,9 @@ public class CaronaController {
     }
 
     @PostMapping("/usuarios")
-    public ResponseEntity<?> cadastrarUsuario(@RequestBody Usuario usuario) {
-        try {
-            Usuario salvo = caronaService.cadastrarUsuario(usuario);
-            return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
-        }
+    public ResponseEntity<Usuario> cadastrarUsuario(@RequestBody Usuario usuario) {
+        Usuario salvo = caronaService.cadastrarUsuario(usuario);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @GetMapping("/usuarios")
@@ -52,13 +48,9 @@ public class CaronaController {
     }
 
     @PostMapping("/caronas")
-    public ResponseEntity<?> publicarCarona(@RequestBody Carona carona) {
-        try {
-            Carona criada = caronaService.publicarCarona(carona);
-            return ResponseEntity.status(HttpStatus.CREATED).body(criada);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
-        }
+    public ResponseEntity<Carona> publicarCarona(@RequestBody Carona carona) {
+        Carona criada = caronaService.publicarCarona(carona);
+        return ResponseEntity.status(HttpStatus.CREATED).body(criada);
     }
 
     @GetMapping("/caronas/recomendadas")
@@ -77,29 +69,23 @@ public class CaronaController {
     }
 
     @PostMapping("/caronas/{id}/solicitar")
-    public ResponseEntity<?> solicitarVaga(
+    public ResponseEntity<SolicitacaoCarona> solicitarVaga(
             @PathVariable Long id,
             @RequestBody Map<String, Object> body) {
-        try {
-            if (body == null || !body.containsKey("passageiroId") || body.get("passageiroId") == null) {
-                throw new IllegalArgumentException("Informe passageiroId no corpo da requisição.");
-            }
-            Long passageiroId;
-            try {
-                passageiroId = Long.valueOf(body.get("passageiroId").toString().trim());
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Informe passageiroId válido no corpo da requisição.");
-            }
-            Object pontoEmbarqueObjeto = body.get("pontoEmbarque");
-            String pontoEmbarque = pontoEmbarqueObjeto == null
-                    ? null : pontoEmbarqueObjeto.toString();
-            SolicitacaoCarona sol = caronaService.solicitarVaga(id, passageiroId, pontoEmbarque);
-            return ResponseEntity.status(HttpStatus.CREATED).body(sol);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
+        if (body == null || !body.containsKey("passageiroId") || body.get("passageiroId") == null) {
+            throw new IllegalArgumentException("Informe passageiroId no corpo da requisição.");
         }
+        Long passageiroId;
+        try {
+            passageiroId = Long.valueOf(body.get("passageiroId").toString().trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Informe passageiroId válido no corpo da requisição.");
+        }
+        Object pontoEmbarqueObjeto = body.get("pontoEmbarque");
+        String pontoEmbarque = pontoEmbarqueObjeto == null
+                ? null : pontoEmbarqueObjeto.toString();
+        SolicitacaoCarona sol = caronaService.solicitarVaga(id, passageiroId, pontoEmbarque);
+        return ResponseEntity.status(HttpStatus.CREATED).body(sol);
     }
 
     @GetMapping("/caronas/{id}/solicitacoes")
@@ -108,16 +94,18 @@ public class CaronaController {
     }
 
     @PatchMapping("/solicitacoes/{id}/responder")
-    public ResponseEntity<?> responderSolicitacao(
+    public ResponseEntity<SolicitacaoCarona> responderSolicitacao(
             @PathVariable Long id,
-            @RequestParam String acao) {
-        try {
-            SolicitacaoCarona atualizada = caronaService.responderSolicitacao(id, acao);
-            return ResponseEntity.ok(atualizada);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
-        }
+            @RequestParam String acao,
+            @RequestParam(required = false) Long motoristaId) {
+        SolicitacaoCarona atualizada = caronaService.responderSolicitacao(id, motoristaId, acao);
+        return ResponseEntity.ok(atualizada);
+    }
+
+    @PatchMapping("/caronas/{id}/cancelar")
+    public ResponseEntity<Carona> cancelarCarona(
+            @PathVariable Long id,
+            @RequestParam Long motoristaId) {
+        return ResponseEntity.ok(caronaService.cancelarCarona(id, motoristaId));
     }
 }

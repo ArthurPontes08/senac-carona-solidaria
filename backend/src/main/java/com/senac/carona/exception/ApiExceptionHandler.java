@@ -3,6 +3,7 @@ package com.senac.carona.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,5 +27,11 @@ public class ApiExceptionHandler {
             MissingServletRequestParameterException exception) {
         return ResponseEntity.badRequest()
                 .body(Map.of("erro", "Parâmetro obrigatório ausente: " + exception.getParameterName()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleUnreadableBody(HttpMessageNotReadableException exception) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("erro", "Corpo da requisição inválido ou ausente."));
     }
 }
