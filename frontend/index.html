@@ -3,14 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Carona Solidária · Senac Canoas</title>
+    <title>Vai Junto · Carona Solidária</title>
+    <link rel="icon" type="image/png" href="img/logo-vai-junto.png" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <div id="offline" class="banner" role="status" hidden>Você está sem conexão. Mostrando as últimas informações salvas.</div>
     <div class="app">
       <aside class="sidebar" aria-label="Menu principal">
-        <img class="brand-logo" src="img/logo-carona-solidaria-senac-branca.png" alt="Carona Solidária · Senac Canoas" />
+        <img class="brand-logo" src="img/logo-vai-junto.png" alt="Vai Junto · Carona Solidária" />
         <nav>
           <button class="nav-item" data-view="dashboard">
             <span aria-hidden="true">▦</span>
@@ -61,15 +62,7 @@
               </label>
               <label>
                 Região de origem
-                <select id="fRegion">
-                  <option value="">Todas</option>
-                  <option>Centro</option>
-                  <option>Marechal Rondon</option>
-                  <option>Niterói</option>
-                  <option>Mathias Velho</option>
-                  <option>Igara</option>
-                  <option>Harmonia</option>
-                </select>
+                <input id="fRegion" type="text" placeholder="Digite qualquer lugar" autocomplete="off" />
               </label>
               <label>
                 Horário a partir de
@@ -105,7 +98,7 @@
         <p class="muted">Pedimos poucos dados, só para aproximar pessoas da comunidade Senac Canoas. Telefone e endereço nunca aparecem antes da confirmação.</p>
         <label>
           Nome
-          <input name="name" required placeholder="Ex.: Marina Souza" />
+          <input name="name" required placeholder="Java Lima de Python" />
           <span class="err"></span>
         </label>
         <label>
@@ -123,15 +116,7 @@
         </label>
         <label>
           Bairro de origem
-          <select name="region" required>
-            <option value="">Selecione</option>
-            <option>Centro</option>
-            <option>Marechal Rondon</option>
-            <option>Niterói</option>
-            <option>Mathias Velho</option>
-            <option>Igara</option>
-            <option>Harmonia</option>
-          </select>
+          <input name="region" type="text" required placeholder="Ex.: Bairro, cidade ou endereço" autocomplete="address-level2" />
           <span class="err"></span>
         </label>
         <label>
@@ -148,15 +133,7 @@
         <div class="row2">
           <label>
             Região de origem
-            <select name="origin" required>
-              <option value="">Selecione</option>
-              <option>Centro</option>
-              <option>Marechal Rondon</option>
-              <option>Niterói</option>
-              <option>Mathias Velho</option>
-              <option>Igara</option>
-              <option>Harmonia</option>
-            </select>
+            <input name="origin" type="text" required placeholder="Digite seu bairro, cidade ou endereço" autocomplete="street-address" />
             <span class="err"></span>
           </label>
           <label>
@@ -216,6 +193,22 @@
         <div class="actions">
           <button type="button" class="btn btn-neutral" data-close>Voltar</button>
           <button class="btn btn-primary" type="submit">Enviar solicitação</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlg-chat" class="modal chat-modal" aria-labelledby="t-chat">
+      <form id="chatForm">
+        <h2 id="t-chat">Conversa com <span id="chatPartner"></span></h2>
+        <p id="chatRide" class="muted"></p>
+        <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="Mensagens da conversa"></div>
+        <label>
+          Sua mensagem
+          <textarea name="message" rows="2" maxlength="500" required placeholder="Escreva uma mensagem..."></textarea>
+        </label>
+        <div class="actions">
+          <button type="button" class="btn btn-neutral" data-close>Fechar</button>
+          <button class="btn btn-primary" type="submit">Enviar</button>
         </div>
       </form>
     </dialog>

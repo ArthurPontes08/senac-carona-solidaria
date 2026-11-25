@@ -420,6 +420,43 @@ input:disabled {
 .modal-sm {
   width: 440px;
 }
+.chat-modal {
+  width: 560px;
+}
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  height: min(50vh, 420px);
+  overflow-y: auto;
+  padding: var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--bg);
+}
+.chat-message {
+  align-self: flex-start;
+  max-width: 82%;
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--card);
+  overflow-wrap: anywhere;
+}
+.chat-message.mine {
+  align-self: flex-end;
+  background: var(--blue-l);
+  border-color: #b7cde5;
+}
+.chat-message p {
+  white-space: pre-wrap;
+}
+.chat-message-meta {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
 .modal::backdrop {
   background: rgba(13, 59, 58, 0.55);
 }
@@ -477,6 +514,15 @@ table {
   border: 1px solid var(--line);
   border-radius: var(--r);
   margin-top: var(--s3);
+}
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+}
+.table-actions .btn {
+  padding: 6px 10px;
+  min-height: 38px;
 }
 th,
 td {
@@ -576,7 +622,12 @@ th {
 }
 .brand-logo {
   width: 196px;
+  max-height: 112px;
+  height: auto;
+  object-fit: contain;
+  object-position: left center;
   display: block;
+  border-radius: var(--r);
 }
 .nav-item {
   transition:

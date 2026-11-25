@@ -1,4 +1,4 @@
-const State = { view: "dashboard", tab: "offered", data: null, results: null, pending: null };
+const State = { view: "dashboard", tab: "offered", data: null, results: null, pending: null, chat: null };
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -13,6 +13,7 @@ const STATUS = {
   full: ["▣", "Sem vagas"],
 };
 const badge = (s) => `<span class="badge b-${s}"><span aria-hidden="true">${STATUS[s][0]}</span>${STATUS[s][1]}</span>`;
+const chatButton = (requestId) => `<button class="btn btn-secondary" data-chat="${requestId}">Iniciar conversa</button>`;
 
 const UI = {
   toast(msg, error) {
@@ -103,7 +104,7 @@ function renderRequests() {
           (r) => `<article class="card ride"><h3>${esc(r.who)} ${badge(r.status)}</h3>
     <div class="meta"><span>Região: ${esc(r.region)}</span><span>${fmtDate(r.date)}, ${r.time}</span></div>
     ${r.msg ? `<p>“${esc(r.msg)}”</p>` : '<p class="muted">Sem mensagem.</p>'}
-    ${r.status === "pending" ? `<div class="actions"><button class="btn btn-danger" data-act="recusar" data-id="${r.id}">Recusar</button><button class="btn btn-primary" data-act="aceitar" data-id="${r.id}">Aceitar</button></div>` : r.status === "confirmed" ? `<p class="private">Confirmado. Combinem o ponto de encontro exato.</p><div class="actions"><button class="btn btn-danger" data-act="cancelar" data-id="${r.id}">Cancelar carona</button></div>` : ""}</article>`,
+    ${r.status === "pending" ? `<div class="actions"><button class="btn btn-danger" data-act="recusar" data-id="${r.id}">Recusar</button><button class="btn btn-primary" data-act="aceitar" data-id="${r.id}">Aceitar</button></div>` : r.status === "confirmed" ? `<p class="private">Confirmado. Agora vocês podem combinar os detalhes da carona.</p><div class="actions"><button class="btn btn-danger" data-act="cancelar" data-id="${r.id}">Cancelar carona</button>${chatButton(r.id)}</div>` : ""}</article>`,
         )
         .join("")}</div>`
     : UI.empty("Nenhuma solicitação recebida", "Quando alguém pedir uma vaga, ela aparece aqui.", '<button class="btn btn-primary" data-open="publish">Oferecer carona</button>');
@@ -122,7 +123,8 @@ function renderRides() {
             .filter((r) => r.offerId === o.id && r.status === "confirmed")
             .map((r) => r.who)
             .join(", ") || "Ninguém ainda";
-        return `<tr><td>${esc(o.origin)}</td><td>Senac Canoas</td><td>${fmtDate(o.date)}</td><td>${o.time}</td><td>${esc(p)}</td><td>${o.seats}</td><td>${badge(o.seats ? "open" : "full")}</td><td></td></tr>`;
+        const chats = requests.filter((r) => r.offerId === o.id && r.status === "confirmed").map((r) => chatButton(r.id)).join("");
+        return `<tr><td>${esc(o.origin)}</td><td>Senac Canoas</td><td>${fmtDate(o.date)}</td><td>${o.time}</td><td>${esc(p)}</td><td>${o.seats}</td><td>${badge(o.seats ? "open" : "full")}</td><td><div class="table-actions">${chats}</div></td></tr>`;
       });
   else
     rows = requests
@@ -130,7 +132,7 @@ function renderRides() {
       .map((r) => {
         const o = offers.find((x) => x.id === r.offerId);
         return `<tr><td>${esc(r.region)}</td><td>Senac Canoas</td><td>${fmtDate(r.date)}</td><td>${r.time}</td><td>${esc(o.driver)}${r.status === "confirmed" ? `<div class="private">Encontro: ${esc(o.ref)}</div>` : ""}</td><td>${o.seats}</td><td>${badge(r.status)}</td>
-    <td>${["pending", "confirmed"].includes(r.status) ? `<button class="btn btn-danger" data-act="cancelar" data-id="${r.id}">Cancelar</button>` : ""}</td></tr>`;
+    <td><div class="table-actions">${r.status === "confirmed" ? chatButton(r.id) : ""}${["pending", "confirmed"].includes(r.status) ? `<button class="btn btn-danger" data-act="cancelar" data-id="${r.id}">Cancelar</button>` : ""}</div></td></tr>`;
       });
   $("#ridesTable").innerHTML = rows.length ? `<table><thead><tr><th>Origem</th><th>Destino</th><th>Data</th><th>Horário</th><th>Participantes</th><th>Vagas</th><th>Estado</th><th><span class="sr">Ação</span></th></tr></thead><tbody>${rows.join("")}</tbody></table>` : UI.empty("Nada por aqui esta semana", "Ofereça ou busque uma carona para começar.");
 }
@@ -180,6 +182,20 @@ async function runAction(btn, fn, ok) {
   }
 }
 
+function renderChat() {
+  const { partner, ride, messages } = State.chat;
+  $("#chatPartner").textContent = partner;
+  $("#chatRide").textContent = ride;
+  $("#chatMessages").innerHTML = messages.length
+    ? messages
+        .map(
+          (m) => `<article class="chat-message${m.mine ? " mine" : ""}"><p>${esc(m.text)}</p><span class="chat-message-meta">${esc(m.sender)} · ${new Date(m.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span></article>`,
+        )
+        .join("")
+    : '<p class="muted">Conversa iniciada. Envie uma mensagem para combinar os detalhes da carona.</p>';
+  $("#chatMessages").scrollTop = $("#chatMessages").scrollHeight;
+}
+
 const req = (el, m) => UI.field(el, el.value.trim() ? "" : m);
 function publishSummary() {
   const f = $("#publishForm"),
@@ -210,6 +226,16 @@ function bind() {
       $("#reqInfo").textContent = `${o.origin} → Senac Canoas · ${fmtDate(o.date)}, ${o.time} · ${o.driver}`;
       $("#dlg-request").showModal();
     }
+    if (t.dataset.chat) {
+      try {
+        State.chat = await Api.conversation(t.dataset.chat);
+        renderChat();
+        $("#dlg-chat").showModal();
+        $("#chatForm").elements.message.focus();
+      } catch {
+        UI.toast("Não foi possível abrir esta conversa.", true);
+      }
+    }
     if (t.dataset.act) {
       const a = t.dataset.act,
         id = +t.dataset.id;
@@ -235,12 +261,30 @@ function bind() {
       UI.toast("Não foi possível enviar a solicitação.", true);
     }
   });
+  $("#chatForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const text = form.elements.message.value.trim();
+    if (!text) {
+      form.elements.message.focus();
+      return;
+    }
+    try {
+      await UI.busy(e.submitter, () => Api.sendMessage(State.chat.requestId, text));
+      State.chat = await Api.conversation(State.chat.requestId);
+      renderChat();
+      form.reset();
+      form.elements.message.focus();
+    } catch {
+      UI.toast("Não foi possível enviar a mensagem.", true);
+    }
+  });
   $("#publishForm").addEventListener("input", publishSummary);
   $("#publishForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = e.target,
       el = f.elements;
-    const ok = [req(el.origin, "Escolha a região de origem."), req(el.date, "Informe a data."), req(el.time, "Verifique o horário informado."), req(el.ref, "Informe um ponto de referência aproximado."), UI.field(el.seats, +el.seats.value >= 1 && +el.seats.value <= 4 ? "" : "Informe de 1 a 4 vagas.")].every(Boolean);
+    const ok = [req(el.origin, "Informe a região de origem."), req(el.date, "Informe a data."), req(el.time, "Verifique o horário informado."), req(el.ref, "Informe um ponto de referência aproximado."), UI.field(el.seats, +el.seats.value >= 1 && +el.seats.value <= 4 ? "" : "Informe de 1 a 4 vagas.")].every(Boolean);
     if (!ok) return;
     try {
       await UI.busy(e.submitter, () => Api.createOffer({ origin: el.origin.value, date: el.date.value, time: el.time.value, seats: +el.seats.value, ref: el.ref.value, notes: el.notes.value }));
@@ -261,7 +305,7 @@ function bind() {
   $("#onboardForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const el = e.target.elements;
-    const ok = [req(el.name, "Informe seu nome."), UI.field(el.email, /^\S+@\S+\.\S+$/.test(el.email.value) ? "" : "Use seu e-mail institucional."), req(el.region, "Escolha seu bairro.")].every(Boolean);
+    const ok = [req(el.name, "Informe seu nome."), UI.field(el.email, /^\S+@\S+\.\S+$/.test(el.email.value) ? "" : "Use seu e-mail institucional."), req(el.region, "Informe seu bairro de origem.")].every(Boolean);
     if (!ok) return;
     try {
       const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email: el.email.value, role: el.role.value, region: el.region.value }));
@@ -283,16 +327,24 @@ function bind() {
   $("#simError").addEventListener("click", (e) => {
     Api.config.fail = !Api.config.fail;
     e.target.textContent = Api.config.fail ? "Restaurar conexão" : "Simular falha de conexão";
+    syncConnectionStatus();
+    $("#profileMenu").hidden = true;
+    pb.setAttribute("aria-expanded", "false");
     UI.toast(Api.config.fail ? "Falha simulada ativada." : "Conexão restaurada.");
+    if (State.view === "search") search();
+    else load();
   });
   $("#resetDemo").addEventListener("click", () => {
     Api.reset();
     location.reload();
   });
-  const off = () => ($("#offline").hidden = navigator.onLine);
-  addEventListener("online", off);
-  addEventListener("offline", off);
-  off();
+  const syncConnectionStatus = () => {
+    const offline = Api.config.fail || !navigator.onLine;
+    $("#offline").hidden = !offline;
+  };
+  addEventListener("online", syncConnectionStatus);
+  addEventListener("offline", syncConnectionStatus);
+  syncConnectionStatus();
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       $("#profileMenu").hidden = true;

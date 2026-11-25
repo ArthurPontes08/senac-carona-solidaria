@@ -40,6 +40,26 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **Alternativas consideradas:** Rodar verificações manualmente antes de aprovar PRs.
 - **Motivo:** Garante a qualidade do código, impede que código quebrado entre na `main` e atende aos requisitos obrigatórios de CI/CD desde o início do projeto.
 
+## 25/11/2026 — Origem livre para as caronas
+- **Decisão:** Permitir que o usuário informe a origem em texto livre no cadastro, na oferta e na busca de caronas; a busca usa correspondência parcial sem diferenciar maiúsculas e minúsculas.
+- **Alternativas consideradas:** Restringir a origem a uma lista fixa de bairros de Canoas ou adicionar um serviço externo de busca de locais.
+- **Motivo:** O texto livre aceita origens fora dos bairros predefinidos sem introduzir dependência externa.
+
+## 25/11/2026 — Simulação de falha de conexão
+- **Decisão:** Manter o controle de conexão como uma simulação repetível de falha da API, atualizando o banner offline e recarregando a tela atual.
+- **Alternativas consideradas:** Alterar a conexão real do navegador ou apenas exibir uma notificação de confirmação.
+- **Motivo:** A falha simulada permite demonstrar e verificar estados de erro previsivelmente, sem afetar a rede do dispositivo.
+
+## 25/11/2026 — Identidade visual Vai Junto
+- **Decisão:** Usar a logo fornecida Vai Junto como recurso visual do front-end, incluindo a barra lateral e o favicon do navegador.
+- **Alternativas consideradas:** Manter a logo anterior ou carregar a imagem de um serviço externo.
+- **Motivo:** Um recurso local mantém a identidade visual consistente e evita dependência externa durante a execução.
+
+## 25/11/2026 — Fluxo básico de conversa para caronas confirmadas
+- **Decisão:** Na demonstração do front-end, disponibilizar uma conversa por solicitação tanto para motorista quanto para passageiro após a confirmação; armazenar as mensagens no navegador.
+- **Alternativas consideradas:** Abrir um aplicativo externo de mensagens ou implementar imediatamente um chat compartilhado completo no back-end.
+- **Motivo:** O front-end atual usa uma API simulada local e não possui autenticação. Conversas compartilhadas entre sessões ou dispositivos exigem persistência no back-end e integração de identidade, não oferecidas por esta demonstração.
+
 <<<<<<< HEAD
 ## 24/11/2026 — Divisão detalhada das responsabilidades do time
 - **Decisão:** João Cenerelli ficará responsável pela implementação do front-end em HTML, CSS e JavaScript e pela UI/UX. Arthur ficará responsável pelo back-end completo. Lívia ficará responsável pelo banco de dados, incluindo modelagem, relacionamentos e consultas.

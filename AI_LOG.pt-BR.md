@@ -40,6 +40,30 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **O que o time aproveitou:** Mantivemos as rotas REST e os modelos em memória, com extensões mínimas para integração.
 - **O que o time corrigiu ou rejeitou, e por quê:** Autenticação completa foi adiada porque login no frontend e identidade no banco ainda não foram implementados. A identidade por perfil será integrada após esses módulos ficarem prontos.
 
+### 25/11/2026 — Permitir origem livre nas caronas
+- **Prompt principal:** "Permita que o usuário informe qualquer origem em vez de escolher apenas bairros de Canoas."
+- **O que a IA gerou:** Campos de texto no cadastro, na oferta de carona e na busca, com correspondência parcial sem diferenciar maiúsculas e minúsculas na demonstração do front-end.
+- **O que o time aproveitou:** O usuário pode informar bairro, cidade ou endereço sem depender de uma lista fixa.
+- **O que o time corrigiu ou rejeitou, e por quê:** O front-end continua usando uma API simulada; a mudança não adiciona geocodificação nem validação do local.
+
+### 25/11/2026 — Simulação de falha de conexão
+- **Prompt principal:** "Corrija o controle Simular falha de conexão, que não fazia nada ao ser clicado."
+- **O que a IA gerou:** Sincronização do estado da conexão, exibição do banner offline, recarga da tela ao ativar/restaurar a falha e fechamento do menu.
+- **O que o time aproveitou:** A alternância existente de falha da API simulada e seu comportamento de erro de rede.
+- **O que o time corrigiu ou rejeitou, e por quê:** O controle simula uma falha da API; ele não altera a conexão real do dispositivo.
+
+### 25/11/2026 — Identidade visual Vai Junto
+- **Prompt principal:** "Utilize a logo Vai Junto fornecida em todo o projeto."
+- **O que a IA gerou:** Arquivo local da logo, marca na barra lateral, favicon, título da página e estilos de dimensionamento.
+- **O que o time aproveitou:** A imagem fornecida e o contexto Senac existente nas informações das caronas.
+- **O que o time corrigiu ou rejeitou, e por quê:** A imagem foi adicionada como recurso local, sem carregamento por serviço externo.
+
+### 25/11/2026 — Chat básico para caronas confirmadas
+- **Prompt principal:** "Após aceitar uma solicitação de carona, permitir que motorista e passageiro iniciem e troquem mensagens, independentemente de quem ofereceu a carona."
+- **O que a IA gerou:** Interface de conversa e armazenamento de mensagens por solicitação na demonstração do front-end, com acesso para motorista e passageiro.
+- **O que o time aproveitou:** A conversa só abre para solicitações confirmadas, cada solicitação tem sua própria conversa e o conteúdo das mensagens é escapado antes de ser renderizado.
+- **O que o time corrigiu ou rejeitou, e por quê:** O front-end ainda usa uma API simulada local, então as mensagens não são compartilhadas entre usuários ou dispositivos diferentes; persistência no back-end e autenticação continuam pendentes de integração.
+
 
 ### [data] — [tarefa ou trecho]
 

@@ -24,8 +24,10 @@ const Api = (() => {
       { id: 105, offerId: 3, who: "Você", region: "Niterói", time: "07:20", date: iso(-1), msg: "", status: "done", mine: true },
       { id: 106, offerId: 2, who: "Você", region: "Marechal Rondon", time: "18:10", date: iso(1), msg: "", status: "cancelled", mine: true },
     ],
+    chats: [],
   });
   let db = JSON.parse(localStorage.getItem("cs-db") || "null") || seed();
+  if (!Array.isArray(db.chats)) db.chats = [];
   const save = () => localStorage.setItem("cs-db", JSON.stringify(db));
   const wait = (fn) =>
     new Promise((ok, no) =>
@@ -54,7 +56,7 @@ const Api = (() => {
     },
     session: () => db.me,
     register: (u) => call("/usuarios", { method: "POST", body: JSON.stringify(u) }, () => (db.me = u)),
-    listOffers: (f) => call("/ofertas?" + new URLSearchParams(f), {}, () => db.offers.filter((o) => !o.mine && (!f.data || o.date === f.data) && (!f.regiao || o.origin === f.regiao) && (!f.horario || o.time >= f.horario) && o.seats >= (+f.vagas || 0))),
+    listOffers: (f) => call("/ofertas?" + new URLSearchParams(f), {}, () => db.offers.filter((o) => !o.mine && (!f.data || o.date === f.data) && (!f.regiao || o.origin.toLocaleLowerCase("pt-BR").includes(f.regiao.trim().toLocaleLowerCase("pt-BR"))) && (!f.horario || o.time >= f.horario) && o.seats >= (+f.vagas || 0))),
     createOffer: (o) =>
       call("/ofertas", { method: "POST", body: JSON.stringify(o) }, () => {
         const n = { ...o, id: Date.now(), driver: "Você", mine: true, match: 100, summary: o.origin + " → Campus" };
@@ -75,6 +77,38 @@ const Api = (() => {
         r.status = { aceitar: "confirmed", recusar: "refused", cancelar: "cancelled" }[acao];
         if (acao === "aceitar" && o.mine) o.seats = Math.max(0, o.seats - 1);
         return r;
+      }),
+    conversation: (requestId) =>
+      call(`/solicitacoes/${requestId}/conversa`, {}, () => {
+        const request = find(db.requests, +requestId);
+        if (!request || request.status !== "confirmed") throw new Error("conversation unavailable");
+        const offer = find(db.offers, request.offerId);
+        let chat = db.chats.find((item) => item.requestId === request.id);
+        if (!chat) {
+          chat = { requestId: request.id, messages: [] };
+          db.chats.push(chat);
+        }
+        return {
+          requestId: request.id,
+          partner: request.mine ? offer.driver : request.who,
+          ride: `${offer.origin} → Senac Canoas · ${offer.date} às ${offer.time}`,
+          messages: chat.messages,
+        };
+      }),
+    sendMessage: (requestId, text) =>
+      call(`/solicitacoes/${requestId}/conversa`, { method: "POST", body: JSON.stringify({ text }) }, () => {
+        const request = find(db.requests, +requestId);
+        if (!request || request.status !== "confirmed") throw new Error("conversation unavailable");
+        const message = String(text || "").trim();
+        if (!message || message.length > 500) throw new Error("invalid message");
+        let chat = db.chats.find((item) => item.requestId === request.id);
+        if (!chat) {
+          chat = { requestId: request.id, messages: [] };
+          db.chats.push(chat);
+        }
+        const sent = { id: Date.now(), sender: db.me ? db.me.name : "Você", text: message, createdAt: new Date().toISOString(), mine: true };
+        chat.messages.push(sent);
+        return sent;
       }),
     snapshot: () => call("/minhas-caronas", {}, () => db),
   };

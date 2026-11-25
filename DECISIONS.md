@@ -41,6 +41,26 @@ Copy the template below whenever you need a new entry.
 - **Alternatives considered:** Running checks manually before merging PRs.
 - **Rationale:** Ensures code quality, prevents broken code from reaching `main`, and fulfills the project's mandatory CI/CD requirements from day one.
 
+## 25/11/2026 — Free-form ride origins
+- **Decision:** Allow users to enter an origin as free text in registration, ride offers, and ride search; search uses partial, case-insensitive matching.
+- **Alternatives considered:** Restricting origins to a fixed list of Canoas neighborhoods or adding an external place lookup service.
+- **Rationale:** Free text supports origins outside the predefined neighborhoods without introducing an external dependency.
+
+## 25/11/2026 — Connection failure simulation
+- **Decision:** Keep the connection control as a repeatable API-failure simulation that updates the offline banner and reloads the current view.
+- **Alternatives considered:** Changing the browser's real network state or only displaying a confirmation toast.
+- **Rationale:** The mock failure provides a predictable way to demonstrate and verify error states without affecting the device's network.
+
+## 25/11/2026 — Vai Junto visual identity
+- **Decision:** Use the supplied Vai Junto logo as the frontend brand asset, including the sidebar and browser favicon.
+- **Alternatives considered:** Keeping the previous logo or loading the image from an external service.
+- **Rationale:** A local asset keeps the visual identity consistent and avoids an external runtime dependency.
+
+## 25/11/2026 — Basic conversation flow for confirmed rides
+- **Decision:** In the frontend demo, expose a per-request conversation to both the driver and passenger after confirmation; store its messages in the browser.
+- **Alternatives considered:** Opening an external messaging app or implementing a fully shared backend chat immediately.
+- **Rationale:** The current frontend uses a local mock API and has no authentication. Shared conversations across user sessions or devices require backend persistence and identity integration and are not provided by this demo.
+
 <<<<<<< HEAD
 ## 24/11/2026 — Detailed division of team responsibilities
 - **Decision:** João Cenerelli will be responsible for the HTML, CSS, and JavaScript front-end implementation and for UI/UX. Arthur will be responsible for the complete back end. Lívia will be responsible for the database, including modeling, relationships, and queries.

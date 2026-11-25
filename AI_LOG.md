@@ -41,6 +41,30 @@ Copy the template below whenever you need a new entry.
 - **What the team kept:** The existing REST routes and in-memory model, with minimal extensions for integration.
 - **What the team corrected or rejected, and why:** Full authentication was deferred because frontend login and database identity were not yet implemented. A stable role-based identity contract will be integrated after those modules are ready.
 
+### 25/11/2026 — Accept free-form ride origins
+- **Main prompt:** "Let users enter any origin instead of choosing only Canoas neighborhoods."
+- **What the AI generated:** Text inputs for registration, ride offers, and origin search, with partial, case-insensitive matching in the frontend demo.
+- **What the team kept:** Users can enter a neighborhood, city, or address without a fixed list.
+- **What the team corrected or rejected, and why:** The front end remains a local mock; the change does not add geocoding or location validation.
+
+### 25/11/2026 — Connection failure simulation
+- **Main prompt:** "Fix the Simular falha de conexão control, which did nothing when clicked."
+- **What the AI generated:** Connection status synchronization, the offline banner, a view reload on activation/restoration, and menu closure.
+- **What the team kept:** The existing API mock failure toggle and its network-error behavior.
+- **What the team corrected or rejected, and why:** The control simulates an API failure; it does not change the device's actual network state.
+
+### 25/11/2026 — Vai Junto visual identity
+- **Main prompt:** "Use the supplied Vai Junto logo throughout the project."
+- **What the AI generated:** The logo asset in the frontend, sidebar branding, browser favicon, page title, and sizing styles.
+- **What the team kept:** The provided image and the existing Senac context in ride-related content.
+- **What the team corrected or rejected, and why:** The image was added as a local asset rather than loaded from an external service.
+
+### 25/11/2026 — Basic chat for confirmed rides
+- **Main prompt:** "After a ride request is accepted, let the driver and passenger start and exchange messages regardless of who offered the ride."
+- **What the AI generated:** A conversation interface and per-request message storage in the frontend demo, with entry points for both driver and passenger.
+- **What the team kept:** The conversation is only available for confirmed requests, each request has its own thread, and message content is escaped before rendering.
+- **What the team corrected or rejected, and why:** The frontend still uses a local mock API, so messages are not shared across separate users or devices; shared backend persistence and user authentication remain future integration work.
+
 ### 24/11/2026 — Back-end, Front-end, and CI/CD project scaffolding
 
 - **Main prompt:** "Help organize the folder and file structure for a Spring Boot back-end (carpooling module), a vanilla HTML/CSS/JS front-end, and a GitHub Actions CI pipeline with build, lint, and tests."
