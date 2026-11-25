@@ -40,6 +40,7 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **Alternativas consideradas:** Rodar verificações manualmente antes de aprovar PRs.
 - **Motivo:** Garante a qualidade do código, impede que código quebrado entre na `main` e atende aos requisitos obrigatórios de CI/CD desde o início do projeto.
 
+<<<<<<< HEAD
 ## 24/11/2026 — Divisão detalhada das responsabilidades do time
 - **Decisão:** João Cenerelli ficará responsável pela implementação do front-end em HTML, CSS e JavaScript e pela UI/UX. Arthur ficará responsável pelo back-end completo. Lívia ficará responsável pelo banco de dados, incluindo modelagem, relacionamentos e consultas.
 - **Alternativas consideradas:** Dividir o trabalho por funcionalidades completas; alternar responsabilidades entre front-end e back-end; ou distribuir todas as tarefas sem responsáveis principais definidos.
@@ -54,4 +55,15 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **Decisão:** Priorizar a versão desktop do front-end e implementar responsividade somente se houver tempo suficiente após concluir o fluxo essencial do MVP.
 - **Alternativas consideradas:** Começar pela responsividade completa em todos os tamanhos de tela ou construir desktop e mobile simultaneamente.
 - **Motivo:** A implementação desktop permite entregar primeiro um fluxo visual completo e testável dentro do prazo de uma semana. Responsividade será adicionada como etapa posterior, sem comprometer as funcionalidades indispensáveis do MVP.
+=======
+## 25/11/2026 — Validações e testes do back-end
+- **Decisão:** Manter o MVP em memória e implementar validações defensivas, transições sincronizadas de estado, testes unitários e respostas HTTP centralizadas.
+- **Alternativas consideradas:** Introduzir JPA e banco de dados imediatamente.
+- **Motivo:** A implementação em memória preserva a demonstração local do hackathon e deve ser substituída pelo módulo de banco após a aprovação do esquema e das entidades JPA.
+
+## 25/11/2026 — Responsabilidade do back-end e regras de estado da API
+- **Decisão:** Arthur manterá estáveis o serviço em memória e o contrato REST para integração; banco de dados e frontend usarão as rotas e os estados documentados.
+- **Alternativas consideradas:** Adicionar autenticação ou persistência antes de Lívia e João concluírem seus módulos.
+- **Motivo:** O prazo favorece um contrato estável do MVP. O back-end agora valida datas e horários, solicitações duplicadas, vagas disponíveis, transições e cancelamento da carona; persistência e autenticação permanecem temas de integração.
+>>>>>>> 7ff614e3ac232e0f9e4c6ca00c77065ed1f5e75a
 

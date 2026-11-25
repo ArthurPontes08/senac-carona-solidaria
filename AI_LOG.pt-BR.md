@@ -28,6 +28,18 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 
 ## Registro
 
+### 25/11/2026 — Implementação de validações e testes no back-end
+- **Prompt principal:** "Leia a documentação do projeto e implemente melhorias no back-end para validação, consistência, testes e revisão."
+- **O que a IA gerou:** Validações defensivas, operações sincronizadas de estado, tratamento HTTP centralizado de exceções, testes JUnit e atualização da documentação.
+- **O que o time aproveitou:** Mantemos a arquitetura Java 17/Spring Boot e o escopo em memória até a integração com o banco.
+- **O que o time corrigiu ou rejeitou, e por quê:** Mantivemos apenas código compilável localmente e removemos artefatos gerados em `target/`; persistência e autenticação continuam separadas para não misturar responsabilidades do banco e do frontend.
+
+### 25/11/2026 — Fortalecimento do back-end para integração
+- **Prompt principal:** "Continue as melhorias apontadas na revisão técnica e prepare a API para integração."
+- **O que a IA gerou:** Validações de datas e horários passados, limites de campos e vagas, cancelamento da carona e das solicitações ativas, identificação opcional/obrigatória do motorista ao responder, exceções HTTP centralizadas e novos testes JUnit.
+- **O que o time aproveitou:** Mantivemos as rotas REST e os modelos em memória, com extensões mínimas para integração.
+- **O que o time corrigiu ou rejeitou, e por quê:** Autenticação completa foi adiada porque login no frontend e identidade no banco ainda não foram implementados. A identidade por perfil será integrada após esses módulos ficarem prontos.
+
 
 ### [data] — [tarefa ou trecho]
 

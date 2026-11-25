@@ -41,6 +41,7 @@ Copy the template below whenever you need a new entry.
 - **Alternatives considered:** Running checks manually before merging PRs.
 - **Rationale:** Ensures code quality, prevents broken code from reaching `main`, and fulfills the project's mandatory CI/CD requirements from day one.
 
+<<<<<<< HEAD
 ## 24/11/2026 — Detailed division of team responsibilities
 - **Decision:** João Cenerelli will be responsible for the HTML, CSS, and JavaScript front-end implementation and for UI/UX. Arthur will be responsible for the complete back end. Lívia will be responsible for the database, including modeling, relationships, and queries.
 - **Alternatives considered:** Splitting work by complete features; alternating front-end and back-end responsibilities; or distributing all tasks without clearly assigned primary owners.
@@ -55,3 +56,14 @@ Copy the template below whenever you need a new entry.
 - **Decision:** Prioritize the desktop version of the front end and implement responsiveness only if sufficient time remains after completing the essential MVP flow.
 - **Alternatives considered:** Starting with full responsiveness across every screen size or building desktop and mobile simultaneously.
 - **Rationale:** A desktop-first implementation allows the team to deliver a complete, testable visual flow within the one-week deadline. Responsiveness will be added later so that it does not compromise mandatory MVP features.
+=======
+## 25/11/2026 — Back-end validation and testing
+- **Decision:** Keep the MVP in memory while implementing defensive validations, synchronized state transitions, automated unit tests and centralized HTTP error responses.
+- **Alternatives considered:** Introducing JPA and a database immediately.
+- **Rationale:** The in-memory implementation preserves the local hackathon demo; it should be replaced by the database module after the schema and JPA entities are approved.
+
+## 25/11/2026 — Backend responsibility and API state rules
+- **Decision:** Arthur will keep the in-memory service and REST contract stable for integration; the database and frontend will implement against the documented routes and status values.
+- **Alternatives considered:** Adding authentication or persistence before Lívia and João finish their modules.
+- **Rationale:** The deadline favors a stable MVP contract. The backend now validates dates and times, duplicate requests, available seats, request transitions, and ride cancellation, while persistence and authentication remain integration topics.
+>>>>>>> 7ff614e3ac232e0f9e4c6ca00c77065ed1f5e75a
