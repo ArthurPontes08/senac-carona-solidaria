@@ -1,78 +1,124 @@
 package com.senac.carona.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "caronas")
 public class Carona {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long motoristaId;
-    private String motoristaNome;
-    private String vinculoSenac; // Ex: "ALUNO • Comunidade Senac"
+
+    @Column(nullable = false)
+    private String motorista;
+
+    @Column(name = "telefone_contato")
+    private String telefoneContato;
+
+    @Column(nullable = false)
     private String origem;
+
+    @Column(nullable = false)
     private String destino;
-    private String data;         // Ex: "2026-11-25"
-    private String horario;      // Ex: "18:15"
-    private String pontoEncontro;
+
+    @Column(name = "data_hora")
+    private String dataHora;
+
+    @Column(name = "vagas_totais")
     private int vagasTotais;
+
+    @Column(name = "vagas_disponiveis")
     private int vagasDisponiveis;
-    private String status;       // ABERTA, LOTADA, CANCELADA
+
+    @Column
     private String observacao;
 
     public Carona() {
     }
 
-    public Carona(Long id, Long motoristaId, String motoristaNome, String vinculoSenac,
-                  String origem, String destino, String data, String horario,
-                  String pontoEncontro, int vagasTotais, String status, String observacao) {
+    public Carona(Long id, String motorista, String telefoneContato, String origem,
+                  String destino, String dataHora, int vagasTotais, String observacao) {
         this.id = id;
-        this.motoristaId = motoristaId;
-        this.motoristaNome = motoristaNome != null ? motoristaNome.trim() : null;
-        this.vinculoSenac = vinculoSenac != null ? vinculoSenac.trim() : null;
-        this.origem = origem != null ? origem.trim() : null;
-        this.destino = destino != null ? destino.trim() : null;
-        this.data = data != null ? data.trim() : null;
-        this.horario = horario != null ? horario.trim() : null;
-        this.pontoEncontro = pontoEncontro != null ? pontoEncontro.trim() : null;
+        this.motorista = motorista;
+        this.telefoneContato = telefoneContato;
+        this.origem = origem;
+        this.destino = destino;
+        this.dataHora = dataHora;
         this.vagasTotais = vagasTotais;
         this.vagasDisponiveis = vagasTotais;
-        this.status = status != null ? status.trim().toUpperCase() : "ABERTA";
-        this.observacao = observacao != null ? observacao.trim() : null;
+        this.observacao = observacao;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Long getMotoristaId() { return motoristaId; }
-    public void setMotoristaId(Long motoristaId) { this.motoristaId = motoristaId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getMotoristaNome() { return motoristaNome; }
-    public void setMotoristaNome(String motoristaNome) { this.motoristaNome = motoristaNome; }
+    public String getMotorista() {
+        return motorista;
+    }
 
-    public String getVinculoSenac() { return vinculoSenac; }
-    public void setVinculoSenac(String vinculoSenac) { this.vinculoSenac = vinculoSenac; }
+    public void setMotorista(String motorista) {
+        this.motorista = motorista;
+    }
 
-    public String getOrigem() { return origem; }
-    public void setOrigem(String origem) { this.origem = origem; }
+    public String getTelefoneContato() {
+        return telefoneContato;
+    }
 
-    public String getDestino() { return destino; }
-    public void setDestino(String destino) { this.destino = destino; }
+    public void setTelefoneContato(String telefoneContato) {
+        this.telefoneContato = telefoneContato;
+    }
 
-    public String getData() { return data; }
-    public void setData(String data) { this.data = data; }
+    public String getOrigem() {
+        return origem;
+    }
 
-    public String getHorario() { return horario; }
-    public void setHorario(String horario) { this.horario = horario; }
+    public void setOrigem(String origem) {
+        this.origem = origem;
+    }
 
-    public String getPontoEncontro() { return pontoEncontro; }
-    public void setPontoEncontro(String pontoEncontro) { this.pontoEncontro = pontoEncontro; }
+    public String getDestino() {
+        return destino;
+    }
 
-    public int getVagasTotais() { return vagasTotais; }
-    public void setVagasTotais(int vagasTotais) { this.vagasTotais = vagasTotais; }
+    public void setDestino(String destino) {
+        this.destino = destino;
+    }
 
-    public int getVagasDisponiveis() { return vagasDisponiveis; }
-    public void setVagasDisponiveis(int vagasDisponiveis) { this.vagasDisponiveis = vagasDisponiveis; }
+    public String getDataHora() {
+        return dataHora;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setDataHora(String dataHora) {
+        this.dataHora = dataHora;
+    }
 
-    public String getObservacao() { return observacao; }
-    public void setObservacao(String observacao) { this.observacao = observacao; }
+    public int getVagasTotais() {
+        return vagasTotais;
+    }
+
+    public void setVagasTotais(int vagasTotais) {
+        this.vagasTotais = vagasTotais;
+    }
+
+    public int getVagasDisponiveis() {
+        return vagasDisponiveis;
+    }
+
+    public void setVagasDisponiveis(int vagasDisponiveis) {
+        this.vagasDisponiveis = vagasDisponiveis;
+    }
+
+    public String getObservacao() {
+        return observacao;
+    }
+
+    public void setObservacao(String observacao) {
+        this.observacao = observacao;
+    }
 }
