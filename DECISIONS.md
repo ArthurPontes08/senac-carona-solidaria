@@ -45,3 +45,8 @@ Copy the template below whenever you need a new entry.
 - **Decision:** Keep the MVP in memory while implementing defensive validations, synchronized state transitions, automated unit tests and centralized HTTP error responses.
 - **Alternatives considered:** Introducing JPA and a database immediately.
 - **Rationale:** The in-memory implementation preserves the local hackathon demo; it should be replaced by the database module after the schema and JPA entities are approved.
+
+## 25/11/2026 — Backend responsibility and API state rules
+- **Decision:** Arthur will keep the in-memory service and REST contract stable for integration; the database and frontend will implement against the documented routes and status values.
+- **Alternatives considered:** Adding authentication or persistence before Lívia and João finish their modules.
+- **Rationale:** The deadline favors a stable MVP contract. The backend now validates dates and times, duplicate requests, available seats, request transitions, and ride cancellation, while persistence and authentication remain integration topics.

@@ -34,6 +34,12 @@ Copy the template below whenever you need a new entry.
 - **What the team kept:** The Java 17/Spring Boot architecture and the in-memory MVP scope pending database integration.
 - **What the team corrected or rejected, and why:** The team retained code that could be compiled locally and removed generated `target/` artifacts; database persistence and authentication remain separate responsibilities to avoid mixing frontend/database work.
 
+### 25/11/2026 — Backend integration hardening
+- **Main prompt:** "Continue the backend improvements identified in the technical review and prepare the API for integration."
+- **What the AI generated:** Past-date and past-time checks, field limits, seat limits, cancellation of a ride and its active requests, optional/explicit driver authorization in request responses, unified HTTP exception handling, and additional JUnit coverage.
+- **What the team kept:** The existing REST routes and in-memory model, with minimal extensions for integration.
+- **What the team corrected or rejected, and why:** Full authentication was deferred because frontend login and database identity were not yet implemented. A stable role-based identity contract will be integrated after those modules are ready.
+
 ### 24/11/2026 — Back-end, Front-end, and CI/CD project scaffolding
 
 - **Main prompt:** "Help organize the folder and file structure for a Spring Boot back-end (carpooling module), a vanilla HTML/CSS/JS front-end, and a GitHub Actions CI pipeline with build, lint, and tests."
