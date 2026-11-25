@@ -1,0 +1,191 @@
+.modal-solicitar__resumo {
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: 6px;
+  background: var(--cor-primaria-clara);
+  color: #7A4A00;
+  font-size: 15px;
+}
+
+.modal-solicitar__resumo:empty {
+  display: none;
+}
+
+.modal-solicitar__entrada-mensagem {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #C5D0DC;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--cor-texto);
+  font: inherit;
+  transition: border-color .15s,box-shadow .15s;
+}
+
+.modal-solicitar__entrada-mensagem:focus {
+  border-color: var(--cor-azul);
+  box-shadow: 0 0 0 3px rgba(0,74,141,.15);
+  outline: none;
+}
+
+.modal-solicitar__entrada-mensagem:disabled {
+  background: var(--cor-fundo);
+  color: var(--cor-texto-suave);
+}
+
+.modal-solicitar__entrada-mensagem.estado-invalido {
+  border-color: var(--cor-erro);
+  background: #FFFAFA;
+}
+
+.modal-solicitar__entrada-mensagem.estado-valido {
+  border-color: var(--cor-azul);
+}
+
+.modal-solicitar__rotulo-mensagem {
+  font-weight: 600;
+}
+
+.modal-solicitar__grupo-mensagem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 15px;
+}
+
+.modal-solicitar__aviso {
+  margin: 0;
+  font-size: 15px;
+  color: var(--cor-texto-suave);
+}
+
+.modal-solicitar__botao-voltar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--raio);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s,box-shadow .18s,transform .12s;
+  background: #fff;
+  color: var(--cor-texto);
+  border-color: var(--cor-borda);
+}
+
+.modal-solicitar__botao-voltar:hover {
+  background: var(--cor-fundo);
+}
+
+.modal-solicitar__botao-voltar:active {
+  transform: scale(.98);
+}
+
+.modal-solicitar__botao-voltar:focus-visible {
+  outline: 3px solid var(--cor-azul);
+  outline-offset: 2px;
+}
+
+.modal-solicitar__botao-voltar:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.modal-solicitar__botao-voltar.botao--carregando::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: girar .7s linear infinite;
+}
+
+.modal-solicitar__botao-enviar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--raio);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s,box-shadow .18s,transform .12s;
+  background: var(--cor-primaria);
+  color: var(--cor-azul-escura);
+  border-color: transparent;
+}
+
+.modal-solicitar__botao-enviar:hover {
+  background: var(--cor-primaria-escura);
+}
+
+.modal-solicitar__botao-enviar:active {
+  transform: scale(.98);
+}
+
+.modal-solicitar__botao-enviar:focus-visible {
+  outline: 3px solid var(--cor-azul);
+  outline-offset: 2px;
+}
+
+.modal-solicitar__botao-enviar:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.modal-solicitar__botao-enviar.botao--carregando::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: girar .7s linear infinite;
+}
+
+.modal-solicitar__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--esp-2);
+  margin-top: var(--esp-3);
+}
+
+.modal-solicitar__titulo {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.modal-solicitar__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin: 0;
+}
+
+.modal-solicitar {
+  width: 640px;
+  max-width: 94vw;
+  padding: var(--esp-4);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(18,38,63,.3);
+  color: var(--cor-texto);
+}
+
+.modal-solicitar::backdrop {
+  background: rgba(6,48,92,.5);
+}
+
+.modal-solicitar[open] {
+  animation: aparecer-modal .22s ease;
+}

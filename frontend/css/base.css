@@ -1,0 +1,84 @@
+:root {
+  --cor-primaria: #F7941D;
+  --cor-primaria-escura: #DB7B05;
+  --cor-primaria-clara: #FFF3E2;
+  --cor-azul: #004A8D;
+  --cor-azul-escura: #06305C;
+  --cor-azul-clara: #E8F0F8;
+  --cor-texto: #12263F;
+  --cor-texto-suave: #5B6B7F;
+  --cor-fundo: #F6F8FB;
+  --cor-borda: #E3E9F0;
+  --cor-erro: #A02A22;
+  --cor-erro-fundo: #FBE6E4;
+  --cor-aviso-fundo: #FDF3CF;
+  --cor-aviso-texto: #7A5A00;
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 16px;
+  --esp-4: 24px;
+  --esp-5: 40px;
+  --raio: 12px;
+  --fonte: "Segoe UI", "Source Sans 3", Roboto, Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; }
+}
+
+@keyframes aparecer-modal {
+  from { opacity: 0; transform: translateY(10px) scale(.98); }
+}
+
+@keyframes subir {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes brilho {
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+.conteudo {
+  max-width: 1180px;
+  padding: var(--esp-5) 48px;
+  outline: none;
+}
+
+.area-principal {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.aplicativo {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+.pagina {
+  margin: 0;
+  font-family: var(--fonte);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--cor-texto);
+  background: var(--cor-fundo);
+}

@@ -1,0 +1,291 @@
+.tabela-solicitadas {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.tabela-solicitadas__cabecalho {
+  display: table-header-group;
+}
+
+.tabela-solicitadas__linha-cabecalho {
+  background: #F1F5F9;
+}
+
+.tabela-solicitadas__corpo {
+  display: table-row-group;
+}
+
+.tabela-solicitadas__linha {
+  background: transparent;
+}
+
+.tabela-solicitadas__linha:hover {
+  background: #FAFBFD;
+}
+
+.tabela-solicitadas__titulo-origem {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-solicitadas__celula-origem {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-solicitadas__titulo-destino {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-solicitadas__celula-destino {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-solicitadas__titulo-data {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-solicitadas__celula-data {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-solicitadas__titulo-horario {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-solicitadas__celula-horario {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-solicitadas__titulo-motorista {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-solicitadas__celula-motorista {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-solicitadas__titulo-vagas {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-solicitadas__celula-vagas {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-solicitadas__titulo-estado {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-solicitadas__celula-estado {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-solicitadas__titulo-acao {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-solicitadas__celula-acao {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-solicitadas__titulo-acao-texto {
+  position: absolute;
+  left: -9999px;
+}
+
+.tabela-solicitadas__selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tabela-solicitadas__selo-icone {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tabela-solicitadas__selo--aberta {
+  background: var(--cor-azul-clara);
+  color: var(--cor-azul);
+  border-color: #B7CDE5;
+}
+
+.tabela-solicitadas__selo--cheia {
+  background: #E9EDF1;
+  color: #3C4B59;
+  border-color: #B6C1CB;
+}
+
+.tabela-solicitadas__selo--pendente {
+  background: #FFF4CC;
+  color: #7A5200;
+  border-color: #E8C65A;
+  border-style: dashed;
+}
+
+.tabela-solicitadas__selo--confirmada {
+  background: var(--cor-azul-clara);
+  color: var(--cor-azul);
+  border-color: #B7CDE5;
+}
+
+.tabela-solicitadas__selo--recusada {
+  background: var(--cor-erro-fundo);
+  color: var(--cor-erro);
+  border-color: #E2AAA5;
+}
+
+.tabela-solicitadas__selo--cancelada {
+  background: var(--cor-erro-fundo);
+  color: var(--cor-erro);
+  border-color: #E2AAA5;
+}
+
+.tabela-solicitadas__selo--concluida {
+  background: var(--cor-azul-clara);
+  color: var(--cor-azul);
+  border-color: #B7CDE5;
+  border-style: double;
+  border-width: 3px;
+}
+
+.tabela-solicitadas__encontro {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--cor-azul);
+}
+
+.tabela-solicitadas__botao-cancelar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--raio);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s,box-shadow .18s,transform .12s;
+  background: #fff;
+  color: var(--cor-erro);
+  border-color: #E2AAA5;
+}
+
+.tabela-solicitadas__botao-cancelar:hover {
+  background: var(--cor-erro-fundo);
+}
+
+.tabela-solicitadas__botao-cancelar:active {
+  transform: scale(.98);
+}
+
+.tabela-solicitadas__botao-cancelar:focus-visible {
+  outline: 3px solid var(--cor-azul);
+  outline-offset: 2px;
+}
+
+.tabela-solicitadas__botao-cancelar:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.tabela-solicitadas__botao-cancelar.botao--carregando::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: girar .7s linear infinite;
+}

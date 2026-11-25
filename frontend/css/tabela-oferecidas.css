@@ -1,0 +1,205 @@
+.tabela-oferecidas {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.tabela-oferecidas__cabecalho {
+  display: table-header-group;
+}
+
+.tabela-oferecidas__linha-cabecalho {
+  background: #F1F5F9;
+}
+
+.tabela-oferecidas__corpo {
+  display: table-row-group;
+}
+
+.tabela-oferecidas__linha {
+  background: transparent;
+}
+
+.tabela-oferecidas__linha:hover {
+  background: #FAFBFD;
+}
+
+.tabela-oferecidas__titulo-origem {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-oferecidas__celula-origem {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-oferecidas__titulo-destino {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-oferecidas__celula-destino {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-oferecidas__titulo-data {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-oferecidas__celula-data {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-oferecidas__titulo-horario {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-oferecidas__celula-horario {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-oferecidas__titulo-participantes {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-oferecidas__celula-participantes {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-oferecidas__titulo-vagas {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-oferecidas__celula-vagas {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-oferecidas__titulo-estado {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-oferecidas__celula-estado {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-oferecidas__titulo-acao {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  background: #F1F5F9;
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-oferecidas__celula-acao {
+  padding: 12px var(--esp-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-oferecidas__titulo-acao-texto {
+  position: absolute;
+  left: -9999px;
+}
+
+.tabela-oferecidas__selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tabela-oferecidas__selo-icone {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tabela-oferecidas__selo--aberta {
+  background: var(--cor-azul-clara);
+  color: var(--cor-azul);
+  border-color: #B7CDE5;
+}
+
+.tabela-oferecidas__selo--cheia {
+  background: #E9EDF1;
+  color: #3C4B59;
+  border-color: #B6C1CB;
+}

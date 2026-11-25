@@ -1,0 +1,31 @@
+.aviso-offline {
+  padding: var(--esp-2) var(--esp-3);
+  text-align: center;
+  font-weight: 600;
+  background: var(--cor-aviso-fundo);
+  color: var(--cor-aviso-texto);
+}
+
+.avisos {
+  position: fixed;
+  right: var(--esp-4);
+  bottom: var(--esp-4);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.aviso-toast {
+  padding: 12px 18px;
+  border-radius: var(--raio);
+  background: var(--cor-azul-escura);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0,0,0,.2);
+  animation: subir .3s ease;
+}
+
+.aviso-toast--erro {
+  background: var(--cor-erro);
+}

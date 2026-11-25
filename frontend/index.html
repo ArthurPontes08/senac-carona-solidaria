@@ -1,238 +1,252 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Carona Solidária · Senac Canoas</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body>
-    <div id="offline" class="banner" role="status" hidden>Você está sem conexão. Mostrando as últimas informações salvas.</div>
-    <div class="app">
-      <aside class="sidebar" aria-label="Menu principal">
-        <img class="brand-logo" src="img/logo-carona-solidaria-senac-branca.png" alt="Carona Solidária · Senac Canoas" />
-        <nav>
-          <button class="nav-item" data-view="dashboard">
-            <span aria-hidden="true">▦</span>
-            Início
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carona Solidária · Senac Canoas</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/barra-lateral.css">
+  <link rel="stylesheet" href="css/cabecalho.css">
+  <link rel="stylesheet" href="css/inicio.css">
+  <link rel="stylesheet" href="css/busca.css">
+  <link rel="stylesheet" href="css/card-oferta.css">
+  <link rel="stylesheet" href="css/solicitacoes.css">
+  <link rel="stylesheet" href="css/card-solicitacao.css">
+  <link rel="stylesheet" href="css/caronas.css">
+  <link rel="stylesheet" href="css/tabela-oferecidas.css">
+  <link rel="stylesheet" href="css/tabela-solicitadas.css">
+  <link rel="stylesheet" href="css/modal-cadastro.css">
+  <link rel="stylesheet" href="css/modal-publicar.css">
+  <link rel="stylesheet" href="css/modal-solicitar.css">
+  <link rel="stylesheet" href="css/modal-confirmar.css">
+  <link rel="stylesheet" href="css/avisos.css">
+</head>
+<body class="pagina">
+  <div class="aviso-offline" id="offline" role="status" hidden>Você está sem conexão. Mostrando as últimas informações salvas.</div>
+  <div class="aplicativo">
+    <aside class="barra-lateral">
+      <img class="barra-lateral__logo" src="img/logo-carona-solidaria-senac-branca.png" alt="Carona Solidária · Senac Canoas">
+      <nav class="menu-lateral" aria-label="Menu principal">
+        <button class="menu-lateral__item-inicio" type="button" data-view="dashboard">
+          <svg class="menu-lateral__icone-inicio" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>
+          <span class="menu-lateral__texto-inicio">Início</span>
+        </button>
+        <button class="menu-lateral__item-buscar" type="button" data-view="search">
+          <svg class="menu-lateral__icone-buscar" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-4.5-4.5"/></svg>
+          <span class="menu-lateral__texto-buscar">Buscar caronas</span>
+        </button>
+        <button class="menu-lateral__item-solicitacoes" type="button" data-view="requests">
+          <svg class="menu-lateral__icone-solicitacoes" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18v12H3zM3 7l9 7 9-7"/></svg>
+          <span class="menu-lateral__texto-solicitacoes">Solicitações</span>
+          <b class="menu-lateral__contador" id="reqCount" hidden>0</b>
+        </button>
+        <button class="menu-lateral__item-caronas" type="button" data-view="rides">
+          <svg class="menu-lateral__icone-caronas" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          <span class="menu-lateral__texto-caronas">Minhas caronas</span>
+        </button>
+      </nav>
+      <p class="barra-lateral__aviso">Ambiente exclusivo da comunidade Senac Canoas. Dados de contato só aparecem após a confirmação.</p>
+    </aside>
+    <div class="area-principal">
+      <header class="cabecalho">
+        <h1 class="cabecalho__titulo" id="pageTitle">Início</h1>
+        <div class="cabecalho__direita">
+          <span class="cabecalho__selo-senac" title="Seu vínculo institucional foi confirmado">
+            <svg class="cabecalho__selo-senac-icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12l5 5 9-10"/></svg>
+            Comunidade Senac
+          </span>
+          <button class="cabecalho__botao-oferecer" type="button" data-open="publish">
+            <svg class="cabecalho__botao-oferecer-icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg>
+            <span class="cabecalho__botao-oferecer-texto">Oferecer carona</span>
           </button>
-          <button class="nav-item" data-view="search">
-            <span aria-hidden="true">⌕</span>
-            Buscar caronas
-          </button>
-          <button class="nav-item" data-view="requests">
-            <span aria-hidden="true">✉</span>
-            Solicitações
-            <b id="reqCount" class="count" hidden>0</b>
-          </button>
-          <button class="nav-item" data-view="rides">
-            <span aria-hidden="true">☰</span>
-            Minhas caronas
-          </button>
-        </nav>
-        <p class="sidebar-note">Ambiente exclusivo da comunidade Senac Canoas. Dados de contato só aparecem após a confirmação.</p>
-      </aside>
-      <div class="main">
-        <header class="topbar">
-          <h1 id="pageTitle">Início</h1>
-          <div class="topbar-right">
-            <span class="chip chip-ok" title="Seu vínculo institucional foi confirmado">
-              <span aria-hidden="true">✓</span>
-              Comunidade Senac
-            </span>
-            <button class="btn btn-primary" data-open="publish">+ Oferecer carona</button>
-            <div class="menu-wrap">
-              <button class="avatar-btn" id="profileBtn" aria-haspopup="true" aria-expanded="false" aria-label="Menu do perfil"><span class="avatar" id="avatar">?</span></button>
-              <div class="menu" id="profileMenu" hidden>
-                <p id="profileName" class="menu-name"></p>
-                <button class="menu-item" id="simError">Simular falha de conexão</button>
-                <button class="menu-item" id="resetDemo">Reiniciar demonstração</button>
-              </div>
+          <div class="perfil">
+            <button class="perfil__botao" type="button" id="profileBtn" aria-haspopup="true" aria-expanded="false" aria-label="Menu do perfil">
+              <span class="perfil__avatar" id="avatar">?</span>
+            </button>
+            <div class="perfil__menu" id="profileMenu" hidden>
+              <p class="perfil__nome" id="profileName"></p>
+              <button class="perfil__item-simular-erro" type="button" id="simError">Simular falha de conexão</button>
+              <button class="perfil__item-reiniciar" type="button" id="resetDemo">Reiniciar demonstração</button>
             </div>
           </div>
-        </header>
-        <main id="content" class="content" tabindex="-1">
-          <section id="view-dashboard" class="view"></section>
-          <section id="view-search" class="view" hidden>
-            <form id="searchForm" class="filters" novalidate>
-              <label>
-                Dia
-                <input type="date" id="fDate" />
-              </label>
-              <label>
-                Região de origem
-                <select id="fRegion">
-                  <option value="">Todas</option>
-                  <option>Centro</option>
-                  <option>Marechal Rondon</option>
-                  <option>Niterói</option>
-                  <option>Mathias Velho</option>
-                  <option>Igara</option>
-                  <option>Harmonia</option>
-                </select>
-              </label>
-              <label>
-                Horário a partir de
-                <input type="time" id="fTime" />
-              </label>
-              <label>
-                Vagas mínimas
-                <select id="fSeats">
-                  <option value="1">1+</option>
-                  <option value="2">2+</option>
-                  <option value="3">3+</option>
-                </select>
-              </label>
-              <button class="btn btn-primary" type="submit">Buscar</button>
-            </form>
-            <div id="searchResults" class="grid" aria-live="polite"></div>
-          </section>
-          <section id="view-requests" class="view" hidden></section>
-          <section id="view-rides" class="view" hidden>
-            <div class="tabs" role="tablist">
-              <button role="tab" class="tab" data-tab="offered" aria-selected="true">Oferecidas por mim</button>
-              <button role="tab" class="tab" data-tab="requested" aria-selected="false">Solicitadas por mim</button>
-            </div>
-            <div id="ridesTable"></div>
-          </section>
-        </main>
-      </div>
+        </div>
+      </header>
+      <main class="conteudo" id="content" tabindex="-1">
+        <section class="tela-inicio" id="view-dashboard" data-tela></section>
+        <section class="tela-busca" id="view-search" data-tela hidden>
+          <form class="busca__formulario" id="searchForm" novalidate>
+            <label class="busca__grupo-dia">
+              <span class="busca__rotulo-dia">Dia</span>
+              <input class="busca__entrada-dia" name="dia" id="fDate" type="date">
+            </label>
+            <label class="busca__grupo-regiao">
+              <span class="busca__rotulo-regiao">Região de origem</span>
+              <select class="busca__entrada-regiao" name="regiao" id="fRegion">
+                <option value="">Todas</option>
+                <option value="Centro">Centro</option>
+                <option value="Marechal Rondon">Marechal Rondon</option>
+                <option value="Niterói">Niterói</option>
+                <option value="Mathias Velho">Mathias Velho</option>
+                <option value="Igara">Igara</option>
+                <option value="Harmonia">Harmonia</option>
+              </select>
+            </label>
+            <label class="busca__grupo-horario">
+              <span class="busca__rotulo-horario">Horário a partir de</span>
+              <input class="busca__entrada-horario" name="horario" id="fTime" type="time">
+            </label>
+            <label class="busca__grupo-vagas">
+              <span class="busca__rotulo-vagas">Vagas mínimas</span>
+              <select class="busca__entrada-vagas" name="vagas" id="fSeats">
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+              </select>
+            </label>
+            <button class="busca__botao-buscar" type="submit">Buscar</button>
+          </form>
+          <div class="busca__resultados" id="searchResults" aria-live="polite"></div>
+        </section>
+        <section class="tela-solicitacoes" id="view-requests" data-tela hidden></section>
+        <section class="tela-caronas" id="view-rides" data-tela hidden>
+          <div class="caronas__abas" role="tablist">
+            <button class="caronas__aba-oferecidas" type="button" role="tab" data-tab="offered" aria-selected="true">Oferecidas por mim</button>
+            <button class="caronas__aba-solicitadas" type="button" role="tab" data-tab="requested" aria-selected="false">Solicitadas por mim</button>
+          </div>
+          <div class="caronas__conteudo-tabela" id="ridesTable"></div>
+        </section>
+      </main>
     </div>
-
-    <dialog id="dlg-onboard" class="modal" aria-labelledby="t-onboard">
-      <form id="onboardForm" novalidate>
-        <h2 id="t-onboard">Bem-vindo(a) à Carona Solidária</h2>
-        <p class="muted">Pedimos poucos dados, só para aproximar pessoas da comunidade Senac Canoas. Telefone e endereço nunca aparecem antes da confirmação.</p>
-        <label>
-          Nome
-          <input name="name" required placeholder="Ex.: Marina Souza" />
-          <span class="err"></span>
-        </label>
-        <label>
-          E-mail institucional
-          <input name="email" type="email" required placeholder="nome@senacrs.edu.br" />
-          <span class="err"></span>
-        </label>
-        <label>
-          Seu perfil
-          <select name="role">
-            <option value="both">Ofereço e preciso de carona</option>
-            <option value="driver">Ofereço carona</option>
-            <option value="rider">Preciso de carona</option>
-          </select>
-        </label>
-        <label>
-          Bairro de origem
-          <select name="region" required>
+  </div>
+  <dialog class="modal-cadastro" id="dlg-onboard" aria-labelledby="t-onboard">
+    <form class="modal-cadastro__formulario" id="onboardForm" novalidate>
+      <h2 class="modal-cadastro__titulo" id="t-onboard">Bem-vindo(a) à Carona Solidária</h2>
+      <p class="modal-cadastro__descricao">Pedimos poucos dados, só para aproximar pessoas da comunidade Senac Canoas. Telefone e endereço nunca aparecem antes da confirmação.</p>
+      <label class="modal-cadastro__grupo-nome">
+        <span class="modal-cadastro__rotulo-nome">Nome</span>
+        <input class="modal-cadastro__entrada-nome" name="name" id="modal-cadastro-nome" aria-describedby="erro-modal-cadastro-nome" required placeholder="Ex.: Marina Souza">
+        <span class="modal-cadastro__erro-nome" id="erro-modal-cadastro-nome" data-erro></span>
+      </label>
+      <label class="modal-cadastro__grupo-email">
+        <span class="modal-cadastro__rotulo-email">E-mail institucional</span>
+        <input class="modal-cadastro__entrada-email" name="email" id="modal-cadastro-email" aria-describedby="erro-modal-cadastro-email" type="email" required placeholder="nome@senacrs.edu.br">
+        <span class="modal-cadastro__erro-email" id="erro-modal-cadastro-email" data-erro></span>
+      </label>
+      <label class="modal-cadastro__grupo-perfil">
+        <span class="modal-cadastro__rotulo-perfil">Seu perfil</span>
+        <select class="modal-cadastro__entrada-perfil" name="role" id="modal-cadastro-perfil">
+          <option value="both">Ofereço e preciso de carona</option>
+          <option value="driver">Ofereço carona</option>
+          <option value="rider">Preciso de carona</option>
+        </select>
+      </label>
+      <label class="modal-cadastro__grupo-bairro">
+        <span class="modal-cadastro__rotulo-bairro">Bairro de origem</span>
+        <select class="modal-cadastro__entrada-bairro" name="region" id="modal-cadastro-bairro" aria-describedby="erro-modal-cadastro-bairro" required>
+          <option value="">Selecione</option>
+          <option value="Centro">Centro</option>
+          <option value="Marechal Rondon">Marechal Rondon</option>
+          <option value="Niterói">Niterói</option>
+          <option value="Mathias Velho">Mathias Velho</option>
+          <option value="Igara">Igara</option>
+          <option value="Harmonia">Harmonia</option>
+        </select>
+        <span class="modal-cadastro__erro-bairro" id="erro-modal-cadastro-bairro" data-erro></span>
+      </label>
+      <label class="modal-cadastro__grupo-destino">
+        <span class="modal-cadastro__rotulo-destino">Destino</span>
+        <input class="modal-cadastro__entrada-destino" name="destino" id="modal-cadastro-destino" disabled value="Campus Senac Canoas">
+      </label>
+      <div class="modal-cadastro__acoes">
+        <button class="modal-cadastro__botao-entrar" type="submit">Entrar na comunidade</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog class="modal-publicar" id="dlg-publish" aria-labelledby="t-pub">
+    <form class="modal-publicar__formulario" id="publishForm" novalidate>
+      <h2 class="modal-publicar__titulo" id="t-pub">Oferecer carona</h2>
+      <div class="modal-publicar__grade">
+        <label class="modal-publicar__grupo-origem">
+          <span class="modal-publicar__rotulo-origem">Região de origem</span>
+          <select class="modal-publicar__entrada-origem" name="origin" id="modal-publicar-origem" aria-describedby="erro-modal-publicar-origem" required>
             <option value="">Selecione</option>
-            <option>Centro</option>
-            <option>Marechal Rondon</option>
-            <option>Niterói</option>
-            <option>Mathias Velho</option>
-            <option>Igara</option>
-            <option>Harmonia</option>
+            <option value="Centro">Centro</option>
+            <option value="Marechal Rondon">Marechal Rondon</option>
+            <option value="Niterói">Niterói</option>
+            <option value="Mathias Velho">Mathias Velho</option>
+            <option value="Igara">Igara</option>
+            <option value="Harmonia">Harmonia</option>
           </select>
-          <span class="err"></span>
+          <span class="modal-publicar__erro-origem" id="erro-modal-publicar-origem" data-erro></span>
         </label>
-        <label>
-          Destino
-          <input value="Campus Senac Canoas" disabled />
+        <label class="modal-publicar__grupo-destino">
+          <span class="modal-publicar__rotulo-destino">Destino</span>
+          <input class="modal-publicar__entrada-destino" name="destino" id="modal-publicar-destino" disabled value="Campus Senac Canoas">
         </label>
-        <div class="actions"><button class="btn btn-primary" type="submit">Entrar na comunidade</button></div>
-      </form>
-    </dialog>
-
-    <dialog id="dlg-publish" class="modal" aria-labelledby="t-pub">
-      <form id="publishForm" novalidate>
-        <h2 id="t-pub">Oferecer carona</h2>
-        <div class="row2">
-          <label>
-            Região de origem
-            <select name="origin" required>
-              <option value="">Selecione</option>
-              <option>Centro</option>
-              <option>Marechal Rondon</option>
-              <option>Niterói</option>
-              <option>Mathias Velho</option>
-              <option>Igara</option>
-              <option>Harmonia</option>
-            </select>
-            <span class="err"></span>
-          </label>
-          <label>
-            Destino
-            <input value="Campus Senac Canoas" disabled />
-          </label>
-          <label>
-            Data
-            <input type="date" name="date" required />
-            <span class="err"></span>
-          </label>
-          <label>
-            Horário de saída
-            <input type="time" name="time" required />
-            <span class="err"></span>
-          </label>
-          <label>
-            Vagas
-            <input type="number" name="seats" min="1" max="4" value="2" required />
-            <span class="err"></span>
-          </label>
-          <label>
-            Ponto de referência aproximado
-            <input name="ref" required placeholder="Ex.: Em frente à praça central" />
-            <span class="err"></span>
-          </label>
-        </div>
-        <label>
-          Observações (opcional)
-          <textarea name="notes" rows="2" placeholder="Ex.: Saio pontualmente, volto às 22h."></textarea>
+        <label class="modal-publicar__grupo-data">
+          <span class="modal-publicar__rotulo-data">Data</span>
+          <input class="modal-publicar__entrada-data" name="date" id="modal-publicar-data" aria-describedby="erro-modal-publicar-data" type="date" required>
+          <span class="modal-publicar__erro-data" id="erro-modal-publicar-data" data-erro></span>
         </label>
-        <p class="note-safe">
-          <span aria-hidden="true">🛈</span>
-          Só a região e o ponto aproximado ficam visíveis. O endereço exato é combinado após a confirmação.
-        </p>
-        <div id="pubSummary" class="summary" aria-live="polite"></div>
-        <div class="actions">
-          <button type="button" class="btn btn-neutral" data-close>Cancelar</button>
-          <button class="btn btn-primary" type="submit">Publicar oferta</button>
-        </div>
-      </form>
-    </dialog>
-
-    <dialog id="dlg-request" class="modal" aria-labelledby="t-req">
-      <form id="requestForm">
-        <h2 id="t-req">Solicitar vaga</h2>
-        <p id="reqInfo" class="summary"></p>
-        <label>
-          Mensagem para a pessoa que dirige (opcional)
-          <textarea name="msg" rows="2" maxlength="140" placeholder="Ex.: Posso esperar na esquina da praça."></textarea>
+        <label class="modal-publicar__grupo-horario">
+          <span class="modal-publicar__rotulo-horario">Horário de saída</span>
+          <input class="modal-publicar__entrada-horario" name="time" id="modal-publicar-horario" aria-describedby="erro-modal-publicar-horario" type="time" required>
+          <span class="modal-publicar__erro-horario" id="erro-modal-publicar-horario" data-erro></span>
         </label>
-        <p class="muted">
-          Sua solicitação ficará
-          <b>pendente</b>
-          até a resposta. Dados de contato só aparecem após a confirmação.
-        </p>
-        <div class="actions">
-          <button type="button" class="btn btn-neutral" data-close>Voltar</button>
-          <button class="btn btn-primary" type="submit">Enviar solicitação</button>
-        </div>
-      </form>
-    </dialog>
-
-    <dialog id="dlg-confirm" class="modal modal-sm" aria-labelledby="t-conf">
-      <form method="dialog">
-        <h2 id="t-conf"></h2>
-        <p id="confText" class="muted"></p>
-        <div class="actions">
-          <button value="no" class="btn btn-neutral">Voltar</button>
-          <button value="yes" id="confYes" class="btn btn-danger">Confirmar</button>
-        </div>
-      </form>
-    </dialog>
-
-    <div id="toasts" class="toasts" aria-live="polite" role="status"></div>
-    <script src="js/api.js"></script>
-    <script src="js/main.js"></script>
-  </body>
+        <label class="modal-publicar__grupo-vagas">
+          <span class="modal-publicar__rotulo-vagas">Vagas</span>
+          <input class="modal-publicar__entrada-vagas" name="seats" id="modal-publicar-vagas" aria-describedby="erro-modal-publicar-vagas" type="number" min="1" max="4" value="2" required>
+          <span class="modal-publicar__erro-vagas" id="erro-modal-publicar-vagas" data-erro></span>
+        </label>
+        <label class="modal-publicar__grupo-referencia">
+          <span class="modal-publicar__rotulo-referencia">Ponto de referência aproximado</span>
+          <input class="modal-publicar__entrada-referencia" name="ref" id="modal-publicar-referencia" aria-describedby="erro-modal-publicar-referencia" required placeholder="Ex.: Em frente à praça central">
+          <span class="modal-publicar__erro-referencia" id="erro-modal-publicar-referencia" data-erro></span>
+        </label>
+      </div>
+      <label class="modal-publicar__grupo-observacoes">
+        <span class="modal-publicar__rotulo-observacoes">Observações (opcional)</span>
+        <textarea class="modal-publicar__entrada-observacoes" name="notes" id="modal-publicar-observacoes" rows="2" placeholder="Ex.: Saio pontualmente, volto às 22h."></textarea>
+      </label>
+      <p class="modal-publicar__aviso-seguranca">
+        <svg class="modal-publicar__aviso-seguranca-icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <span class="modal-publicar__aviso-seguranca-texto">Só a região e o ponto aproximado ficam visíveis. O endereço exato é combinado após a confirmação.</span>
+      </p>
+      <div class="modal-publicar__resumo" id="pubSummary" aria-live="polite"></div>
+      <div class="modal-publicar__acoes">
+        <button class="modal-publicar__botao-cancelar" type="button" data-close>Cancelar</button>
+        <button class="modal-publicar__botao-publicar" type="submit">Publicar oferta</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog class="modal-solicitar" id="dlg-request" aria-labelledby="t-req">
+    <form class="modal-solicitar__formulario" id="requestForm">
+      <h2 class="modal-solicitar__titulo" id="t-req">Solicitar vaga</h2>
+      <p class="modal-solicitar__resumo" id="reqInfo"></p>
+      <label class="modal-solicitar__grupo-mensagem">
+        <span class="modal-solicitar__rotulo-mensagem">Mensagem para a pessoa que dirige (opcional)</span>
+        <textarea class="modal-solicitar__entrada-mensagem" name="msg" id="modal-solicitar-mensagem" rows="2" maxlength="140" placeholder="Ex.: Posso esperar na esquina da praça."></textarea>
+      </label>
+      <p class="modal-solicitar__aviso">Sua solicitação ficará pendente até a resposta. Dados de contato só aparecem após a confirmação.</p>
+      <div class="modal-solicitar__acoes">
+        <button class="modal-solicitar__botao-voltar" type="button" data-close>Voltar</button>
+        <button class="modal-solicitar__botao-enviar" type="submit">Enviar solicitação</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog class="modal-confirmar" id="dlg-confirm" aria-labelledby="t-conf">
+    <form class="modal-confirmar__formulario" method="dialog">
+      <h2 class="modal-confirmar__titulo" id="t-conf"></h2>
+      <p class="modal-confirmar__texto" id="confText"></p>
+      <div class="modal-confirmar__acoes">
+        <button class="modal-confirmar__botao-voltar" value="no">Voltar</button>
+        <button class="modal-confirmar__botao-confirmar" value="yes" id="confYes">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+  <div class="avisos" id="toasts" aria-live="polite" role="status"></div>
+  <script src="js/icones.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+</body>
 </html>

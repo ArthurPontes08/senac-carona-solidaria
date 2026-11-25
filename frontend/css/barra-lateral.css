@@ -1,0 +1,227 @@
+.menu-lateral__icone-inicio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.menu-lateral__texto-inicio {
+  flex: 1;
+  margin: 0;
+}
+
+.menu-lateral__item-inicio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--raio);
+  background: transparent;
+  color: #E9F0F8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .18s,color .18s;
+}
+
+.menu-lateral__item-inicio:hover {
+  background: rgba(255,255,255,.1);
+}
+
+.menu-lateral__item-inicio:focus-visible {
+  outline: 3px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.menu-lateral__item-inicio[aria-current=page] {
+  background: #fff;
+  color: var(--cor-azul);
+  font-weight: 600;
+}
+
+.menu-lateral__icone-buscar {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.menu-lateral__texto-buscar {
+  flex: 1;
+  margin: 0;
+}
+
+.menu-lateral__item-buscar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--raio);
+  background: transparent;
+  color: #E9F0F8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .18s,color .18s;
+}
+
+.menu-lateral__item-buscar:hover {
+  background: rgba(255,255,255,.1);
+}
+
+.menu-lateral__item-buscar:focus-visible {
+  outline: 3px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.menu-lateral__item-buscar[aria-current=page] {
+  background: #fff;
+  color: var(--cor-azul);
+  font-weight: 600;
+}
+
+.menu-lateral__contador {
+  margin-left: auto;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: var(--cor-primaria);
+  color: var(--cor-azul-escura);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.menu-lateral__icone-solicitacoes {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.menu-lateral__texto-solicitacoes {
+  flex: 1;
+  margin: 0;
+}
+
+.menu-lateral__item-solicitacoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--raio);
+  background: transparent;
+  color: #E9F0F8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .18s,color .18s;
+}
+
+.menu-lateral__item-solicitacoes:hover {
+  background: rgba(255,255,255,.1);
+}
+
+.menu-lateral__item-solicitacoes:focus-visible {
+  outline: 3px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.menu-lateral__item-solicitacoes[aria-current=page] {
+  background: #fff;
+  color: var(--cor-azul);
+  font-weight: 600;
+}
+
+.menu-lateral__icone-caronas {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.menu-lateral__texto-caronas {
+  flex: 1;
+  margin: 0;
+}
+
+.menu-lateral__item-caronas {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--raio);
+  background: transparent;
+  color: #E9F0F8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .18s,color .18s;
+}
+
+.menu-lateral__item-caronas:hover {
+  background: rgba(255,255,255,.1);
+}
+
+.menu-lateral__item-caronas:focus-visible {
+  outline: 3px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.menu-lateral__item-caronas[aria-current=page] {
+  background: #fff;
+  color: var(--cor-azul);
+  font-weight: 600;
+}
+
+.menu-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.barra-lateral__logo {
+  display: block;
+  width: 196px;
+  height: auto;
+}
+
+.barra-lateral__aviso {
+  margin: auto 0 0;
+  font-size: 14px;
+  color: #AEBFD6;
+}
+
+.barra-lateral {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  height: 100vh;
+  padding: var(--esp-4) var(--esp-3);
+  background: var(--cor-azul-escura);
+  color: #E9F0F8;
+}

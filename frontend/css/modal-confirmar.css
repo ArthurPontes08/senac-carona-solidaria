@@ -1,0 +1,137 @@
+.modal-confirmar__titulo {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.modal-confirmar__texto {
+  margin: 0;
+  font-size: 15px;
+  color: var(--cor-texto-suave);
+}
+
+.modal-confirmar__botao-voltar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--raio);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s,box-shadow .18s,transform .12s;
+  background: #fff;
+  color: var(--cor-texto);
+  border-color: var(--cor-borda);
+}
+
+.modal-confirmar__botao-voltar:hover {
+  background: var(--cor-fundo);
+}
+
+.modal-confirmar__botao-voltar:active {
+  transform: scale(.98);
+}
+
+.modal-confirmar__botao-voltar:focus-visible {
+  outline: 3px solid var(--cor-azul);
+  outline-offset: 2px;
+}
+
+.modal-confirmar__botao-voltar:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.modal-confirmar__botao-voltar.botao--carregando::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: girar .7s linear infinite;
+}
+
+.modal-confirmar__botao-confirmar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--raio);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s,box-shadow .18s,transform .12s;
+  background: #fff;
+  color: var(--cor-erro);
+  border-color: #E2AAA5;
+}
+
+.modal-confirmar__botao-confirmar:hover {
+  background: var(--cor-erro-fundo);
+}
+
+.modal-confirmar__botao-confirmar:active {
+  transform: scale(.98);
+}
+
+.modal-confirmar__botao-confirmar:focus-visible {
+  outline: 3px solid var(--cor-azul);
+  outline-offset: 2px;
+}
+
+.modal-confirmar__botao-confirmar:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.modal-confirmar__botao-confirmar.botao--carregando::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: girar .7s linear infinite;
+}
+
+.modal-confirmar__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--esp-2);
+  margin-top: var(--esp-3);
+}
+
+.modal-confirmar__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin: 0;
+}
+
+.modal-confirmar {
+  width: 440px;
+  max-width: 94vw;
+  padding: var(--esp-4);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(18,38,63,.3);
+  color: var(--cor-texto);
+}
+
+.modal-confirmar::backdrop {
+  background: rgba(6,48,92,.5);
+}
+
+.modal-confirmar[open] {
+  animation: aparecer-modal .22s ease;
+}
