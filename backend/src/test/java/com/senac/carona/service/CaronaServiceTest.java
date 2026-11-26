@@ -3,52 +3,126 @@ package com.senac.carona.service;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
+import com.senac.carona.repository.CaronaRepository;
+import com.senac.carona.repository.SolicitacaoCaronaRepository;
+import com.senac.carona.repository.UsuarioRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class CaronaServiceTest {
 
+    private UsuarioRepository usuarioRepository;
+    private CaronaRepository caronaRepository;
+    private SolicitacaoCaronaRepository solicitacaoRepository;
+    private CaronaService service;
+
+    @BeforeEach
+    void setUp() {
+        usuarioRepository = mock(UsuarioRepository.class);
+        caronaRepository = mock(CaronaRepository.class);
+        solicitacaoRepository = mock(SolicitacaoCaronaRepository.class);
+        service = new CaronaService(usuarioRepository, caronaRepository, solicitacaoRepository);
+    }
+
     @Test
     void naoPermiteEmailDuplicado() {
-        CaronaService service = new CaronaService();
-        Usuario duplicado = new Usuario(null, "Outro Usuário",
-                "arthur.pontes@senacrs.com.br", "ALUNO", "BUSCA",
-                "Centro", "(51) 90000-0000");
+        String email = "arthur.pontes@senacrs.com.br";
+        when(usuarioRepository.existsByEmailSenacIgnoreCase(email)).thenReturn(true);
+        Usuario duplicado = usuario(null, "Outro Usuário", email, "BUSCA");
 
         assertThrows(IllegalArgumentException.class, () -> service.cadastrarUsuario(duplicado));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    void persisteUsuarioSemReutilizarIdEnviadoPeloCliente() {
+        Usuario novoUsuario = usuario(99L, "  Arthur Pontes  ",
+                "ARTHUR.PONTES@SENACRS.COM.BR", "AMBOS");
+        when(usuarioRepository.existsByEmailSenacIgnoreCase("arthur.pontes@senacrs.com.br"))
+                .thenReturn(false);
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> {
+            Usuario salvo = invocation.getArgument(0);
+            salvo.setId(7L);
+            return salvo;
+        });
+
+        Usuario salvo = service.cadastrarUsuario(novoUsuario);
+
+        assertEquals(7L, salvo.getId());
+        assertEquals("Arthur Pontes", salvo.getNome());
+        assertEquals("arthur.pontes@senacrs.com.br", salvo.getEmailSenac());
     }
 
     @Test
     void naoPermiteDataInvalidaAoPublicarCarona() {
-        CaronaService service = new CaronaService();
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario(1L,
+                "Motorista", "motorista@senacrs.com.br", "OFERECE")));
         Carona carona = new Carona(null, 1L, null, null,
                 "Mathias Velho", "Senac Canoas",
                 "2026-99-99", "18:15", "Estação", 2, "ABERTA", "");
 
         assertThrows(IllegalArgumentException.class, () -> service.publicarCarona(carona));
+        verify(caronaRepository, never()).save(any(Carona.class));
     }
 
     @Test
-    void confirmarERestornarVagaMantemStatusConsistente() {
-        CaronaService service = new CaronaService();
+    void confirmarECancelarSolicitacaoMantemVagasConsistentes() {
+        Carona carona = carona(1L, 1L, 3, 3, "ABERTA");
+        SolicitacaoCarona solicitacao = solicitacao(10L, 1L, 3L, "PENDENTE");
+        prepararSolicitacao(carona, solicitacao);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(
+                usuario(1L, "Motorista", "motorista@senacrs.com.br", "OFERECE")));
+        when(solicitacaoRepository.save(any(SolicitacaoCarona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(caronaRepository.save(any(Carona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        SolicitacaoCarona solicitacao = service.solicitarVaga(1L, 3L, null);
-        SolicitacaoCarona confirmada = service.responderSolicitacao(solicitacao.getId(), "CONFIRMAR");
-
+        SolicitacaoCarona confirmada = service.responderSolicitacao(10L, 1L, "CONFIRMAR");
         assertEquals("CONFIRMADA", confirmada.getStatus());
-        assertEquals(2, service.buscarCaronaPorId(1L).orElseThrow().getVagasDisponiveis());
+        assertEquals(2, carona.getVagasDisponiveis());
 
-        SolicitacaoCarona cancelada = service.responderSolicitacao(solicitacao.getId(), "CANCELAR");
-
+        SolicitacaoCarona cancelada = service.responderSolicitacao(10L, 1L, "CANCELAR");
         assertEquals("CANCELADA", cancelada.getStatus());
-        assertEquals(3, service.buscarCaronaPorId(1L).orElseThrow().getVagasDisponiveis());
+        assertEquals(3, carona.getVagasDisponiveis());
+        verify(solicitacaoRepository, org.mockito.Mockito.times(2))
+                .save(any(SolicitacaoCarona.class));
+    }
+
+    @Test
+    void persisteSolicitacaoPendenteNoRepository() {
+        Carona carona = carona(1L, 1L, 3, 3, "ABERTA");
+        Usuario passageiro = usuario(3L, "Passageiro",
+                "passageiro@senacrs.com.br", "BUSCA");
+        when(caronaRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(carona));
+        when(usuarioRepository.findById(3L)).thenReturn(Optional.of(passageiro));
+        when(solicitacaoRepository.existsByCaronaIdAndPassageiroIdAndStatusIn(
+                1L, 3L, List.of("PENDENTE", "CONFIRMADA"))).thenReturn(false);
+        when(solicitacaoRepository.save(any(SolicitacaoCarona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        SolicitacaoCarona criada = service.solicitarVaga(1L, 3L, null);
+
+        assertEquals("PENDENTE", criada.getStatus());
+        assertEquals("Praça", criada.getPontoEmbarque());
+        verify(solicitacaoRepository).save(any(SolicitacaoCarona.class));
     }
 
     @Test
     void naoPermiteMotoristaSolicitarNaPropriaCarona() {
-        CaronaService service = new CaronaService();
+        when(caronaRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(carona(1L, 1L, 3, 3, "ABERTA")));
 
         assertThrows(IllegalArgumentException.class,
                 () -> service.solicitarVaga(1L, 1L, null));
@@ -56,31 +130,70 @@ class CaronaServiceTest {
 
     @Test
     void naoPermiteConfirmacaoDeOutroUsuario() {
-        CaronaService service = new CaronaService();
-        SolicitacaoCarona solicitacao = service.solicitarVaga(1L, 3L, null);
+        Carona carona = carona(1L, 1L, 3, 3, "ABERTA");
+        SolicitacaoCarona solicitacao = solicitacao(10L, 1L, 3L, "PENDENTE");
+        prepararSolicitacao(carona, solicitacao);
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.responderSolicitacao(solicitacao.getId(), 2L, "CONFIRMAR"));
+                () -> service.responderSolicitacao(10L, 2L, "CONFIRMAR"));
     }
 
     @Test
     void naoPermiteConfirmacaoRepetida() {
-        CaronaService service = new CaronaService();
-        SolicitacaoCarona solicitacao = service.solicitarVaga(1L, 3L, null);
-        service.responderSolicitacao(solicitacao.getId(), 1L, "CONFIRMAR");
+        Carona carona = carona(1L, 1L, 3, 3, "ABERTA");
+        SolicitacaoCarona solicitacao = solicitacao(10L, 1L, 3L, "PENDENTE");
+        prepararSolicitacao(carona, solicitacao);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(
+                usuario(1L, "Motorista", "motorista@senacrs.com.br", "OFERECE")));
+        when(solicitacaoRepository.save(any(SolicitacaoCarona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(caronaRepository.save(any(Carona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        service.responderSolicitacao(10L, 1L, "CONFIRMAR");
 
         assertThrows(IllegalStateException.class,
-                () -> service.responderSolicitacao(solicitacao.getId(), 1L, "CONFIRMAR"));
+                () -> service.responderSolicitacao(10L, 1L, "CONFIRMAR"));
     }
 
     @Test
     void cancelarCaronaCancelaSolicitacoesAtivas() {
-        CaronaService service = new CaronaService();
-        SolicitacaoCarona solicitacao = service.solicitarVaga(1L, 3L, null);
+        Carona carona = carona(1L, 1L, 3, 3, "ABERTA");
+        SolicitacaoCarona solicitacao = solicitacao(10L, 1L, 3L, "PENDENTE");
+        when(caronaRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(carona));
+        when(caronaRepository.save(any(Carona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(solicitacaoRepository.findByCaronaId(1L)).thenReturn(List.of(solicitacao));
 
         service.cancelarCarona(1L, 1L);
 
         assertEquals("CANCELADA", solicitacao.getStatus());
-        assertEquals("CANCELADA", service.buscarCaronaPorId(1L).orElseThrow().getStatus());
+        assertEquals("CANCELADA", carona.getStatus());
+        verify(solicitacaoRepository).saveAll(List.of(solicitacao));
+    }
+
+    private void prepararSolicitacao(Carona carona, SolicitacaoCarona solicitacao) {
+        when(solicitacaoRepository.findCaronaIdById(solicitacao.getId()))
+                .thenReturn(Optional.of(carona.getId()));
+        when(caronaRepository.findByIdForUpdate(carona.getId())).thenReturn(Optional.of(carona));
+        when(solicitacaoRepository.findByIdForUpdate(solicitacao.getId()))
+                .thenReturn(Optional.of(solicitacao));
+    }
+
+    private Usuario usuario(Long id, String nome, String email, String perfil) {
+        return new Usuario(id, nome, email, "ALUNO", perfil, "Centro", "(51) 90000-0000");
+    }
+
+    private Carona carona(Long id, Long motoristaId, int vagasTotais,
+                          int vagasDisponiveis, String status) {
+        Carona carona = new Carona(id, motoristaId, "Motorista", "ALUNO • Comunidade Senac",
+                "Centro", "Senac Canoas", LocalDate.now().plusDays(2).toString(),
+                "18:00", "Praça", vagasTotais, status, null);
+        carona.setVagasDisponiveis(vagasDisponiveis);
+        return carona;
+    }
+
+    private SolicitacaoCarona solicitacao(Long id, Long caronaId, Long passageiroId, String status) {
+        return new SolicitacaoCarona(id, caronaId, passageiroId,
+                "Passageiro", "Praça", status, null);
     }
 }
