@@ -60,6 +60,8 @@ O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicita�
 
 `GET /api/minhas-caronas?userId={id}` retorna o formato de snapshot do front-end, com `offers` e `requests`, estados em inglês e indicadores `mine`. O front-end precisa enviar o ID do usuário cadastrado. Como não há autenticação, esse ID enviado pelo cliente serve apenas como contexto e não comprova a identidade.
 
+`PATCH /api/solicitacoes/{id}` recebe `{"userId": 7, "action": "accept"}` (também aceita `refuse` ou `cancel`). Somente o motorista pode aceitar ou recusar; o motorista ou o passageiro solicitante pode cancelar. A rota legada `/responder` exige `motoristaId`. Esses IDs são verificações de propriedade dentro da API, não autenticação.
+
 ## Estrutura de pastas
 
 ```text
