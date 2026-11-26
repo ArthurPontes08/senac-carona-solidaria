@@ -70,6 +70,8 @@ The user registration endpoint accepts an omitted or blank phone number and stor
 
 `POST /api/ofertas/{id}/solicitacoes` requires `passengerId` and accepts an optional `msg` of up to 140 characters. The request message is stored in the nullable `mensagem VARCHAR(140)` column of `solicitacoes_carona`. The database schema/migration must include this column; Hibernate `update` can create it in local development, but is not a substitute for a versioned migration.
 
+`GET /api/minhas-caronas?userId={id}` returns the front-end snapshot shape with `offers` and `requests`, including English status values and `mine` flags. The front end must pass the registered user's ID. No authentication is implemented, so this client-supplied ID is context only and does not verify identity.
+
 ## Folder structure
 
 ```text

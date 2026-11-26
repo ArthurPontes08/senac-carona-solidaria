@@ -58,6 +58,8 @@ O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicita�
 
 `POST /api/ofertas/{id}/solicitacoes` exige `passengerId` e aceita `msg` opcional com até 140 caracteres. A mensagem é salva na coluna anulável `mensagem VARCHAR(140)` da tabela `solicitacoes_carona`. O schema/migration do banco precisa incluir essa coluna; o `update` do Hibernate pode criá-la no desenvolvimento local, mas não substitui uma migration versionada.
 
+`GET /api/minhas-caronas?userId={id}` retorna o formato de snapshot do front-end, com `offers` e `requests`, estados em inglês e indicadores `mine`. O front-end precisa enviar o ID do usuário cadastrado. Como não há autenticação, esse ID enviado pelo cliente serve apenas como contexto e não comprova a identidade.
+
 ## Estrutura de pastas
 
 ```text
