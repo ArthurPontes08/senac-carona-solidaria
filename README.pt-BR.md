@@ -30,7 +30,7 @@ A aplicação permite que alunos e funcionários do Senac Canoas ofereçam e enc
 
 O usuário pode informar qualquer local de origem, como bairro, cidade ou endereço; a busca de caronas aceita correspondências parciais.
 
-O front-end também oferece uma interface básica de conversa para solicitações de carona confirmadas. Na demonstração atual, as mensagens ficam salvas no navegador e não são sincronizadas entre usuários ou dispositivos diferentes.
+O backend oferece conversas persistidas via JPA para solicitações confirmadas. O front-end ainda usa um mock local por padrão; João precisa conectá-lo à API e enviar o `userId` para que as mensagens sejam compartilhadas entre usuários e dispositivos.
 
 **O que não entra no MVP:**
 - Pagamentos
@@ -48,6 +48,8 @@ Java 17 com Spring Boot, Spring Data JPA e Maven são utilizados no back-end. Po
 
 A conexão com o PostgreSQL é configurada pelas variáveis de ambiente `DB_URL`, `DB_USERNAME` e `DB_PASSWORD`. O banco local precisa ser criado antes de iniciar a aplicação. O Hibernate usa `ddl-auto=update` por padrão neste momento; isso facilita o desenvolvimento, mas não substitui migrations versionadas. O service principal agora usa repositories Spring Data JPA para persistir usuários, caronas e solicitações. Ainda é necessário verificar a integração PostgreSQL com o schema da equipe.
 
+Por padrão, o CORS da API permite somente `http://localhost:5500` e `http://127.0.0.1:5500`. Defina `CORS_ALLOWED_ORIGINS` com uma lista separada por vírgulas se o front-end for servido por outra origem confiável.
+
 O endpoint de cadastro aceita telefone ausente ou em branco e o armazena como `null`; quando informado, o telefone precisa seguir o formato aceito.
 
 O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicitações por carona, passageiro e status, e é usado pelo `CaronaService`. As operações que alteram vagas rodam em transações e bloqueiam a linha da carona correspondente. O backend não cria mais usuários e caronas de demonstração ao iniciar; o front-end continua usando um mock local por padrão, e ainda precisa enviar o ID do passageiro ao solicitar uma vaga.
@@ -59,6 +61,14 @@ O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicita�
 `POST /api/ofertas/{id}/solicitacoes` exige `passengerId` e aceita `msg` opcional com até 140 caracteres. A mensagem é salva na coluna anulável `mensagem VARCHAR(140)` da tabela `solicitacoes_carona`. O schema/migration do banco precisa incluir essa coluna; o `update` do Hibernate pode criá-la no desenvolvimento local, mas não substitui uma migration versionada.
 
 `GET /api/minhas-caronas?userId={id}` retorna o formato de snapshot do front-end, com `offers` e `requests`, estados em inglês e indicadores `mine`. O front-end precisa enviar o ID do usuário cadastrado. Como não há autenticação, esse ID enviado pelo cliente serve apenas como contexto e não comprova a identidade.
+
+`PATCH /api/solicitacoes/{id}` recebe `{"userId": 7, "action": "accept"}` (também aceita `refuse` ou `cancel`). Somente o motorista pode aceitar ou recusar; o motorista ou o passageiro solicitante pode cancelar. A rota legada `/responder` exige `motoristaId`. Esses IDs são verificações de propriedade dentro da API, não autenticação.
+
+`GET /api/caronas/{id}/solicitacoes?userId={id}` é restrita ao motorista da carona e retorna um DTO que não inclui o telefone do motorista. Outros IDs recebem HTTP 403. O ID informado não é validado por um sistema de autenticação.
+
+O chat usa `GET /api/solicitacoes/{id}/conversa?userId={id}` e `POST /api/solicitacoes/{id}/conversa` com `{"userId": 7, "text": "..."}`. Somente o motorista e o passageiro de uma solicitação confirmada podem ler ou enviar mensagens; o texto pode ter até 500 caracteres. A migration do banco deve criar `mensagens_chat` com `id BIGSERIAL`, `solicitacao_id BIGINT`, `remetente_id BIGINT`, `texto VARCHAR(500)` e `criado_em TIMESTAMPTZ`, além de chaves estrangeiras para `solicitacoes_carona(id)` e `usuarios(id)` e um índice em `(solicitacao_id, criado_em)`.
+
+Os erros da API usam o JSON `{"erro":"..."}`: entrada inválida retorna 400, acesso negado retorna 403, conflitos de estado ou dados retornam 409 e falhas de acesso ao banco retornam 503. Detalhes internos do banco não são enviados ao cliente.
 
 ## Estrutura de pastas
 
@@ -121,7 +131,7 @@ export DB_PASSWORD="sua_senha_postgres"
 A API ficará disponível em `http://localhost:8080`. `DB_DDL_AUTO` pode sobrescrever o modo de schema do Hibernate; o padrão atual é `update`. `DB_SHOW_SQL` controla a exibição de SQL e o padrão é `false`.
 
 ### Front-end
-Abra o arquivo `frontend/index.html` diretamente no navegador ou utilize a extensão **Live Server** no VS Code.
+Abra `frontend/index.html` diretamente para usar o mock local ou utilize **Live Server** no VS Code. Para chamar a API, use o Live Server: o navegador trata páginas `file://` com origem `null`, que é intencionalmente bloqueada pela política CORS do backend.
 
 ## CI/CD
 

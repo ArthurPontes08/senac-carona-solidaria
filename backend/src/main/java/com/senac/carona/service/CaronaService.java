@@ -5,6 +5,7 @@ import com.senac.carona.dto.MinhaContaSnapshotResponse;
 import com.senac.carona.dto.OfertaResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
 import com.senac.carona.dto.SolicitacaoResponse;
+import com.senac.carona.exception.AcessoNegadoException;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -311,15 +312,13 @@ public class CaronaService {
     }
 
     @Transactional
-    public SolicitacaoCarona responderSolicitacao(Long solicitacaoId, String acao) {
-        return responderSolicitacao(solicitacaoId, null, acao);
-    }
-
-    @Transactional
     public SolicitacaoCarona responderSolicitacao(
-            Long solicitacaoId, Long motoristaId, String acao) {
+            Long solicitacaoId, Long usuarioId, String acao) {
         if (solicitacaoId == null || solicitacaoId <= 0) {
             throw new IllegalArgumentException("SolicitacaoId é obrigatório.");
+        }
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("userId é obrigatório.");
         }
         Long caronaId = solicitacaoCaronaRepository.findCaronaIdById(solicitacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada."));
@@ -329,15 +328,15 @@ public class CaronaService {
         SolicitacaoCarona sol = solicitacaoCaronaRepository.findByIdForUpdate(solicitacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada."));
 
-        if (motoristaId != null && !motoristaId.equals(carona.getMotoristaId())) {
-            throw new IllegalArgumentException("Apenas o motorista desta carona pode responder à solicitação.");
-        }
-
         String decisao = acao == null ? "" : acao.toUpperCase().trim();
 
         switch (decisao) {
             case "ACEITAR":
             case "CONFIRMAR":
+                if (!usuarioId.equals(carona.getMotoristaId())) {
+                    throw new IllegalArgumentException(
+                            "Apenas o motorista desta carona pode responder à solicitação.");
+                }
                 if (!"PENDENTE".equalsIgnoreCase(sol.getStatus())) {
                     throw new IllegalStateException("Apenas solicitações pendentes podem ser confirmadas.");
                 }
@@ -355,6 +354,10 @@ public class CaronaService {
                 break;
 
             case "RECUSAR":
+                if (!usuarioId.equals(carona.getMotoristaId())) {
+                    throw new IllegalArgumentException(
+                            "Apenas o motorista desta carona pode responder à solicitação.");
+                }
                 if (!"PENDENTE".equalsIgnoreCase(sol.getStatus())) {
                     throw new IllegalStateException("Apenas solicitações pendentes podem ser recusadas.");
                 }
@@ -363,6 +366,11 @@ public class CaronaService {
                 break;
 
             case "CANCELAR":
+                if (!usuarioId.equals(carona.getMotoristaId())
+                        && !usuarioId.equals(sol.getPassageiroId())) {
+                    throw new IllegalArgumentException(
+                            "Apenas o motorista ou o passageiro desta solicitação pode cancelá-la.");
+                }
                 if (!Set.of("PENDENTE", "CONFIRMADA").contains(sol.getStatus().toUpperCase())) {
                     throw new IllegalStateException("Esta solicitação já está encerrada e não pode ser cancelada.");
                 }
@@ -494,12 +502,20 @@ public class CaronaService {
     }
 
     @Transactional(readOnly = true)
-    public List<SolicitacaoCarona> listarSolicitacoesPorCarona(Long caronaId) {
+    public List<SolicitacaoCarona> listarSolicitacoesPorCarona(
+            Long caronaId, Long usuarioId) {
         if (caronaId == null || caronaId <= 0) {
             throw new IllegalArgumentException("CaronaId é obrigatório.");
         }
-        buscarCaronaPorId(caronaId)
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("userId é obrigatório.");
+        }
+        Carona carona = buscarCaronaPorId(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
+        if (!usuarioId.equals(carona.getMotoristaId())) {
+            throw new AcessoNegadoException(
+                    "Apenas o motorista desta carona pode listar as solicitações.");
+        }
         return solicitacaoCaronaRepository.findByCaronaId(caronaId);
     }
 

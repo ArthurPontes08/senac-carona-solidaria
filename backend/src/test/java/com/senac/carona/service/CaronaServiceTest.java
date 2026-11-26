@@ -1,6 +1,7 @@
 package com.senac.carona.service;
 
 import com.senac.carona.dto.MinhaContaSnapshotResponse;
+import com.senac.carona.exception.AcessoNegadoException;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -224,6 +225,50 @@ class CaronaServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> service.responderSolicitacao(10L, 2L, "CONFIRMAR"));
+    }
+
+    @Test
+    void passageiroPodeCancelarSuaSolicitacaoConfirmada() {
+        Carona carona = carona(1L, 1L, 3, 2, "ABERTA");
+        SolicitacaoCarona solicitacao = solicitacao(10L, 1L, 3L, "CONFIRMADA");
+        prepararSolicitacao(carona, solicitacao);
+        when(solicitacaoRepository.save(any(SolicitacaoCarona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(caronaRepository.save(any(Carona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        SolicitacaoCarona cancelada = service.responderSolicitacao(10L, 3L, "CANCELAR");
+
+        assertEquals("CANCELADA", cancelada.getStatus());
+        assertEquals(3, carona.getVagasDisponiveis());
+    }
+
+    @Test
+    void terceiroNaoPodeCancelarSolicitacao() {
+        Carona carona = carona(1L, 1L, 3, 3, "ABERTA");
+        SolicitacaoCarona solicitacao = solicitacao(10L, 1L, 3L, "PENDENTE");
+        prepararSolicitacao(carona, solicitacao);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.responderSolicitacao(10L, 99L, "CANCELAR"));
+        verify(solicitacaoRepository, never()).save(any(SolicitacaoCarona.class));
+    }
+
+    @Test
+    void exigeUsuarioParaResponderSolicitacao() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.responderSolicitacao(10L, null, "RECUSAR"));
+    }
+
+    @Test
+    void apenasMotoristaPodeListarSolicitacoesDaCarona() {
+        when(caronaRepository.findById(1L))
+                .thenReturn(Optional.of(carona(1L, 7L, 3, 3, "ABERTA")));
+        when(solicitacaoRepository.findByCaronaId(1L)).thenReturn(List.of());
+
+        assertEquals(List.of(), service.listarSolicitacoesPorCarona(1L, 7L));
+        assertThrows(AcessoNegadoException.class,
+                () -> service.listarSolicitacoesPorCarona(1L, 8L));
     }
 
     @Test
