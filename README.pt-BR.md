@@ -68,6 +68,8 @@ O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicita�
 
 O chat usa `GET /api/solicitacoes/{id}/conversa?userId={id}` e `POST /api/solicitacoes/{id}/conversa` com `{"userId": 7, "text": "..."}`. Somente o motorista e o passageiro de uma solicitação confirmada podem ler ou enviar mensagens; o texto pode ter até 500 caracteres. A migration do banco deve criar `mensagens_chat` com `id BIGSERIAL`, `solicitacao_id BIGINT`, `remetente_id BIGINT`, `texto VARCHAR(500)` e `criado_em TIMESTAMPTZ`, além de chaves estrangeiras para `solicitacoes_carona(id)` e `usuarios(id)` e um índice em `(solicitacao_id, criado_em)`.
 
+Os erros da API usam o JSON `{"erro":"..."}`: entrada inválida retorna 400, acesso negado retorna 403, conflitos de estado ou dados retornam 409 e falhas de acesso ao banco retornam 503. Detalhes internos do banco não são enviados ao cliente.
+
 ## Estrutura de pastas
 
 ```text
