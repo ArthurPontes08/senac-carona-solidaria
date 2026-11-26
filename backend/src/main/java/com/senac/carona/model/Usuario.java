@@ -1,13 +1,31 @@
 package com.senac.carona.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "usuarios")
 public class Usuario {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String nome;
+
+    @Column(name = "email_senac", nullable = false, unique = true)
     private String emailSenac;
+
+    @Column(name = "tipo_vinculo")
     private String tipoVinculo; // ALUNO ou FUNCIONARIO
+
+    @Column
     private String perfil;      // OFERECE, BUSCA ou AMBOS
+
+    @Column(name = "bairro_origem")
     private String bairroOrigem;
+
+    @Column
     private String telefone;
 
     public Usuario() {
