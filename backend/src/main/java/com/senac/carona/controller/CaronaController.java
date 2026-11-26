@@ -1,7 +1,9 @@
 package com.senac.carona.controller;
 
+import com.senac.carona.dto.CadastroUsuarioRequest;
 import com.senac.carona.dto.MinhasCaronasResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
+import com.senac.carona.dto.UsuarioResponse;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -25,14 +27,18 @@ public class CaronaController {
     }
 
     @PostMapping("/usuarios")
-    public ResponseEntity<Usuario> cadastrarUsuario(@RequestBody Usuario usuario) {
-        Usuario salvo = caronaService.cadastrarUsuario(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+    public ResponseEntity<UsuarioResponse> cadastrarUsuario(
+            @RequestBody CadastroUsuarioRequest request) {
+        Usuario salvo = caronaService.cadastrarUsuario(request.toUsuario());
+        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.from(salvo));
     }
 
     @GetMapping("/usuarios")
-    public ResponseEntity<List<Usuario>> listarUsuarios() {
-        return ResponseEntity.ok(caronaService.listarUsuarios());
+    public ResponseEntity<List<UsuarioResponse>> listarUsuarios() {
+        List<UsuarioResponse> usuarios = caronaService.listarUsuarios().stream()
+                .map(UsuarioResponse::from)
+                .toList();
+        return ResponseEntity.ok(usuarios);
     }
 
     @GetMapping("/usuarios/{id}/minhas-caronas")
