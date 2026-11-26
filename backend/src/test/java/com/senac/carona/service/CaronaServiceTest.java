@@ -1,6 +1,7 @@
 package com.senac.carona.service;
 
 import com.senac.carona.dto.MinhaContaSnapshotResponse;
+import com.senac.carona.exception.AcessoNegadoException;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -257,6 +258,17 @@ class CaronaServiceTest {
     void exigeUsuarioParaResponderSolicitacao() {
         assertThrows(IllegalArgumentException.class,
                 () -> service.responderSolicitacao(10L, null, "RECUSAR"));
+    }
+
+    @Test
+    void apenasMotoristaPodeListarSolicitacoesDaCarona() {
+        when(caronaRepository.findById(1L))
+                .thenReturn(Optional.of(carona(1L, 7L, 3, 3, "ABERTA")));
+        when(solicitacaoRepository.findByCaronaId(1L)).thenReturn(List.of());
+
+        assertEquals(List.of(), service.listarSolicitacoesPorCarona(1L, 7L));
+        assertThrows(AcessoNegadoException.class,
+                () -> service.listarSolicitacoesPorCarona(1L, 8L));
     }
 
     @Test

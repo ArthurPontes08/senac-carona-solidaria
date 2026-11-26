@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/solicitacoes/{id}/conversa")
-@CrossOrigin(origins = "*")
 public class ChatController {
 
     private final ChatService chatService;

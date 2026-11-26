@@ -60,6 +60,8 @@ Java 17 with Spring Boot, Spring Data JPA, and Maven are used for the back end. 
 
 The PostgreSQL connection is configured through environment variables: `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. The local database must be created before starting the application. Hibernate currently uses `ddl-auto=update` by default; this is a development convenience, not a versioned database migration. The main service now uses Spring Data JPA repositories to persist users, rides, and ride requests. PostgreSQL integration still needs to be verified against the team's database schema.
 
+API CORS is restricted to `http://localhost:5500` and `http://127.0.0.1:5500` by default. Set `CORS_ALLOWED_ORIGINS` to a comma-separated list when serving the front end from another trusted origin.
+
 The user registration endpoint accepts an omitted or blank phone number and stores it as `null`; when provided, the phone number must use the accepted format.
 
 `SolicitacaoCaronaRepository` provides JPA operations and queries for ride requests by ride, passenger, and status, and is used by `CaronaService`. Seat-changing operations run in transactions and lock the corresponding ride row. The backend no longer seeds demo users and rides at startup; the front end still uses a local mock by default, and its request flow still needs to send the passenger ID.
@@ -74,7 +76,11 @@ The user registration endpoint accepts an omitted or blank phone number and stor
 
 `PATCH /api/solicitacoes/{id}` accepts `{"userId": 7, "action": "accept"}` (also `refuse` or `cancel`). Only the ride's driver can accept or refuse; either the driver or the requesting passenger can cancel. The legacy `/responder` route requires `motoristaId`. These IDs are ownership checks within the API, not authentication.
 
+`GET /api/caronas/{id}/solicitacoes?userId={id}` is restricted to the ride's driver and returns a response DTO that omits the driver's phone number. Other user IDs receive HTTP 403. The supplied ID is not verified by an authentication system.
+
 The chat uses `GET /api/solicitacoes/{id}/conversa?userId={id}` and `POST /api/solicitacoes/{id}/conversa` with `{"userId": 7, "text": "..."}`. Only the driver and passenger of a confirmed request may read or send messages; text is limited to 500 characters. The database migration should create `mensagens_chat` with `id BIGSERIAL`, `solicitacao_id BIGINT`, `remetente_id BIGINT`, `texto VARCHAR(500)`, and `criado_em TIMESTAMPTZ`, plus foreign keys to `solicitacoes_carona(id)` and `usuarios(id)` and an index on `(solicitacao_id, criado_em)`.
+
+API errors use the JSON shape `{"erro":"..."}`: invalid input returns 400, denied access returns 403, state or data conflicts return 409, and database access failures return 503. Database error details are not returned to clients.
 
 ## Folder structure
 
@@ -137,7 +143,7 @@ export DB_PASSWORD="your_postgres_password"
 The API will be available at `http://localhost:8080`. `DB_DDL_AUTO` can override the Hibernate schema mode; it defaults to `update`. `DB_SHOW_SQL` controls SQL logging and defaults to `false`.
 
 ### Front-end
-Open the `frontend/index.html` file directly in your browser or use the **Live Server** extension in VS Code.
+Open the `frontend/index.html` file directly for the local mock, or use the **Live Server** extension in VS Code. Use Live Server when connecting to the API; browsers give `file://` pages a `null` origin, which is intentionally not allowed by the backend CORS policy.
 
 ## CI/CD
 
