@@ -80,6 +80,8 @@ The user registration endpoint accepts an omitted or blank phone number and stor
 
 The chat uses `GET /api/solicitacoes/{id}/conversa?userId={id}` and `POST /api/solicitacoes/{id}/conversa` with `{"userId": 7, "text": "..."}`. Only the driver and passenger of a confirmed request may read or send messages; text is limited to 500 characters. The database migration should create `mensagens_chat` with `id BIGSERIAL`, `solicitacao_id BIGINT`, `remetente_id BIGINT`, `texto VARCHAR(500)`, and `criado_em TIMESTAMPTZ`, plus foreign keys to `solicitacoes_carona(id)` and `usuarios(id)` and an index on `(solicitacao_id, criado_em)`.
 
+API errors use the JSON shape `{"erro":"..."}`: invalid input returns 400, denied access returns 403, state or data conflicts return 409, and database access failures return 503. Database error details are not returned to clients.
+
 ## Folder structure
 
 ```text
