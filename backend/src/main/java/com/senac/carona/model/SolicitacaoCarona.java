@@ -1,13 +1,31 @@
 package com.senac.carona.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "solicitacoes_carona")
 public class SolicitacaoCarona {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "carona_id", nullable = false)
     private Long caronaId;
+
+    @Column(name = "passageiro_id", nullable = false)
     private Long passageiroId;
+
+    @Column(name = "passageiro_nome", nullable = false)
     private String passageiroNome;
+
+    @Column(name = "ponto_embarque", nullable = false)
     private String pontoEmbarque;
+
+    @Column(nullable = false)
     private String status; // PENDENTE, CONFIRMADA, RECUSADA, CANCELADA
+
+    @Column(name = "telefone_motorista_liberado")
     private String telefoneMotoristaLiberado; // Só preenchido quando CONFIRMADA
 
     public SolicitacaoCarona() {
