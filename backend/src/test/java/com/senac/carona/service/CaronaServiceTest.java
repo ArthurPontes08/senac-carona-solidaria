@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -63,6 +64,32 @@ class CaronaServiceTest {
         assertEquals(7L, salvo.getId());
         assertEquals("Arthur Pontes", salvo.getNome());
         assertEquals("arthur.pontes@senacrs.com.br", salvo.getEmailSenac());
+    }
+
+    @Test
+    void persisteUsuarioSemTelefoneQuandoCampoNaoInformado() {
+        Usuario novoUsuario = new Usuario(null, "Arthur Pontes",
+                "arthur.pontes@senacrs.com.br", "ALUNO", "AMBOS", "Centro", null);
+        when(usuarioRepository.existsByEmailSenacIgnoreCase("arthur.pontes@senacrs.com.br"))
+                .thenReturn(false);
+        when(usuarioRepository.save(any(Usuario.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Usuario salvo = service.cadastrarUsuario(novoUsuario);
+
+        assertNull(salvo.getTelefone());
+        verify(usuarioRepository).save(novoUsuario);
+    }
+
+    @Test
+    void rejeitaTelefoneInformadoEmFormatoInvalido() {
+        Usuario novoUsuario = new Usuario(null, "Arthur Pontes",
+                "arthur.pontes@senacrs.com.br", "ALUNO", "AMBOS", "Centro", "12");
+        when(usuarioRepository.existsByEmailSenacIgnoreCase("arthur.pontes@senacrs.com.br"))
+                .thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrarUsuario(novoUsuario));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 
     @Test
