@@ -60,6 +60,8 @@ Java 17 with Spring Boot, Spring Data JPA, and Maven are used for the back end. 
 
 The PostgreSQL connection is configured through environment variables: `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. The local database must be created before starting the application. Hibernate currently uses `ddl-auto=update` by default; this is a development convenience, not a versioned database migration. The main service now uses Spring Data JPA repositories to persist users, rides, and ride requests. PostgreSQL integration still needs to be verified against the team's database schema.
 
+The user registration endpoint accepts an omitted or blank phone number and stores it as `null`; when provided, the phone number must use the accepted format.
+
 `SolicitacaoCaronaRepository` provides JPA operations and queries for ride requests by ride, passenger, and status, and is used by `CaronaService`. Seat-changing operations run in transactions and lock the corresponding ride row. The backend no longer seeds demo users and rides at startup; the front end still uses a local mock by default, and its API contract has not yet been aligned with the backend.
 
 ## Folder structure

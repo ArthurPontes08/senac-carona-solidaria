@@ -76,16 +76,15 @@ public class CaronaService {
         if (!Set.of("OFERECE", "BUSCA", "AMBOS").contains(perfil)) {
             throw new IllegalArgumentException("Perfil inválido. Use OFERECE, BUSCA ou AMBOS.");
         }
-        if (usuario.getTelefone() == null || usuario.getTelefone().isBlank()) {
-            throw new IllegalArgumentException("Telefone é obrigatório.");
-        }
-        if (!usuario.getTelefone().matches("^[0-9()+ -]{8,25}$")) {
+        String telefone = usuario.getTelefone();
+        if (telefone != null && !telefone.isBlank()
+                && !telefone.matches("^[0-9()+ -]{8,25}$")) {
             throw new IllegalArgumentException("Telefone inválido.");
         }
         usuario.setEmailSenac(email);
         usuario.setNome(usuario.getNome().trim());
         usuario.setBairroOrigem(usuario.getBairroOrigem().trim());
-        usuario.setTelefone(usuario.getTelefone().trim());
+        usuario.setTelefone(telefone == null || telefone.isBlank() ? null : telefone.trim());
         usuario.setId(null);
         usuario.setTipoVinculo(vinculo);
         usuario.setPerfil(perfil);
