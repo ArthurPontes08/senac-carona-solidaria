@@ -60,6 +60,8 @@ Java 17 with Spring Boot, Spring Data JPA, and Maven are used for the back end. 
 
 The PostgreSQL connection is configured through environment variables: `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. The local database must be created before starting the application. Hibernate currently uses `ddl-auto=update` by default; this is a development convenience, not a versioned database migration. The main service now uses Spring Data JPA repositories to persist users, rides, and ride requests. PostgreSQL integration still needs to be verified against the team's database schema.
 
+API CORS is restricted to `http://localhost:5500` and `http://127.0.0.1:5500` by default. Set `CORS_ALLOWED_ORIGINS` to a comma-separated list when serving the front end from another trusted origin.
+
 The user registration endpoint accepts an omitted or blank phone number and stores it as `null`; when provided, the phone number must use the accepted format.
 
 `SolicitacaoCaronaRepository` provides JPA operations and queries for ride requests by ride, passenger, and status, and is used by `CaronaService`. Seat-changing operations run in transactions and lock the corresponding ride row. The backend no longer seeds demo users and rides at startup; the front end still uses a local mock by default, and its request flow still needs to send the passenger ID.
@@ -137,7 +139,7 @@ export DB_PASSWORD="your_postgres_password"
 The API will be available at `http://localhost:8080`. `DB_DDL_AUTO` can override the Hibernate schema mode; it defaults to `update`. `DB_SHOW_SQL` controls SQL logging and defaults to `false`.
 
 ### Front-end
-Open the `frontend/index.html` file directly in your browser or use the **Live Server** extension in VS Code.
+Open the `frontend/index.html` file directly for the local mock, or use the **Live Server** extension in VS Code. Use Live Server when connecting to the API; browsers give `file://` pages a `null` origin, which is intentionally not allowed by the backend CORS policy.
 
 ## CI/CD
 

@@ -48,6 +48,8 @@ Java 17 com Spring Boot, Spring Data JPA e Maven são utilizados no back-end. Po
 
 A conexão com o PostgreSQL é configurada pelas variáveis de ambiente `DB_URL`, `DB_USERNAME` e `DB_PASSWORD`. O banco local precisa ser criado antes de iniciar a aplicação. O Hibernate usa `ddl-auto=update` por padrão neste momento; isso facilita o desenvolvimento, mas não substitui migrations versionadas. O service principal agora usa repositories Spring Data JPA para persistir usuários, caronas e solicitações. Ainda é necessário verificar a integração PostgreSQL com o schema da equipe.
 
+Por padrão, o CORS da API permite somente `http://localhost:5500` e `http://127.0.0.1:5500`. Defina `CORS_ALLOWED_ORIGINS` com uma lista separada por vírgulas se o front-end for servido por outra origem confiável.
+
 O endpoint de cadastro aceita telefone ausente ou em branco e o armazena como `null`; quando informado, o telefone precisa seguir o formato aceito.
 
 O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicitações por carona, passageiro e status, e é usado pelo `CaronaService`. As operações que alteram vagas rodam em transações e bloqueiam a linha da carona correspondente. O backend não cria mais usuários e caronas de demonstração ao iniciar; o front-end continua usando um mock local por padrão, e ainda precisa enviar o ID do passageiro ao solicitar uma vaga.
@@ -125,7 +127,7 @@ export DB_PASSWORD="sua_senha_postgres"
 A API ficará disponível em `http://localhost:8080`. `DB_DDL_AUTO` pode sobrescrever o modo de schema do Hibernate; o padrão atual é `update`. `DB_SHOW_SQL` controla a exibição de SQL e o padrão é `false`.
 
 ### Front-end
-Abra o arquivo `frontend/index.html` diretamente no navegador ou utilize a extensão **Live Server** no VS Code.
+Abra `frontend/index.html` diretamente para usar o mock local ou utilize **Live Server** no VS Code. Para chamar a API, use o Live Server: o navegador trata páginas `file://` com origem `null`, que é intencionalmente bloqueada pela política CORS do backend.
 
 ## CI/CD
 
