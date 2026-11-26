@@ -5,6 +5,7 @@ import com.senac.carona.dto.MinhaContaSnapshotResponse;
 import com.senac.carona.dto.OfertaResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
 import com.senac.carona.dto.SolicitacaoResponse;
+import com.senac.carona.exception.AcessoNegadoException;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -501,12 +502,20 @@ public class CaronaService {
     }
 
     @Transactional(readOnly = true)
-    public List<SolicitacaoCarona> listarSolicitacoesPorCarona(Long caronaId) {
+    public List<SolicitacaoCarona> listarSolicitacoesPorCarona(
+            Long caronaId, Long usuarioId) {
         if (caronaId == null || caronaId <= 0) {
             throw new IllegalArgumentException("CaronaId é obrigatório.");
         }
-        buscarCaronaPorId(caronaId)
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("userId é obrigatório.");
+        }
+        Carona carona = buscarCaronaPorId(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
+        if (!usuarioId.equals(carona.getMotoristaId())) {
+            throw new AcessoNegadoException(
+                    "Apenas o motorista desta carona pode listar as solicitações.");
+        }
         return solicitacaoCaronaRepository.findByCaronaId(caronaId);
     }
 
