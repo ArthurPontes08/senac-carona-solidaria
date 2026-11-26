@@ -50,9 +50,11 @@ A conexão com o PostgreSQL é configurada pelas variáveis de ambiente `DB_URL`
 
 O endpoint de cadastro aceita telefone ausente ou em branco e o armazena como `null`; quando informado, o telefone precisa seguir o formato aceito.
 
-O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicitações por carona, passageiro e status, e é usado pelo `CaronaService`. As operações que alteram vagas rodam em transações e bloqueiam a linha da carona correspondente. O backend não cria mais usuários e caronas de demonstração ao iniciar; o front-end continua usando um mock local por padrão, e os fluxos de caronas e solicitações ainda não estão alinhados às rotas do backend.
+O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicitações por carona, passageiro e status, e é usado pelo `CaronaService`. As operações que alteram vagas rodam em transações e bloqueiam a linha da carona correspondente. O backend não cria mais usuários e caronas de demonstração ao iniciar; o front-end continua usando um mock local por padrão, e o fluxo de solicitações ainda não está alinhado às rotas do backend.
 
 `POST /api/usuarios` aceita os campos do front-end `name`, `email`, `role` (`both`, `driver` ou `rider`) e `region`; a resposta contém `id`, `name`, `email`, `role` e `region`. Os nomes dos campos em português também são aceitos para compatibilidade. O telefone é opcional e não aparece nas respostas nem na listagem de usuários.
+
+`GET /api/ofertas` aceita os filtros opcionais `data`, `regiao`, `horario` (`HH:mm`, horário mínimo de saída) e `vagas` (mínimo de vagas disponíveis). A resposta usa campos do front-end como `driver`, `origin`, `destination`, `date`, `time`, `seats`, `ref`, `summary` e `match`. `POST /api/ofertas` recebe `driverId`, `origin`, `date`, `time`, `seats`, `ref` e `notes` opcional; se `destination` não for enviado, usa `Campus Senac Canoas`. `driverId` é obrigatório porque o backend não consegue inferir o usuário atual sem autenticação.
 
 ## Estrutura de pastas
 

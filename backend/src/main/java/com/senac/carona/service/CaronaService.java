@@ -197,6 +197,38 @@ public class CaronaService {
     }
 
     @Transactional(readOnly = true)
+    public List<Carona> buscarOfertas(
+            String data, String regiao, String horario, Integer vagasMinimas) {
+        LocalTime horarioMinimo = null;
+        if (horario != null && !horario.isBlank()) {
+            try {
+                horarioMinimo = LocalTime.parse(horario.trim(), HORARIO_FORMATO);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("Horário inválido. Use o formato HH:mm.");
+            }
+        }
+        int minimo = vagasMinimas == null ? 1 : vagasMinimas;
+        if (minimo < 1 || minimo > 8) {
+            throw new IllegalArgumentException("O filtro de vagas deve estar entre 1 e 8.");
+        }
+
+        LocalTime finalHorarioMinimo = horarioMinimo;
+        return buscarCaronas(data, regiao).stream()
+                .filter(c -> STATUS_ABERTA.equalsIgnoreCase(c.getStatus()))
+                .filter(c -> c.getVagasDisponiveis() >= minimo)
+                .filter(c -> {
+                    if (finalHorarioMinimo == null) return true;
+                    try {
+                        return !LocalTime.parse(c.getHorario(), HORARIO_FORMATO)
+                                .isBefore(finalHorarioMinimo);
+                    } catch (DateTimeParseException e) {
+                        return false;
+                    }
+                })
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Transactional(readOnly = true)
     public Optional<Carona> buscarCaronaPorId(Long id) {
         if (id == null || id <= 0) return Optional.empty();
         return caronaRepository.findById(id);
