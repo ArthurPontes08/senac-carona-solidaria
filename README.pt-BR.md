@@ -48,6 +48,8 @@ Java 17 com Spring Boot, Spring Data JPA e Maven são utilizados no back-end. Po
 
 A conexão com o PostgreSQL é configurada pelas variáveis de ambiente `DB_URL`, `DB_USERNAME` e `DB_PASSWORD`. O banco local precisa ser criado antes de iniciar a aplicação. O Hibernate usa `ddl-auto=update` por padrão neste momento; isso facilita o desenvolvimento, mas não substitui migrations versionadas. Os principais fluxos de caronas ainda estão sendo conectados à persistência.
 
+O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicitações por carona, passageiro e status. Ele ainda não está conectado ao `CaronaService`; o service principal mantém as solicitações em memória, então o repository, sozinho, não torna esse fluxo persistente.
+
 ## Estrutura de pastas
 
 ```text
