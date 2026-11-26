@@ -60,6 +60,8 @@ Java 17 with Spring Boot, Spring Data JPA, and Maven are used for the back end. 
 
 The PostgreSQL connection is configured through environment variables: `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. The local database must be created before starting the application. Hibernate currently uses `ddl-auto=update` by default; this is a development convenience, not a versioned database migration. The main ride flows are still being connected to persistent storage.
 
+`SolicitacaoCaronaRepository` provides JPA operations and queries for ride requests by ride, passenger, and status. It is not yet connected to `CaronaService`; the main service currently keeps requests in memory, so this repository alone does not make the request flow persistent.
+
 ## Folder structure
 
 ```text
