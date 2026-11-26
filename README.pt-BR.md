@@ -7,7 +7,7 @@
 - **Turma:** TDS | turmas mistas 6570, 6756 e 6863
 - **Tech Lead:** Arthur
 - **Responsável pela apresentação:** João
-- **Integrantes:**
+- **Integrantes:** Livia
   - Arthur | GitHub
   - Lívia | GitHub
   - João Cenerelli | GitHub

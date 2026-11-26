@@ -1,6 +1,11 @@
 package com.senac.carona.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "caronas")
@@ -11,10 +16,13 @@ public class Carona {
     private Long id;
 
     @Column(nullable = false)
-    private String motorista;
+    private Long motoristaId;
 
-    @Column(name = "telefone_contato")
-    private String telefoneContato;
+    @Column(name = "motorista_nome")
+    private String motoristaNome;
+
+    @Column(name = "vinculo_senac")
+    private String vinculoSenac;
 
     @Column(nullable = false)
     private String origem;
@@ -22,8 +30,14 @@ public class Carona {
     @Column(nullable = false)
     private String destino;
 
-    @Column(name = "data_hora")
-    private String dataHora;
+    @Column(nullable = false)
+    private String data;
+
+    @Column(nullable = false)
+    private String horario;
+
+    @Column(name = "ponto_encontro")
+    private String pontoEncontro;
 
     @Column(name = "vagas_totais")
     private int vagasTotais;
@@ -32,21 +46,29 @@ public class Carona {
     private int vagasDisponiveis;
 
     @Column
+    private String status;
+
+    @Column
     private String observacao;
 
     public Carona() {
     }
 
-    public Carona(Long id, String motorista, String telefoneContato, String origem,
-                  String destino, String dataHora, int vagasTotais, String observacao) {
+    public Carona(Long id, Long motoristaId, String motoristaNome, String vinculoSenac,
+                  String origem, String destino, String data, String horario,
+                  String pontoEncontro, int vagasTotais, String status, String observacao) {
         this.id = id;
-        this.motorista = motorista;
-        this.telefoneContato = telefoneContato;
+        this.motoristaId = motoristaId;
+        this.motoristaNome = motoristaNome;
+        this.vinculoSenac = vinculoSenac;
         this.origem = origem;
         this.destino = destino;
-        this.dataHora = dataHora;
+        this.data = data;
+        this.horario = horario;
+        this.pontoEncontro = pontoEncontro;
         this.vagasTotais = vagasTotais;
         this.vagasDisponiveis = vagasTotais;
+        this.status = status;
         this.observacao = observacao;
     }
 
@@ -58,20 +80,28 @@ public class Carona {
         this.id = id;
     }
 
-    public String getMotorista() {
-        return motorista;
+    public Long getMotoristaId() {
+        return motoristaId;
     }
 
-    public void setMotorista(String motorista) {
-        this.motorista = motorista;
+    public void setMotoristaId(Long motoristaId) {
+        this.motoristaId = motoristaId;
     }
 
-    public String getTelefoneContato() {
-        return telefoneContato;
+    public String getMotoristaNome() {
+        return motoristaNome;
     }
 
-    public void setTelefoneContato(String telefoneContato) {
-        this.telefoneContato = telefoneContato;
+    public void setMotoristaNome(String motoristaNome) {
+        this.motoristaNome = motoristaNome;
+    }
+
+    public String getVinculoSenac() {
+        return vinculoSenac;
+    }
+
+    public void setVinculoSenac(String vinculoSenac) {
+        this.vinculoSenac = vinculoSenac;
     }
 
     public String getOrigem() {
@@ -90,12 +120,28 @@ public class Carona {
         this.destino = destino;
     }
 
-    public String getDataHora() {
-        return dataHora;
+    public String getData() {
+        return data;
     }
 
-    public void setDataHora(String dataHora) {
-        this.dataHora = dataHora;
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public String getHorario() {
+        return horario;
+    }
+
+    public void setHorario(String horario) {
+        this.horario = horario;
+    }
+
+    public String getPontoEncontro() {
+        return pontoEncontro;
+    }
+
+    public void setPontoEncontro(String pontoEncontro) {
+        this.pontoEncontro = pontoEncontro;
     }
 
     public int getVagasTotais() {
@@ -112,6 +158,14 @@ public class Carona {
 
     public void setVagasDisponiveis(int vagasDisponiveis) {
         this.vagasDisponiveis = vagasDisponiveis;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getObservacao() {

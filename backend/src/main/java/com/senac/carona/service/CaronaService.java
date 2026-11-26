@@ -51,12 +51,12 @@ public class CaronaService {
 
         publicarCarona(new Carona(null, arthur.getId(), null, null,
                 "Mathias Velho - Canoas", "Senac Canoas",
-                hoje, "18:15", "Passarela Estação Mathias Velho",
+                hoje, "23:59", "Passarela Estação Mathias Velho",
                 3, "ABERTA", "Saída pontual rumo às aulas"));
 
         publicarCarona(new Carona(null, livia.getId(), null, null,
                 "Centro - Canoas", "Senac Canoas",
-                hoje, "18:45", "Em frente à Praça da Emancipação",
+                hoje, "23:59", "Em frente à Praça da Emancipação",
                 2, "ABERTA", "Trajeto direto sem paradas extras"));
     }
 
@@ -224,6 +224,10 @@ public class CaronaService {
         Carona carona = buscarCaronaPorId(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
 
+        if (carona.getMotoristaId().equals(passageiroId)) {
+            throw new IllegalArgumentException("O motorista não pode solicitar vaga na própria carona.");
+        }
+
         try {
             LocalDate dia = LocalDate.parse(carona.getData(), DATA_FORMATO);
             if (dia.isBefore(LocalDate.now())) {
@@ -243,9 +247,6 @@ public class CaronaService {
 
         Usuario passageiro = buscarUsuarioPorId(passageiroId)
                 .orElseThrow(() -> new IllegalArgumentException("Passageiro não encontrado."));
-        if (carona.getMotoristaId().equals(passageiroId)) {
-            throw new IllegalArgumentException("O motorista não pode solicitar vaga na própria carona.");
-        }
         if ("OFERECE".equalsIgnoreCase(passageiro.getPerfil())) {
             throw new IllegalArgumentException("Este usuário está configurado apenas para oferecer caronas.");
         }
