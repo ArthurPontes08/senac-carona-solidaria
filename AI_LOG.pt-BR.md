@@ -40,6 +40,7 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **O que o time aproveitou:** Mantivemos as rotas REST e os modelos em memória, com extensões mínimas para integração.
 - **O que o time corrigiu ou rejeitou, e por quê:** Autenticação completa foi adiada porque login no frontend e identidade no banco ainda não foram implementados. A identidade por perfil será integrada após esses módulos ficarem prontos.
 
+<<<<<<< HEAD
 ### 25/11/2026 — Permitir origem livre nas caronas
 - **Prompt principal:** "Permita que o usuário informe qualquer origem em vez de escolher apenas bairros de Canoas."
 - **O que a IA gerou:** Campos de texto no cadastro, na oferta de carona e na busca, com correspondência parcial sem diferenciar maiúsculas e minúsculas na demonstração do front-end.
@@ -64,6 +65,8 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **O que o time aproveitou:** A conversa só abre para solicitações confirmadas, cada solicitação tem sua própria conversa e o conteúdo das mensagens é escapado antes de ser renderizado.
 - **O que o time corrigiu ou rejeitou, e por quê:** O front-end ainda usa uma API simulada local, então as mensagens não são compartilhadas entre usuários ou dispositivos diferentes; persistência no back-end e autenticação continuam pendentes de integração.
 
+=======
+>>>>>>> 7ff614e3ac232e0f9e4c6ca00c77065ed1f5e75a
 
 ### [data] — [tarefa ou trecho]
 
