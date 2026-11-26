@@ -27,6 +27,22 @@ You will make it easier for Senac students and staff who already travel similar 
 
 Ship an MVP in which people in the Senac community offer or look for rides, the system (with help from AI) supports matching routes and times, and an arrangement can be confirmed or cancelled clearly.
 
+## Team responsibilities
+
+- **João Cenerelli:** will be responsible for the complete front-end implementation with HTML, CSS, and JavaScript. They will also be responsible for UI/UX: the visual structure of the screens, information hierarchy, interface states, responsiveness, and consistency across flows. This decision was made because João has stronger experience and knowledge in front-end development.
+- **Arthur:** will be responsible for the complete back-end implementation, including API organization, business rules, services, and integration with the front end. This division considers Arthur's stronger back-end experience.
+- **Lívia:** will be responsible for the database, including entity modeling, relationships, queries, and integration of data with the back end. This division considers Lívia's stronger database expertise.
+
+The allocation was made according to technical strengths and to reduce rework during the one-week immersion. Team members will continue collaborating across areas: reviews, integrations, and alignment decisions will be made together, while technical leadership for each area will remain with the member listed above.
+
+## Collaborative documentation
+
+All project documentation will be produced by the three team members simultaneously. The group will use Google Docs for collaborative writing because everyone can see in real time when another member changes the document. After the texts are finalized and reviewed together, they will be recorded in the corresponding bilingual repository files.
+
+## Interface priority
+
+Visual development will prioritize the desktop version. Responsive implementation will be considered only if sufficient time remains after the essential MVP features are complete. This order prevents compromising the main flow within the one-week deadline and allows the interface to be tested first in the desktop environment.
+
 ## Minimum requirements (MVP)
 
 The scope below is realistic for one week. Lock it on the first day and record in `DECISIONS.md` what is in, what is out, and why. A complete, demonstrable flow is better than a long list left half-done.

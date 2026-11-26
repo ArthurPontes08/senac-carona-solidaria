@@ -27,6 +27,22 @@ Vocês vão facilitar o combinado entre alunos e funcionários do Senac que já 
 
 Entregar um MVP em que pessoas da comunidade Senac oferecem ou buscam caronas, o sistema (com apoio de IA) ajuda a combinar rotas e horários, e o combinado pode ser confirmado ou cancelado de forma clara.
 
+## Divisão de responsabilidades
+
+- **João Cenerelli:** será responsável pela implementação integral do front-end com HTML, CSS e JavaScript. Também será responsável pela UI/UX: estrutura visual das telas, hierarquia das informações, estados da interface, responsividade e consistência entre os fluxos. Essa decisão foi tomada porque João possui maior domínio e experiência no desenvolvimento frontend.
+- **Arthur:** será responsável pela implementação integral do back-end, incluindo a organização da API, as regras de negócio, os serviços e a integração com o front-end. Essa divisão considera que Arthur possui maior domínio da área de back-end.
+- **Lívia:** será responsável pelo banco de dados, incluindo a modelagem das entidades, os relacionamentos, as consultas e a integração dos dados com o back-end. Essa divisão considera que Lívia possui maior domínio dessa área.
+
+A distribuição foi feita por afinidade técnica e para reduzir o retrabalho durante uma semana de imersão. Os integrantes continuarão colaborando entre si: revisões, integrações e alinhamentos serão feitos em conjunto, mas a liderança técnica de cada área ficará com a pessoa indicada acima.
+
+## Documentação colaborativa
+
+Toda a documentação do projeto será produzida pelos três integrantes de forma simultânea. O grupo utilizará o Google Docs para a elaboração colaborativa, pois todos poderão visualizar em tempo real quando outro membro estiver alterando o documento. Depois de finalizados e revisados em conjunto, os textos serão registrados no repositório nos respectivos arquivos bilíngues.
+
+## Prioridade de interface
+
+O desenvolvimento visual será priorizado para a versão desktop. A implementação responsiva será considerada apenas se houver tempo suficiente após a conclusão das funcionalidades essenciais do MVP. Essa ordem evita comprometer o fluxo principal dentro do prazo de uma semana e permite testar primeiro a interface no ambiente desktop.
+
 ## Requisitos mínimos (MVP)
 
 O recorte abaixo é realista para uma semana. Fechem-no no primeiro dia e registrem no `DECISIONS.md` o que entra, o que fica de fora e por quê. É melhor um fluxo completo e demonstrável do que uma lista longa pela metade.

@@ -1,4 +1,4 @@
-# CARONA SOLIDÁRIA | Vida no campus e comunidade.
+# VAI JUNTO | Carona Solidária — Vida no campus e comunidade.
 
 [English](README.md) · **Português (Brasil)**
 
@@ -28,13 +28,17 @@ O usuário pode cadastrar-se, oferecer ou procurar caronas, visualizar opções 
 
 A aplicação permite que alunos e funcionários do Senac Canoas ofereçam e encontrem caronas entre pessoas da comunidade, possibilitando a publicação e busca de trajetos, solicitação e aprovação de vagas, além do gerenciamento das caronas em um único ambiente. O MVP contempla cadastro de usuários, publicação de ofertas, busca, solicitações, aprovação ou recusa, cancelamentos e acompanhamento das caronas, priorizando um fluxo simples, funcional e seguro.
 
+O usuário pode informar qualquer local de origem, como bairro, cidade ou endereço; a busca de caronas aceita correspondências parciais.
+
+O front-end também oferece uma interface básica de conversa para solicitações de carona confirmadas. Na demonstração atual, as mensagens ficam salvas no navegador e não são sincronizadas entre usuários ou dispositivos diferentes.
+
 **O que não entra no MVP:**
 - Pagamentos
 - Rastreamento em tempo real
 - Marketplace de transporte
 - Sistema complexo de avaliações
 - Denúncias avançadas
-- Chat interno completo
+- Chat compartilhado entre sessões de usuários ou dispositivos diferentes
 - Algoritmo sofisticado de rotas
 - Caronas abertas para pessoas de fora da comunidade Senac
 
@@ -93,6 +97,16 @@ O repositório utiliza **GitHub Actions** (`.github/workflows/ci.yml`), executad
 1. **Build:** Compila o projeto Java (`./mvnw clean compile`) e valida os arquivos principais do front-end.
 2. **Lint:** Executa verificações de estilo e sintaxe de código.
 3. **Testes:** Roda os testes automatizados por camada (`./mvnw test`).
+
+## Conventional Commits
+
+Use o formato `<tipo>(<escopo>): <descrição curta>` nas mensagens de commit. Os tipos aceitos são `feat` (nova funcionalidade), `fix` (correção de bug), `docs` (documentação), `style` (formatação sem mudança de comportamento), `refactor` (organização do código sem funcionalidade nova ou correção), `test` (testes), `chore` (manutenção) e `ci` (CI/CD).
+
+Exemplos:
+- `feat(chat): adiciona interface de conversa para caronas confirmadas`
+- `fix(api): corrige validação do cadastro`
+- `docs(readme): descreve como rodar o projeto localmente`
+- `ci(actions): adiciona job de lint no workflow`
 
 ## Deploy
 

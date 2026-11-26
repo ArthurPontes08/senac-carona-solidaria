@@ -1,4 +1,4 @@
-# CARONA SOLIDÁRIA | Campus life and community.
+# VAI JUNTO | Carona Solidária — Campus life and community.
 
 **English** · [Português (Brasil)](README.pt-BR.md)
 
@@ -8,9 +8,21 @@
 - **Tech Lead:** Arthur
 - **Presentation lead:** João
 - **Members:**
-  - Arthur | GitHub
-  - Lívia | GitHub
-  - João Cenerelli | GitHub
+  - João Cenerelli | Front-end with HTML, CSS, and JavaScript, responsible for UI/UX | GitHub
+  - Arthur | Back-end | GitHub
+  - Lívia | Database | GitHub
+
+### Detailed responsibilities
+
+- **João Cenerelli:** responsible for the complete front-end implementation with HTML, CSS, and JavaScript and for the product's UI/UX. This choice reflects João's stronger knowledge of these technologies and the need to maintain a consistent visual interface.
+- **Arthur:** responsible for the complete back end, including the API, business rules, services, and integration with the front end.
+- **Lívia:** responsible for the database, including entity modeling, relationships, queries, and integration of data with the back end.
+
+The areas will be reviewed collaboratively, but this division defines each member's primary responsibility during MVP development.
+
+All project documentation will be produced by the three team members simultaneously using Google Docs for real-time collaborative editing. Completed texts will be recorded in the repository in both English and Portuguese.
+
+The desktop version will have visual priority. Responsiveness will be implemented only if time remains after completing the essential MVP flow.
 
 ## Theme / area
 
@@ -28,13 +40,17 @@ Users can register, offer or search for rides, view compatible options, request 
 
 The application allows students and staff from Senac Canoas to offer and find rides among members of the community, enabling route publication and search, seat requests and approvals, as well as ride management in a single environment. The MVP includes user registration, ride offer publication, search, requests, approval or rejection, cancellations, and ride tracking, prioritizing a simple, functional, and safe flow.
 
+Users can enter any origin location, including a neighborhood, city, or address; ride search supports partial matches.
+
+The front end also provides a basic conversation interface for confirmed ride requests. In the current demo, messages are stored in the browser and are not synchronized between different users or devices.
+
 **What is not included in the MVP:**
 - Payments
 - Real-time tracking
 - Transportation marketplace
 - Complex rating system
 - Advanced reporting system
-- Full internal chat
+- Shared chat between different user sessions or devices
 - Sophisticated route algorithm
 - Rides open to people outside the Senac community
 
@@ -93,6 +109,16 @@ The repository uses **GitHub Actions** (`.github/workflows/ci.yml`), which runs 
 1. **Build:** Compiles the Java project (`./mvnw clean compile`) and validates front-end entry files.
 2. **Lint:** Runs code style and syntax checks.
 3. **Tests:** Runs automated unit/layer tests (`./mvnw test`).
+
+## Conventional Commits
+
+Use the format `<type>(<scope>): <short description>` for commit messages. Accepted types are `feat` (feature), `fix` (bug fix), `docs` (documentation), `style` (formatting without behavior changes), `refactor` (code organization without a feature or bug fix), `test` (tests), `chore` (maintenance), and `ci` (CI/CD).
+
+Examples:
+- `feat(chat): add a conversation interface for confirmed rides`
+- `fix(api): correct registration validation`
+- `docs(readme): explain how to run the project locally`
+- `ci(actions): add a lint job to the workflow`
 
 ## Deploy
 
