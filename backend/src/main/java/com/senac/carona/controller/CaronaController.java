@@ -1,7 +1,9 @@
 package com.senac.carona.controller;
 
 import com.senac.carona.dto.CadastroUsuarioRequest;
+import com.senac.carona.dto.CriarOfertaRequest;
 import com.senac.carona.dto.MinhasCaronasResponse;
+import com.senac.carona.dto.OfertaResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
 import com.senac.carona.dto.UsuarioResponse;
 import com.senac.carona.model.Carona;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -57,6 +60,33 @@ public class CaronaController {
     public ResponseEntity<Carona> publicarCarona(@RequestBody Carona carona) {
         Carona criada = caronaService.publicarCarona(carona);
         return ResponseEntity.status(HttpStatus.CREATED).body(criada);
+    }
+
+    @GetMapping("/ofertas")
+    public ResponseEntity<List<OfertaResponse>> listarOfertas(
+            @RequestParam(required = false) String data,
+            @RequestParam(required = false) String regiao,
+            @RequestParam(required = false) String horario,
+            @RequestParam(required = false) Integer vagas) {
+        List<Carona> ofertas = caronaService.buscarOfertas(data, regiao, horario, vagas);
+        Map<Long, Integer> compatibilidade = caronaService
+                .recomendarCaronas(data, regiao, horario).stream()
+                .collect(Collectors.toMap(
+                        recomendacao -> recomendacao.getCarona().getId(),
+                        RecomendacaoCaronaResponse::getScoreCompatibilidade));
+        List<OfertaResponse> resposta = ofertas.stream()
+                .map(oferta -> OfertaResponse.from(
+                        oferta, compatibilidade.getOrDefault(oferta.getId(), 50)))
+                .toList();
+        return ResponseEntity.ok(resposta);
+    }
+
+    @PostMapping("/ofertas")
+    public ResponseEntity<OfertaResponse> publicarOferta(
+            @RequestBody CriarOfertaRequest request) {
+        Carona criada = caronaService.publicarCarona(request.toCarona());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(OfertaResponse.from(criada, 100));
     }
 
     @GetMapping("/caronas/recomendadas")
