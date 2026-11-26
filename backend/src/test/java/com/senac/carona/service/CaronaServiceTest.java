@@ -147,6 +147,29 @@ class CaronaServiceTest {
     }
 
     @Test
+    void filtraOfertasPorHorarioVagasEStatus() {
+        Carona tardeComVagas = carona(1L, 1L, 4, 3, "ABERTA");
+        tardeComVagas.setHorario("20:00");
+        Carona cedoComVagas = carona(2L, 1L, 4, 3, "ABERTA");
+        cedoComVagas.setHorario("18:30");
+        Carona lotada = carona(3L, 1L, 3, 0, "LOTADA");
+        lotada.setHorario("20:30");
+        when(caronaRepository.findAll()).thenReturn(List.of(tardeComVagas, cedoComVagas, lotada));
+
+        List<Carona> ofertas = service.buscarOfertas(null, null, "19:00", 2);
+
+        assertEquals(List.of(tardeComVagas), ofertas);
+    }
+
+    @Test
+    void rejeitaFiltrosDeOfertaInvalidos() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.buscarOfertas(null, null, "25:00", 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> service.buscarOfertas(null, null, null, 0));
+    }
+
+    @Test
     void naoPermiteMotoristaSolicitarNaPropriaCarona() {
         when(caronaRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(carona(1L, 1L, 3, 3, "ABERTA")));
