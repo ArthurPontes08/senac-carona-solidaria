@@ -144,8 +144,20 @@ public class CaronaController {
     }
 
     @GetMapping("/caronas/{id}/solicitacoes")
-    public ResponseEntity<List<SolicitacaoCarona>> listarSolicitacoes(@PathVariable Long id) {
-        return ResponseEntity.ok(caronaService.listarSolicitacoesPorCarona(id));
+    public ResponseEntity<List<SolicitacaoResponse>> listarSolicitacoes(
+            @PathVariable Long id, @RequestParam Long userId) {
+        Carona carona = caronaService.buscarCaronaPorId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
+        List<SolicitacaoResponse> solicitacoes = caronaService
+                .listarSolicitacoesPorCarona(id, userId).stream()
+                .map(solicitacao -> {
+                    Usuario passageiro = caronaService.buscarUsuarioPorId(solicitacao.getPassageiroId())
+                            .orElseThrow(() -> new IllegalStateException(
+                                    "Passageiro vinculado à solicitação não encontrado."));
+                    return SolicitacaoResponse.from(solicitacao, carona, passageiro, false);
+                })
+                .toList();
+        return ResponseEntity.ok(solicitacoes);
     }
 
     @PatchMapping("/solicitacoes/{id}/responder")
