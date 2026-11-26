@@ -62,7 +62,9 @@ The PostgreSQL connection is configured through environment variables: `DB_URL`,
 
 The user registration endpoint accepts an omitted or blank phone number and stores it as `null`; when provided, the phone number must use the accepted format.
 
-`SolicitacaoCaronaRepository` provides JPA operations and queries for ride requests by ride, passenger, and status, and is used by `CaronaService`. Seat-changing operations run in transactions and lock the corresponding ride row. The backend no longer seeds demo users and rides at startup; the front end still uses a local mock by default, and its API contract has not yet been aligned with the backend.
+`SolicitacaoCaronaRepository` provides JPA operations and queries for ride requests by ride, passenger, and status, and is used by `CaronaService`. Seat-changing operations run in transactions and lock the corresponding ride row. The backend no longer seeds demo users and rides at startup; the front end still uses a local mock by default, and its ride and request API flows are not yet aligned with backend routes.
+
+`POST /api/usuarios` accepts the front-end fields `name`, `email`, `role` (`both`, `driver`, or `rider`), and `region`; it responds with `id`, `name`, `email`, `role`, and `region`. Portuguese request field names are also accepted for compatibility. Phone is optional and is not included in user responses or listings.
 
 ## Folder structure
 
