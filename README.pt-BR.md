@@ -44,7 +44,9 @@ O front-end também oferece uma interface básica de conversa para solicitaçõe
 
 ## Stack
 
-Java 17 com Spring Boot (Spring Web) e Maven são utilizados no back-end, e HTML5, CSS3 e JavaScript puro no front-end. Ainda não escolhemos qual banco de dados vamos utilizar.
+Java 17 com Spring Boot, Spring Data JPA e Maven são utilizados no back-end. PostgreSQL é o banco de dados configurado. O front-end usa HTML5, CSS3 e JavaScript puro.
+
+A conexão com o PostgreSQL é configurada pelas variáveis de ambiente `DB_URL`, `DB_USERNAME` e `DB_PASSWORD`. O banco local precisa ser criado antes de iniciar a aplicação. O Hibernate usa `ddl-auto=update` por padrão neste momento; isso facilita o desenvolvimento, mas não substitui migrations versionadas. Os principais fluxos de caronas ainda estão sendo conectados à persistência.
 
 ## Estrutura de pastas
 
@@ -79,14 +81,32 @@ Java 17 com Spring Boot (Spring Web) e Maven são utilizados no back-end, e HTML
 ### Pré-requisitos
 - Java 17 (JDK)
 - Maven (ou o wrapper `./mvnw` incluso no projeto)
+- PostgreSQL, com o banco local criado
 - Navegador web atualizado (Chrome, Edge, Firefox)
 
 ### Back-end
+
+Defina as variáveis de conexão no mesmo terminal em que iniciará a aplicação. Não faça commit de credenciais reais.
+
+PowerShell:
+```powershell
+cd backend
+$env:DB_URL = "jdbc:postgresql://localhost:5432/carona_solidaria"
+$env:DB_USERNAME = "seu_usuario_postgres"
+$env:DB_PASSWORD = "sua_senha_postgres"
+.\mvnw.cmd spring-boot:run
+```
+
+Linux/macOS:
 ```bash
 cd backend
+export DB_URL="jdbc:postgresql://localhost:5432/carona_solidaria"
+export DB_USERNAME="seu_usuario_postgres"
+export DB_PASSWORD="sua_senha_postgres"
 ./mvnw spring-boot:run
 ```
-A API ficará disponível em `http://localhost:8080`.
+
+A API ficará disponível em `http://localhost:8080`. `DB_DDL_AUTO` pode sobrescrever o modo de schema do Hibernate; o padrão atual é `update`. `DB_SHOW_SQL` controla a exibição de SQL e o padrão é `false`.
 
 ### Front-end
 Abra o arquivo `frontend/index.html` diretamente no navegador ou utilize a extensão **Live Server** no VS Code.
