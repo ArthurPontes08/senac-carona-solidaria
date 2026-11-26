@@ -5,6 +5,8 @@ import com.senac.carona.dto.CriarOfertaRequest;
 import com.senac.carona.dto.MinhasCaronasResponse;
 import com.senac.carona.dto.OfertaResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
+import com.senac.carona.dto.SolicitarOfertaRequest;
+import com.senac.carona.dto.SolicitacaoResponse;
 import com.senac.carona.dto.UsuarioResponse;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
@@ -87,6 +89,20 @@ public class CaronaController {
         Carona criada = caronaService.publicarCarona(request.toCarona());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(OfertaResponse.from(criada, 100));
+    }
+
+    @PostMapping("/ofertas/{id}/solicitacoes")
+    public ResponseEntity<SolicitacaoResponse> solicitarOferta(
+            @PathVariable Long id, @RequestBody SolicitarOfertaRequest request) {
+        Long passageiroId = request.getPassengerId();
+        SolicitacaoCarona criada = caronaService.solicitarVaga(
+                id, passageiroId, null, request.getMsg());
+        Carona carona = caronaService.buscarCaronaPorId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
+        Usuario passageiro = caronaService.buscarUsuarioPorId(passageiroId)
+                .orElseThrow(() -> new IllegalArgumentException("Passageiro não encontrado."));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(SolicitacaoResponse.from(criada, carona, passageiro, true));
     }
 
     @GetMapping("/caronas/recomendadas")

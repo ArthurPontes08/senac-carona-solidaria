@@ -236,11 +236,20 @@ public class CaronaService {
 
     @Transactional
     public SolicitacaoCarona solicitarVaga(Long caronaId, Long passageiroId, String pontoEmbarque) {
+        return solicitarVaga(caronaId, passageiroId, pontoEmbarque, null);
+    }
+
+    @Transactional
+    public SolicitacaoCarona solicitarVaga(
+            Long caronaId, Long passageiroId, String pontoEmbarque, String mensagem) {
         if (caronaId == null || caronaId <= 0) {
             throw new IllegalArgumentException("CaronaId é obrigatório.");
         }
         if (passageiroId == null || passageiroId <= 0) {
             throw new IllegalArgumentException("PassageiroId é obrigatório.");
+        }
+        if (mensagem != null && mensagem.trim().length() > 140) {
+            throw new IllegalArgumentException("A mensagem deve ter no máximo 140 caracteres.");
         }
         Carona carona = caronaRepository.findByIdForUpdate(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
@@ -293,6 +302,7 @@ public class CaronaService {
                 "PENDENTE",
                 null
         );
+        solicitacao.setMensagem(mensagem == null || mensagem.isBlank() ? null : mensagem.trim());
 
         return solicitacaoCaronaRepository.save(solicitacao);
     }

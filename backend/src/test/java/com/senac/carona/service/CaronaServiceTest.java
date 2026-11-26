@@ -139,11 +139,19 @@ class CaronaServiceTest {
         when(solicitacaoRepository.save(any(SolicitacaoCarona.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        SolicitacaoCarona criada = service.solicitarVaga(1L, 3L, null);
+        SolicitacaoCarona criada = service.solicitarVaga(1L, 3L, null, "  Posso esperar aqui?  ");
 
         assertEquals("PENDENTE", criada.getStatus());
         assertEquals("Praça", criada.getPontoEmbarque());
+        assertEquals("Posso esperar aqui?", criada.getMensagem());
         verify(solicitacaoRepository).save(any(SolicitacaoCarona.class));
+    }
+
+    @Test
+    void naoPermiteMensagemDeSolicitacaoMaiorQue140Caracteres() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.solicitarVaga(1L, 3L, null, "x".repeat(141)));
+        verify(solicitacaoRepository, never()).save(any(SolicitacaoCarona.class));
     }
 
     @Test
