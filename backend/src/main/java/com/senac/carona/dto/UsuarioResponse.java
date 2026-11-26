@@ -11,13 +11,15 @@ public class UsuarioResponse {
     private final String email;
     private final String role;
     private final String region;
+    private final String photo;
 
-    private UsuarioResponse(Long id, String name, String email, String role, String region) {
+    private UsuarioResponse(Long id, String name, String email, String role, String region, String photo) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.role = role;
         this.region = region;
+        this.photo = photo;
     }
 
     public static UsuarioResponse from(Usuario usuario) {
@@ -26,7 +28,8 @@ public class UsuarioResponse {
                 usuario.getNome(),
                 usuario.getEmailSenac(),
                 mapRole(usuario.getPerfil()),
-                usuario.getBairroOrigem()
+                usuario.getBairroOrigem(),
+                usuario.getFotoPerfil()
         );
     }
 
@@ -47,4 +50,5 @@ public class UsuarioResponse {
     public String getEmail() { return email; }
     public String getRole() { return role; }
     public String getRegion() { return region; }
+    public String getPhoto() { return photo; }
 }

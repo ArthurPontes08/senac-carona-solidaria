@@ -28,6 +28,9 @@ public class Usuario {
     @Column
     private String telefone;
 
+    @Column(name = "foto_perfil", columnDefinition = "TEXT")
+    private String fotoPerfil;
+
     public Usuario() {
     }
 
@@ -62,4 +65,7 @@ public class Usuario {
 
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
+
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
 }

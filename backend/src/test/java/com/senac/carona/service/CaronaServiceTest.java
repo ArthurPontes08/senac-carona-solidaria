@@ -71,6 +71,31 @@ class CaronaServiceTest {
     }
 
     @Test
+    void atualizaNomeEFotoDoPerfil() {
+        Usuario existente = usuario(7L, "Nome antigo", "usuario@senacrs.com.br", "AMBOS");
+        when(usuarioRepository.findById(7L)).thenReturn(Optional.of(existente));
+        when(usuarioRepository.save(any(Usuario.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Usuario atualizado = service.atualizarPerfil(7L, "  Nome novo  ",
+                "data:image/jpeg;base64,dGVzdA==");
+
+        assertEquals("Nome novo", atualizado.getNome());
+        assertEquals("data:image/jpeg;base64,dGVzdA==", atualizado.getFotoPerfil());
+        verify(usuarioRepository).save(existente);
+    }
+
+    @Test
+    void rejeitaFotoDePerfilForaDoFormatoAceito() {
+        Usuario existente = usuario(7L, "Nome", "usuario@senacrs.com.br", "AMBOS");
+        when(usuarioRepository.findById(7L)).thenReturn(Optional.of(existente));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.atualizarPerfil(7L, "Nome", "https://example.com/foto.jpg"));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
     void persisteUsuarioSemTelefoneQuandoCampoNaoInformado() {
         Usuario novoUsuario = new Usuario(null, "Arthur Pontes",
                 "arthur.pontes@senacrs.com.br", "ALUNO", "AMBOS", "Centro", null);
@@ -171,6 +196,22 @@ class CaronaServiceTest {
         List<Carona> ofertas = service.buscarOfertas(null, null, "19:00", 2);
 
         assertEquals(List.of(tardeComVagas), ofertas);
+    }
+
+    @Test
+    void buscaOfertasPorTodosOsTermosSemDiferenciarAcentosEOcultaProprias() {
+        Carona ofertaPublica = carona(1L, 2L, 3, 3, "ABERTA");
+        ofertaPublica.setOrigem("Niterói");
+        ofertaPublica.setPontoEncontro("Próximo à estação");
+        Carona ofertaDoUsuario = carona(2L, 1L, 3, 3, "ABERTA");
+        ofertaDoUsuario.setOrigem("Niterói");
+        ofertaDoUsuario.setPontoEncontro("Próximo à estação");
+        when(caronaRepository.findAll()).thenReturn(List.of(ofertaPublica, ofertaDoUsuario));
+
+        List<Carona> ofertas = service.buscarOfertas(null, null, null, 1,
+                "niteroi estacao", 1L);
+
+        assertEquals(List.of(ofertaPublica), ofertas);
     }
 
     @Test

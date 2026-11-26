@@ -31,4 +31,11 @@ public class ChatController {
                 id, request.getUserId(), request.getText());
         return ResponseEntity.status(HttpStatus.CREATED).body(enviada);
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> apagarConversa(
+            @PathVariable Long id, @RequestParam Long userId) {
+        chatService.apagarConversa(id, userId);
+        return ResponseEntity.noContent().build();
+    }
 }

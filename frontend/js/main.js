@@ -1,4 +1,4 @@
-const State = { view: "dashboard", tab: "offered", data: null, results: null, pending: null, chat: null };
+const State = { view: "dashboard", tab: "offered", data: null, results: null, pending: null, chat: null, profilePhoto: "", searchRequest: 0, photoRequest: 0 };
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -148,19 +148,32 @@ async function load() {
   try {
     State.data = await Api.snapshot();
     renderAll();
-  } catch {
+  } catch (error) {
     $("#view-dashboard").innerHTML = UI.error("load");
+    UI.toast(failureMessage(error, "Não foi possível carregar os dados."), true);
   }
 }
 async function search(e) {
   e && e.preventDefault();
+  const request = ++State.searchRequest;
+  const date = $("#fDate");
+  if (!date.validity.valid) {
+    UI.field(date, "Informe uma data válida com ano de até 4 dígitos.");
+    return;
+  }
+  if (date.value) UI.field(date, "");
   const box = $("#searchResults");
   box.innerHTML = UI.skeleton(4);
   try {
-    State.results = await Api.listOffers({ data: $("#fDate").value, regiao: $("#fRegion").value, horario: $("#fTime").value, vagas: $("#fSeats").value });
+    const results = await Api.listOffers({ q: $("#fQuery").value, data: $("#fDate").value, regiao: $("#fRegion").value, horario: $("#fTime").value, vagas: $("#fSeats").value });
+    if (request !== State.searchRequest) return;
+    State.results = results;
     box.innerHTML = State.results.length ? State.results.map(offerCard).join("") : `<div style="grid-column:1/-1">${UI.empty("Nenhuma carona encontrada", "Tente outro dia ou deixe a região em “Todas”.")}</div>`;
-  } catch {
-    box.innerHTML = `<div style="grid-column:1/-1">${UI.error("search")}</div>`;
+  } catch (error) {
+    if (request === State.searchRequest) {
+      box.innerHTML = `<div style="grid-column:1/-1">${UI.error("search")}</div>`;
+      UI.toast(failureMessage(error, "Não foi possível buscar caronas."), true);
+    }
   }
 }
 function go(v) {
@@ -177,8 +190,8 @@ async function runAction(btn, fn, ok) {
     State.data = await Api.snapshot();
     renderAll();
     UI.toast(ok);
-  } catch {
-    UI.toast("Não foi possível concluir. Tente novamente.", true);
+  } catch (error) {
+    UI.toast(failureMessage(error, "Não foi possível concluir. Tente novamente."), true);
   }
 }
 
@@ -197,12 +210,27 @@ function renderChat() {
 }
 
 const req = (el, m) => UI.field(el, el.value.trim() ? "" : m);
+const failureMessage = (error, fallback) => {
+  const message = error instanceof Error ? error.message : "";
+  return message && !["Failed to fetch", "Load failed", "network"].includes(message) ? message : fallback;
+};
 function publishSummary() {
   const f = $("#publishForm"),
     v = (k) => f.elements[k].value;
   $("#pubSummary").textContent = v("origin") && v("date") && v("time") ? `Resumo: ${v("origin")} → Senac Canoas, ${fmtDate(v("date"))} às ${v("time")}, ${v("seats")} vaga(s).` : "";
   const [h] = (v("time") || "0:0").split(":");
   if (v("time") && +h >= 22) $("#pubSummary").textContent += " Este horário parece apertado. Confira antes de publicar.";
+}
+
+function resetSearchFilters() {
+  const form = $("#searchForm");
+  form.reset();
+  $$(".invalid, .valid", form).forEach((input) => {
+    input.classList.remove("invalid", "valid");
+    input.removeAttribute("aria-invalid");
+    input.removeAttribute("aria-describedby");
+  });
+  $$(".err", form).forEach((error) => (error.textContent = ""));
 }
 
 function bind() {
@@ -232,8 +260,8 @@ function bind() {
         renderChat();
         $("#dlg-chat").showModal();
         $("#chatForm").elements.message.focus();
-      } catch {
-        UI.toast("Não foi possível abrir esta conversa.", true);
+      } catch (error) {
+        UI.toast(failureMessage(error, "Não foi possível abrir esta conversa."), true);
       }
     }
     if (t.dataset.act) {
@@ -241,6 +269,32 @@ function bind() {
         id = +t.dataset.id;
       const txt = { aceitar: ["Aceitar esta solicitação?", "A pessoa verá o ponto de encontro e poderá combinar os detalhes.", "Aceitar"], recusar: ["Recusar esta solicitação?", "A pessoa será avisada de que a vaga não está disponível.", "Recusar"], cancelar: ["Cancelar esta carona?", "Quem participa será avisado. Essa ação não pode ser desfeita.", "Cancelar carona"] }[a];
       if (await UI.confirm(...txt)) runAction(t, () => Api.respond(id, a), { aceitar: "Solicitação aceita.", recusar: "Solicitação recusada.", cancelar: "Carona cancelada." }[a]);
+    }
+  });
+  $("#resetSearch").addEventListener("click", () => {
+    resetSearchFilters();
+    search();
+  });
+  $("#resetBenchmark").addEventListener("click", async (e) => {
+    const button = e.currentTarget;
+    if (!Api.config.MOCK) {
+      UI.toast("O reset do benchmark está disponível apenas no modo local.", true);
+      return;
+    }
+    if (!(await UI.confirm("Zerar dados do benchmark?", "Todas as caronas, solicitações, mensagens e conversas serão apagadas. Seu perfil será mantido.", "Apagar tudo"))) return;
+    State.searchRequest += 1;
+    try {
+      State.data = await UI.busy(button, () => Api.clearBenchmark());
+      State.results = null;
+      State.chat = null;
+      State.pending = null;
+      resetSearchFilters();
+      renderAll();
+      $("#searchResults").innerHTML = `<div style="grid-column:1/-1">${UI.empty("Nenhuma carona encontrada", "Os dados do benchmark foram apagados.")}</div>`;
+      UI.toast("Benchmark zerado. Seu perfil foi mantido.");
+    } catch (error) {
+      console.error("Failed to clear benchmark data", error);
+      UI.toast("Não foi possível zerar os dados do benchmark.", true);
     }
   });
   $("#searchForm").addEventListener("submit", search);
@@ -257,8 +311,8 @@ function bind() {
       go("rides");
       State.tab = "requested";
       renderRides();
-    } catch {
-      UI.toast("Não foi possível enviar a solicitação.", true);
+    } catch (error) {
+      UI.toast(failureMessage(error, "Não foi possível enviar a solicitação."), true);
     }
   });
   $("#chatForm").addEventListener("submit", async (e) => {
@@ -275,16 +329,44 @@ function bind() {
       renderChat();
       form.reset();
       form.elements.message.focus();
-    } catch {
-      UI.toast("Não foi possível enviar a mensagem.", true);
+    } catch (error) {
+      UI.toast(failureMessage(error, "Não foi possível enviar a mensagem."), true);
     }
+  });
+  $("#deleteChat").addEventListener("click", async (e) => {
+    const button = e.currentTarget;
+    const requestId = State.chat.requestId;
+    if (!(await UI.confirm("Apagar esta conversa?", "Todas as mensagens serão excluídas para os participantes. Esta ação não pode ser desfeita.", "Apagar conversa"))) return;
+    try {
+      await UI.busy(button, () => Api.deleteConversation(requestId));
+      State.chat = null;
+      $("#chatMessages").innerHTML = "";
+      $("#chatForm").reset();
+      $("#dlg-chat").close();
+      UI.toast("Conversa apagada.");
+    } catch (error) {
+      console.error("Failed to delete conversation", error);
+      UI.toast(failureMessage(error, "Não foi possível apagar a conversa."), true);
+    }
+  });
+  $$('input[type="date"]').forEach((input) => {
+    input.addEventListener("input", () => {
+      const year = input.value.split("-")[0];
+      if (year.length > 4) {
+        input.value = "";
+        UI.field(input, "O ano deve ter no máximo 4 dígitos.");
+      } else if (input.value && input.validity.valid) {
+        UI.field(input, "");
+      }
+    });
   });
   $("#publishForm").addEventListener("input", publishSummary);
   $("#publishForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = e.target,
       el = f.elements;
-    const ok = [req(el.origin, "Informe a região de origem."), req(el.date, "Informe a data."), req(el.time, "Verifique o horário informado."), req(el.ref, "Informe um ponto de referência aproximado."), UI.field(el.seats, +el.seats.value >= 1 && +el.seats.value <= 4 ? "" : "Informe de 1 a 4 vagas.")].every(Boolean);
+    const dateError = !el.date.value ? "Informe a data." : !el.date.validity.valid ? "Use uma data válida com ano de até 4 dígitos." : "";
+    const ok = [req(el.origin, "Informe a região de origem."), UI.field(el.date, dateError), req(el.time, "Verifique o horário informado."), req(el.ref, "Informe um ponto de referência aproximado."), UI.field(el.seats, +el.seats.value >= 1 && +el.seats.value <= 4 ? "" : "Informe de 1 a 4 vagas.")].every(Boolean);
     if (!ok) return;
     try {
       await UI.busy(e.submitter, () => Api.createOffer({ origin: el.origin.value, date: el.date.value, time: el.time.value, seats: +el.seats.value, ref: el.ref.value, notes: el.notes.value }));
@@ -298,8 +380,8 @@ function bind() {
       go("rides");
       State.tab = "offered";
       renderRides();
-    } catch {
-      UI.toast("Não foi possível publicar a oferta.", true);
+    } catch (error) {
+      UI.toast(failureMessage(error, "Não foi possível publicar a oferta."), true);
     }
   });
   $("#onboardForm").addEventListener("submit", async (e) => {
@@ -313,8 +395,8 @@ function bind() {
       setUser(u);
       UI.toast("Cadastro concluído. Bem-vindo(a)!");
       load();
-    } catch {
-      UI.toast("Não foi possível concluir o cadastro.", true);
+    } catch (error) {
+      UI.toast(failureMessage(error, "Não foi possível concluir o cadastro."), true);
     }
   });
   $("#dlg-onboard").addEventListener("cancel", (e) => e.preventDefault());
@@ -323,6 +405,63 @@ function bind() {
     const m = $("#profileMenu");
     m.hidden = !m.hidden;
     pb.setAttribute("aria-expanded", !m.hidden);
+  });
+  $("#editProfile").addEventListener("click", () => {
+    const user = Api.session();
+    if (!user) return;
+    State.profilePhoto = user.photo || "";
+    $("#profileNameInput").value = user.name || "";
+    $("#profilePreviewName").textContent = user.name || "Seu nome";
+    $("#profilePhoto").value = "";
+    renderAvatar($("#profilePreview"), user);
+    $("#profileMenu").hidden = true;
+    pb.setAttribute("aria-expanded", "false");
+    $("#dlg-profile").showModal();
+    $("#profileNameInput").focus();
+  });
+  $("#profileNameInput").addEventListener("input", (e) => {
+    const name = e.currentTarget.value.trim() || "Seu nome";
+    $("#profilePreviewName").textContent = name;
+    if (!State.profilePhoto) renderAvatar($("#profilePreview"), { name });
+  });
+  $("#profilePhoto").addEventListener("change", async (e) => {
+    const input = e.currentTarget;
+    const file = input.files[0];
+    if (!file) return;
+    const request = ++State.photoRequest;
+    if (!file.type.startsWith("image/")) {
+      input.value = "";
+      UI.toast("Selecione um arquivo de imagem.", true);
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      input.value = "";
+      UI.toast("A imagem deve ter no máximo 8 MB.", true);
+      return;
+    }
+    try {
+      const photo = await imageToDataUrl(file);
+      if (request !== State.photoRequest) return;
+      State.profilePhoto = photo;
+      renderAvatar($("#profilePreview"), { name: $("#profileNameInput").value, photo });
+    } catch (error) {
+      console.error("Failed to load profile photo", error);
+      UI.toast("Não foi possível carregar essa imagem.", true);
+    }
+  });
+  $("#profileForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nameInput = e.currentTarget.elements.name;
+    if (!req(nameInput, "Informe seu nome.")) return;
+    try {
+      const user = await UI.busy(e.submitter, () => Api.updateProfile({ name: nameInput.value.trim(), photo: State.profilePhoto }));
+      setUser(user);
+      $("#dlg-profile").close();
+      UI.toast("Perfil atualizado.");
+    } catch (error) {
+      console.error("Failed to update profile", error);
+      UI.toast(failureMessage(error, "Não foi possível atualizar o perfil."), true);
+    }
   });
   $("#simError").addEventListener("click", (e) => {
     Api.config.fail = !Api.config.fail;
@@ -335,9 +474,14 @@ function bind() {
     else load();
   });
   $("#resetDemo").addEventListener("click", () => {
+    if (!Api.config.MOCK) {
+      UI.toast("A sessão integrada é mantida para preservar seu acesso.", true);
+      return;
+    }
     Api.reset();
     location.reload();
   });
+  $("#resetDemo").hidden = !Api.config.MOCK;
   const syncConnectionStatus = () => {
     const offline = Api.config.fail || !navigator.onLine;
     $("#offline").hidden = !offline;
@@ -352,14 +496,59 @@ function bind() {
     }
   });
 }
+function renderAvatar(element, user) {
+  if (user.photo) {
+    const image = document.createElement("img");
+    image.src = user.photo;
+    image.alt = "";
+    element.replaceChildren(image);
+    return;
+  }
+  const initials = String(user.name || "?").trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "?";
+  element.textContent = initials;
+}
+function imageToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error || new Error("image read failed"));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error("invalid image"));
+      image.onload = () => {
+        const largestSide = Math.max(image.naturalWidth, image.naturalHeight);
+        if (!largestSide) {
+          reject(new Error("empty image"));
+          return;
+        }
+        const scale = Math.min(1, 256 / largestSide);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext("2d");
+        if (!context) {
+          reject(new Error("canvas unavailable"));
+          return;
+        }
+        try {
+          context.fillStyle = "#fff";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.85));
+        } catch (error) {
+          reject(error);
+        }
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
 function setUser(u) {
-  $("#avatar").textContent = u.name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  State.profilePhoto = u.photo || "";
+  renderAvatar($("#avatar"), u);
   $("#profileName").textContent = u.name;
+  $("#profilePreviewName").textContent = u.name;
+  renderAvatar($("#profilePreview"), u);
 }
 
 bind();

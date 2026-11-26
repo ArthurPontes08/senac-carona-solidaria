@@ -72,6 +72,12 @@ public class ChatService {
         return new ChatMessageResponse(salva, context.usuario().getNome(), true);
     }
 
+    @Transactional
+    public void apagarConversa(Long solicitacaoId, Long userId) {
+        validarParticipante(solicitacaoId, userId);
+        mensagemRepository.deleteBySolicitacaoId(solicitacaoId);
+    }
+
     private ChatContext validarParticipante(Long solicitacaoId, Long userId) {
         if (solicitacaoId == null || solicitacaoId <= 0) {
             throw new IllegalArgumentException("requestId é obrigatório.");

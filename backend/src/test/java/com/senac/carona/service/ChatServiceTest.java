@@ -106,6 +106,26 @@ class ChatServiceTest {
     }
 
     @Test
+    void apagaMensagensApenasParaParticipanteDeConversaConfirmada() {
+        prepararConversa(12L, "CONFIRMADA");
+
+        service.apagarConversa(20L, 12L);
+
+        verify(mensagemRepository).deleteBySolicitacaoId(20L);
+    }
+
+    @Test
+    void impedeTerceiroDeApagarConversa() {
+        when(solicitacaoRepository.findById(20L))
+                .thenReturn(Optional.of(solicitacao("CONFIRMADA")));
+        when(caronaRepository.findById(10L)).thenReturn(Optional.of(carona()));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.apagarConversa(20L, 99L));
+        verify(mensagemRepository, never()).deleteBySolicitacaoId(20L);
+    }
+
+    @Test
     void rejeitaMensagemVaziaOuMaiorQue500Caracteres() {
         assertThrows(IllegalArgumentException.class,
                 () -> service.enviarMensagem(20L, 12L, " "));
