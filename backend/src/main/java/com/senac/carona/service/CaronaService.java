@@ -5,14 +5,17 @@ import com.senac.carona.dto.RecomendacaoCaronaResponse;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
+import com.senac.carona.repository.CaronaRepository;
+import com.senac.carona.repository.SolicitacaoCaronaRepository;
+import com.senac.carona.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,42 +28,22 @@ public class CaronaService {
     public static final String SOLICITACAO_RECUSADA = "RECUSADA";
     public static final String SOLICITACAO_CANCELADA = "CANCELADA";
 
-    private final List<Usuario> usuarios = new ArrayList<>();
-    private final List<Carona> caronas = new ArrayList<>();
-    private final List<SolicitacaoCarona> solicitacoes = new ArrayList<>();
-
-    private final AtomicLong usuarioSeq = new AtomicLong(1);
-    private final AtomicLong caronaSeq = new AtomicLong(1);
-    private final AtomicLong solicitacaoSeq = new AtomicLong(1);
+    private final UsuarioRepository usuarioRepository;
+    private final CaronaRepository caronaRepository;
+    private final SolicitacaoCaronaRepository solicitacaoCaronaRepository;
     private static final DateTimeFormatter DATA_FORMATO = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final DateTimeFormatter HORARIO_FORMATO = DateTimeFormatter.ofPattern("HH:mm");
 
-    public CaronaService() {
-        String hoje = LocalDate.now().format(DATA_FORMATO);
-        Usuario arthur = cadastrarUsuario(new Usuario(null, "Arthur Pontes",
-                "arthur.pontes@senacrs.com.br", "ALUNO", "OFERECE",
-                "Mathias Velho", "(51) 99999-1111"));
-
-        Usuario livia = cadastrarUsuario(new Usuario(null, "Lívia Silva",
-                "livia.silva@senacrs.com.br", "ALUNO", "AMBOS",
-                "Centro Canoas", "(51) 98888-2222"));
-
-        cadastrarUsuario(new Usuario(null, "João Souza",
-                "joao.souza@senacrs.com.br", "ALUNO", "BUSCA",
-                "Niterói", "(51) 97777-3333"));
-
-        publicarCarona(new Carona(null, arthur.getId(), null, null,
-                "Mathias Velho - Canoas", "Senac Canoas",
-                hoje, "23:59", "Passarela Estação Mathias Velho",
-                3, "ABERTA", "Saída pontual rumo às aulas"));
-
-        publicarCarona(new Carona(null, livia.getId(), null, null,
-                "Centro - Canoas", "Senac Canoas",
-                hoje, "23:59", "Em frente à Praça da Emancipação",
-                2, "ABERTA", "Trajeto direto sem paradas extras"));
+    public CaronaService(UsuarioRepository usuarioRepository,
+                         CaronaRepository caronaRepository,
+                         SolicitacaoCaronaRepository solicitacaoCaronaRepository) {
+        this.usuarioRepository = usuarioRepository;
+        this.caronaRepository = caronaRepository;
+        this.solicitacaoCaronaRepository = solicitacaoCaronaRepository;
     }
 
-    public synchronized Usuario cadastrarUsuario(Usuario usuario) {
+    @Transactional
+    public Usuario cadastrarUsuario(Usuario usuario) {
         if (usuario == null) {
             throw new IllegalArgumentException("Os dados do usuário são obrigatórios.");
         }
@@ -80,16 +63,16 @@ public class CaronaService {
         if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]*senac[A-Za-z0-9.-]*\\.[A-Za-z]{2,}$")) {
             throw new IllegalArgumentException("É necessário usar um e-mail válido da comunidade Senac.");
         }
-        if (usuarios.stream().anyMatch(u -> u.getEmailSenac().equalsIgnoreCase(email))) {
+        if (usuarioRepository.existsByEmailSenacIgnoreCase(email)) {
             throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail.");
         }
         String vinculo = (usuario.getTipoVinculo() == null || usuario.getTipoVinculo().isBlank())
-                ? "ALUNO" : usuario.getTipoVinculo().toUpperCase();
+                ? "ALUNO" : usuario.getTipoVinculo().trim().toUpperCase(Locale.ROOT);
         if (!Set.of("ALUNO", "FUNCIONARIO").contains(vinculo)) {
             throw new IllegalArgumentException("Vínculo inválido. Use ALUNO ou FUNCIONARIO.");
         }
         String perfil = (usuario.getPerfil() == null || usuario.getPerfil().isBlank())
-                ? "AMBOS" : usuario.getPerfil().toUpperCase();
+                ? "AMBOS" : usuario.getPerfil().trim().toUpperCase(Locale.ROOT);
         if (!Set.of("OFERECE", "BUSCA", "AMBOS").contains(perfil)) {
             throw new IllegalArgumentException("Perfil inválido. Use OFERECE, BUSCA ou AMBOS.");
         }
@@ -100,23 +83,28 @@ public class CaronaService {
             throw new IllegalArgumentException("Telefone inválido.");
         }
         usuario.setEmailSenac(email);
-        usuario.setId(usuarioSeq.getAndIncrement());
+        usuario.setNome(usuario.getNome().trim());
+        usuario.setBairroOrigem(usuario.getBairroOrigem().trim());
+        usuario.setTelefone(usuario.getTelefone().trim());
+        usuario.setId(null);
         usuario.setTipoVinculo(vinculo);
         usuario.setPerfil(perfil);
-        usuarios.add(usuario);
-        return usuario;
+        return usuarioRepository.save(usuario);
     }
 
-    public synchronized List<Usuario> listarUsuarios() {
-        return new ArrayList<>(usuarios);
+    @Transactional(readOnly = true)
+    public List<Usuario> listarUsuarios() {
+        return usuarioRepository.findAll();
     }
 
-    public synchronized Optional<Usuario> buscarUsuarioPorId(Long id) {
+    @Transactional(readOnly = true)
+    public Optional<Usuario> buscarUsuarioPorId(Long id) {
         if (id == null || id <= 0) return Optional.empty();
-        return usuarios.stream().filter(u -> u.getId().equals(id)).findFirst();
+        return usuarioRepository.findById(id);
     }
 
-    public synchronized Carona publicarCarona(Carona novaCarona) {
+    @Transactional
+    public Carona publicarCarona(Carona novaCarona) {
         if (novaCarona == null) {
             throw new IllegalArgumentException("Os dados da carona são obrigatórios.");
         }
@@ -165,17 +153,17 @@ public class CaronaService {
             throw new IllegalArgumentException("Uma nova carona deve iniciar com o status ABERTA.");
         }
 
-        novaCarona.setId(caronaSeq.getAndIncrement());
+        novaCarona.setId(null);
         novaCarona.setMotoristaNome(motorista.getNome());
         novaCarona.setVinculoSenac(motorista.getTipoVinculo() + " • Comunidade Senac");
         novaCarona.setVagasDisponiveis(novaCarona.getVagasTotais());
         novaCarona.setStatus("ABERTA");
 
-        caronas.add(novaCarona);
-        return novaCarona;
+        return caronaRepository.save(novaCarona);
     }
 
-    public synchronized List<Carona> buscarCaronas(String data, String regiao) {
+    @Transactional(readOnly = true)
+    public List<Carona> buscarCaronas(String data, String regiao) {
         if (data != null && !data.isBlank()) {
             try {
                 LocalDate.parse(data.trim(), DATA_FORMATO);
@@ -183,7 +171,7 @@ public class CaronaService {
                 throw new IllegalArgumentException("Data inválida. Use o formato AAAA-MM-DD.");
             }
         }
-        return caronas.stream()
+        return caronaRepository.findAll().stream()
                 .filter(c -> !"CANCELADA".equalsIgnoreCase(c.getStatus()))
                 .filter(c -> {
                     try {
@@ -209,19 +197,21 @@ public class CaronaService {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public synchronized Optional<Carona> buscarCaronaPorId(Long id) {
+    @Transactional(readOnly = true)
+    public Optional<Carona> buscarCaronaPorId(Long id) {
         if (id == null || id <= 0) return Optional.empty();
-        return caronas.stream().filter(c -> c.getId().equals(id)).findFirst();
+        return caronaRepository.findById(id);
     }
 
-    public synchronized SolicitacaoCarona solicitarVaga(Long caronaId, Long passageiroId, String pontoEmbarque) {
+    @Transactional
+    public SolicitacaoCarona solicitarVaga(Long caronaId, Long passageiroId, String pontoEmbarque) {
         if (caronaId == null || caronaId <= 0) {
             throw new IllegalArgumentException("CaronaId é obrigatório.");
         }
         if (passageiroId == null || passageiroId <= 0) {
             throw new IllegalArgumentException("PassageiroId é obrigatório.");
         }
-        Carona carona = buscarCaronaPorId(caronaId)
+        Carona carona = caronaRepository.findByIdForUpdate(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
 
         if (carona.getMotoristaId().equals(passageiroId)) {
@@ -250,44 +240,51 @@ public class CaronaService {
         if ("OFERECE".equalsIgnoreCase(passageiro.getPerfil())) {
             throw new IllegalArgumentException("Este usuário está configurado apenas para oferecer caronas.");
         }
-        boolean jaSolicitou = solicitacoes.stream()
-                .anyMatch(s -> s.getCaronaId().equals(caronaId)
-                        && s.getPassageiroId().equals(passageiroId)
-                        && Set.of("PENDENTE", "CONFIRMADA").contains(s.getStatus()));
+        boolean jaSolicitou = solicitacaoCaronaRepository
+                .existsByCaronaIdAndPassageiroIdAndStatusIn(
+                        caronaId, passageiroId, List.of("PENDENTE", "CONFIRMADA"));
         if (jaSolicitou) {
             throw new IllegalStateException("Este usuário já possui uma solicitação ativa para esta carona.");
         }
 
+        String pontoFinal = (pontoEmbarque == null || pontoEmbarque.isBlank())
+                ? carona.getPontoEncontro() : pontoEmbarque.trim();
+        if (pontoFinal == null || pontoFinal.isBlank()) {
+            throw new IllegalArgumentException("Ponto de embarque é obrigatório.");
+        }
+
         SolicitacaoCarona solicitacao = new SolicitacaoCarona(
-                solicitacaoSeq.getAndIncrement(),
+                null,
                 carona.getId(),
                 passageiro.getId(),
                 passageiro.getNome(),
-                (pontoEmbarque == null || pontoEmbarque.isBlank()) ? carona.getPontoEncontro() : pontoEmbarque,
+                pontoFinal,
                 "PENDENTE",
                 null
         );
 
-        solicitacoes.add(solicitacao);
-        return solicitacao;
+        return solicitacaoCaronaRepository.save(solicitacao);
     }
 
-    public synchronized SolicitacaoCarona responderSolicitacao(Long solicitacaoId, String acao) {
+    @Transactional
+    public SolicitacaoCarona responderSolicitacao(Long solicitacaoId, String acao) {
         return responderSolicitacao(solicitacaoId, null, acao);
     }
 
-    public synchronized SolicitacaoCarona responderSolicitacao(
+    @Transactional
+    public SolicitacaoCarona responderSolicitacao(
             Long solicitacaoId, Long motoristaId, String acao) {
         if (solicitacaoId == null || solicitacaoId <= 0) {
             throw new IllegalArgumentException("SolicitacaoId é obrigatório.");
         }
-        SolicitacaoCarona sol = solicitacoes.stream()
-                .filter(s -> s.getId().equals(solicitacaoId))
-                .findFirst()
+        Long caronaId = solicitacaoCaronaRepository.findCaronaIdById(solicitacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada."));
 
-        Carona carona = buscarCaronaPorId(sol.getCaronaId())
+        Carona carona = caronaRepository.findByIdForUpdate(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona vinculada não encontrada."));
+        SolicitacaoCarona sol = solicitacaoCaronaRepository.findByIdForUpdate(solicitacaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada."));
+
         if (motoristaId != null && !motoristaId.equals(carona.getMotoristaId())) {
             throw new IllegalArgumentException("Apenas o motorista desta carona pode responder à solicitação.");
         }
@@ -309,7 +306,7 @@ public class CaronaService {
                 if (novasVagas == 0) {
                     carona.setStatus("LOTADA");
                 }
-                buscarUsuarioPorId(carona.getMotoristaId())
+                usuarioRepository.findById(carona.getMotoristaId())
                         .ifPresent(m -> sol.setTelefoneMotoristaLiberado(m.getTelefone()));
                 break;
 
@@ -342,17 +339,20 @@ public class CaronaService {
                 throw new IllegalArgumentException("Ação inválida. Use ACEITAR, RECUSAR ou CANCELAR.");
         }
 
+        solicitacaoCaronaRepository.save(sol);
+        caronaRepository.save(carona);
         return sol;
     }
 
-    public synchronized Carona cancelarCarona(Long caronaId, Long motoristaId) {
+    @Transactional
+    public Carona cancelarCarona(Long caronaId, Long motoristaId) {
         if (caronaId == null || caronaId <= 0) {
             throw new IllegalArgumentException("CaronaId é obrigatório.");
         }
         if (motoristaId == null || motoristaId <= 0) {
             throw new IllegalArgumentException("MotoristaId é obrigatório.");
         }
-        Carona carona = buscarCaronaPorId(caronaId)
+        Carona carona = caronaRepository.findByIdForUpdate(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
         if (!motoristaId.equals(carona.getMotoristaId())) {
             throw new IllegalArgumentException("Apenas o motorista desta carona pode cancelá-la.");
@@ -361,6 +361,7 @@ public class CaronaService {
             throw new IllegalStateException("Esta carona já está cancelada.");
         }
         carona.setStatus(STATUS_CANCELADA);
+        List<SolicitacaoCarona> solicitacoes = solicitacaoCaronaRepository.findByCaronaId(caronaId);
         solicitacoes.stream()
                 .filter(s -> s.getCaronaId().equals(caronaId))
                 .filter(s -> SOLICITACAO_PENDENTE.equalsIgnoreCase(s.getStatus())
@@ -369,38 +370,36 @@ public class CaronaService {
                     s.setStatus(SOLICITACAO_CANCELADA);
                     s.setTelefoneMotoristaLiberado(null);
                 });
-        return carona;
+        solicitacaoCaronaRepository.saveAll(solicitacoes);
+        return caronaRepository.save(carona);
     }
 
-    public synchronized MinhasCaronasResponse minhasCaronas(Long usuarioId) {
+    @Transactional(readOnly = true)
+    public MinhasCaronasResponse minhasCaronas(Long usuarioId) {
         if (usuarioId == null || usuarioId <= 0) {
             throw new IllegalArgumentException("UsuarioId é obrigatório.");
         }
         buscarUsuarioPorId(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
-        List<Carona> oferecidas = caronas.stream()
-                .filter(c -> c.getMotoristaId() != null && c.getMotoristaId().equals(usuarioId))
-                .collect(Collectors.toUnmodifiableList());
-
-        List<SolicitacaoCarona> pedidas = solicitacoes.stream()
-                .filter(s -> s.getPassageiroId() != null && s.getPassageiroId().equals(usuarioId))
-                .collect(Collectors.toUnmodifiableList());
+        List<Carona> oferecidas = caronaRepository.findByMotoristaId(usuarioId);
+        List<SolicitacaoCarona> pedidas = solicitacaoCaronaRepository.findByPassageiroId(usuarioId);
 
         return new MinhasCaronasResponse(oferecidas, pedidas);
     }
 
-    public synchronized List<SolicitacaoCarona> listarSolicitacoesPorCarona(Long caronaId) {
+    @Transactional(readOnly = true)
+    public List<SolicitacaoCarona> listarSolicitacoesPorCarona(Long caronaId) {
         if (caronaId == null || caronaId <= 0) {
             throw new IllegalArgumentException("CaronaId é obrigatório.");
         }
         buscarCaronaPorId(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
-        return solicitacoes.stream()
-                .filter(s -> s.getCaronaId().equals(caronaId))
-                .collect(Collectors.toUnmodifiableList());
+        return solicitacaoCaronaRepository.findByCaronaId(caronaId);
     }
 
-    public synchronized List<RecomendacaoCaronaResponse> recomendarCaronas(String data, String regiao, String horarioDesejado) {
+    @Transactional(readOnly = true)
+    public List<RecomendacaoCaronaResponse> recomendarCaronas(
+            String data, String regiao, String horarioDesejado) {
         if (data != null && !data.isBlank()) {
             try {
                 LocalDate.parse(data.trim(), DATA_FORMATO);
