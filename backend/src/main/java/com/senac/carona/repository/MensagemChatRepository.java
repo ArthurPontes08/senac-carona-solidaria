@@ -8,4 +8,6 @@ import java.util.List;
 public interface MensagemChatRepository extends JpaRepository<MensagemChat, Long> {
 
     List<MensagemChat> findBySolicitacaoIdOrderByCriadoEmAscIdAsc(Long solicitacaoId);
+
+    void deleteBySolicitacaoId(Long solicitacaoId);
 }

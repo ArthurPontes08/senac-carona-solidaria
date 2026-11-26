@@ -15,6 +15,7 @@ import com.senac.carona.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -98,6 +99,31 @@ public class CaronaService {
     @Transactional(readOnly = true)
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
+    }
+
+    @Transactional
+    public Usuario atualizarPerfil(Long usuarioId, String nome, String foto) {
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("UsuarioId é obrigatório.");
+        }
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+        if (nome == null || nome.isBlank()) {
+            throw new IllegalArgumentException("Nome é obrigatório.");
+        }
+        String nomeNormalizado = nome.trim();
+        if (nomeNormalizado.length() > 120) {
+            throw new IllegalArgumentException("Nome deve ter no máximo 120 caracteres.");
+        }
+        if (foto != null && !foto.isBlank()) {
+            if (foto.length() > 150_000
+                    || !foto.matches("^data:image/jpeg;base64,[A-Za-z0-9+/]+={0,2}$")) {
+                throw new IllegalArgumentException("Foto inválida ou maior que o limite permitido.");
+            }
+            usuario.setFotoPerfil(foto);
+        }
+        usuario.setNome(nomeNormalizado);
+        return usuarioRepository.save(usuario);
     }
 
     @Transactional(readOnly = true)
@@ -203,6 +229,19 @@ public class CaronaService {
     @Transactional(readOnly = true)
     public List<Carona> buscarOfertas(
             String data, String regiao, String horario, Integer vagasMinimas) {
+        return buscarOfertas(data, regiao, horario, vagasMinimas, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Carona> buscarOfertas(
+            String data, String regiao, String horario, Integer vagasMinimas, String termo) {
+        return buscarOfertas(data, regiao, horario, vagasMinimas, termo, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Carona> buscarOfertas(
+            String data, String regiao, String horario, Integer vagasMinimas,
+            String termo, Long usuarioId) {
         LocalTime horarioMinimo = null;
         if (horario != null && !horario.isBlank()) {
             try {
@@ -217,9 +256,15 @@ public class CaronaService {
         }
 
         LocalTime finalHorarioMinimo = horarioMinimo;
+        List<String> termos = normalizarTexto(termo).trim().lines()
+                .flatMap(linha -> Arrays.stream(linha.split("\\s+")))
+                .filter(palavra -> !palavra.isBlank())
+                .toList();
         return buscarCaronas(data, regiao).stream()
                 .filter(c -> STATUS_ABERTA.equalsIgnoreCase(c.getStatus()))
+                .filter(c -> usuarioId == null || !usuarioId.equals(c.getMotoristaId()))
                 .filter(c -> c.getVagasDisponiveis() >= minimo)
+                .filter(c -> correspondeBusca(c, termos))
                 .filter(c -> {
                     if (finalHorarioMinimo == null) return true;
                     try {
@@ -230,6 +275,25 @@ public class CaronaService {
                     }
                 })
                 .collect(Collectors.toUnmodifiableList());
+    }
+
+    private boolean correspondeBusca(Carona carona, List<String> termos) {
+        if (termos.isEmpty()) return true;
+        String texto = normalizarTexto(String.join(" ",
+                Objects.toString(carona.getMotoristaNome(), ""),
+                Objects.toString(carona.getOrigem(), ""),
+                Objects.toString(carona.getDestino(), ""),
+                Objects.toString(carona.getPontoEncontro(), ""),
+                Objects.toString(carona.getObservacao(), ""),
+                Objects.toString(carona.getData(), ""),
+                Objects.toString(carona.getHorario(), ""),
+                Integer.toString(carona.getVagasDisponiveis())));
+        return termos.stream().allMatch(texto::contains);
+    }
+
+    private String normalizarTexto(String texto) {
+        return Normalizer.normalize(Objects.toString(texto, "").toLowerCase(Locale.ROOT),
+                Normalizer.Form.NFD).replaceAll("\\p{M}+", "");
     }
 
     @Transactional(readOnly = true)

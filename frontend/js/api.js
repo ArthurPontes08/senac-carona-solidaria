@@ -1,5 +1,5 @@
 const Api = (() => {
-  const CONFIG = { BASE: "http://localhost:8080/api", MOCK: true, DELAY: 700, fail: false };
+  const CONFIG = { BASE: "http://localhost:8080/api", MOCK: false, DELAY: 700, fail: false };
   const iso = (n) => {
     const d = new Date();
     d.setDate(d.getDate() + n);
@@ -29,6 +29,16 @@ const Api = (() => {
   let db = JSON.parse(localStorage.getItem("cs-db") || "null") || seed();
   if (!Array.isArray(db.chats)) db.chats = [];
   const save = () => localStorage.setItem("cs-db", JSON.stringify(db));
+  const saveSession = (user) => {
+    localStorage.setItem("cs-session", JSON.stringify(user));
+    if (CONFIG.MOCK) {
+      db.me = user;
+      save();
+    }
+    return user;
+  };
+  const currentUser = () => CONFIG.MOCK ? db.me : JSON.parse(localStorage.getItem("cs-session") || "null");
+  const normalizeSearch = (value) => String(value || "").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const wait = (fn) =>
     new Promise((ok, no) =>
       setTimeout(() => {
@@ -43,8 +53,17 @@ const Api = (() => {
         save();
         return structuredClone(r);
       });
+    if (CONFIG.fail || !navigator.onLine) throw new Error("Conexão indisponível. Verifique a rede e tente novamente.");
     const res = await fetch(CONFIG.BASE + path, { headers: { "Content-Type": "application/json" }, ...opts });
-    if (!res.ok) throw new Error("http");
+    if (!res.ok) {
+      let message = `Erro HTTP ${res.status}`;
+      try {
+        const body = await res.json();
+        if (body.erro) message = body.erro;
+      } catch {}
+      throw new Error(message);
+    }
+    if (res.status === 204) return null;
     return res.json();
   }
   const find = (list, id) => list.find((x) => x.id === id);
@@ -52,26 +71,63 @@ const Api = (() => {
     config: CONFIG,
     reset() {
       localStorage.removeItem("cs-db");
+      localStorage.removeItem("cs-session");
       db = seed();
     },
-    session: () => db.me,
-    register: (u) => call("/usuarios", { method: "POST", body: JSON.stringify(u) }, () => (db.me = u)),
-    listOffers: (f) => call("/ofertas?" + new URLSearchParams(f), {}, () => db.offers.filter((o) => !o.mine && (!f.data || o.date === f.data) && (!f.regiao || o.origin.toLocaleLowerCase("pt-BR").includes(f.regiao.trim().toLocaleLowerCase("pt-BR"))) && (!f.horario || o.time >= f.horario) && o.seats >= (+f.vagas || 0))),
+    clearBenchmark() {
+      if (!CONFIG.MOCK) throw new Error("O reset do benchmark só está disponível no modo de demonstração local.");
+      db = { me: db.me, offers: [], requests: [], chats: [] };
+      save();
+      return structuredClone(db);
+    },
+    session: currentUser,
+    register: async (u) => {
+      const user = await call("/usuarios", { method: "POST", body: JSON.stringify(u) }, () => (db.me = { ...u, id: Date.now(), photo: "" }));
+      return saveSession(user);
+    },
+    updateProfile: (profile) =>
+      call(`/usuarios/${currentUser().id}`, { method: "PATCH", body: JSON.stringify(profile) }, () => {
+        if (!db.me) throw new Error("profile unavailable");
+        const name = String(profile.name || "").trim();
+        if (!name || name.length > 80) throw new Error("invalid profile name");
+        const updated = { ...db.me, name };
+        if (profile.photo) {
+          if (typeof profile.photo !== "string" || !profile.photo.startsWith("data:image/")) throw new Error("invalid profile photo");
+          updated.photo = profile.photo;
+        }
+        return updated;
+      }).then(saveSession),
+    listOffers: (f) =>
+      call("/ofertas?" + new URLSearchParams({ ...f, userId: currentUser().id }), {}, () => {
+        const terms = normalizeSearch(f.q).trim().split(/\s+/).filter(Boolean);
+        const region = normalizeSearch(f.regiao).trim();
+        return db.offers.filter((o) => {
+          const text = normalizeSearch([o.driver, o.origin, o.summary, o.ref, o.date, o.time, o.seats, "Senac Canoas"].join(" "));
+          return (
+            !o.mine &&
+            terms.every((term) => text.includes(term)) &&
+            (!f.data || o.date === f.data) &&
+            (!region || normalizeSearch(o.origin).includes(region)) &&
+            (!f.horario || o.time >= f.horario) &&
+            o.seats >= (+f.vagas || 0)
+          );
+        });
+      }),
     createOffer: (o) =>
-      call("/ofertas", { method: "POST", body: JSON.stringify(o) }, () => {
+      call("/ofertas", { method: "POST", body: JSON.stringify({ ...o, driverId: currentUser().id, destination: "Campus Senac Canoas" }) }, () => {
         const n = { ...o, id: Date.now(), driver: "Você", mine: true, match: 100, summary: o.origin + " → Campus" };
         db.offers.push(n);
         return n;
       }),
     requestSeat: (offerId, msg) =>
-      call(`/ofertas/${offerId}/solicitacoes`, { method: "POST", body: JSON.stringify({ msg }) }, () => {
+      call(`/ofertas/${offerId}/solicitacoes`, { method: "POST", body: JSON.stringify({ passengerId: currentUser().id, msg }) }, () => {
         const o = find(db.offers, offerId);
         const r = { id: Date.now(), offerId, who: "Você", region: o.origin, time: o.time, date: o.date, msg, status: "pending", mine: true };
         db.requests.push(r);
         return r;
       }),
     respond: (id, acao) =>
-      call(`/solicitacoes/${id}`, { method: "PATCH", body: JSON.stringify({ acao }) }, () => {
+      call(`/solicitacoes/${id}`, { method: "PATCH", body: JSON.stringify({ userId: currentUser().id, acao }) }, () => {
         const r = find(db.requests, id),
           o = find(db.offers, r.offerId);
         r.status = { aceitar: "confirmed", recusar: "refused", cancelar: "cancelled" }[acao];
@@ -79,7 +135,7 @@ const Api = (() => {
         return r;
       }),
     conversation: (requestId) =>
-      call(`/solicitacoes/${requestId}/conversa`, {}, () => {
+      call(`/solicitacoes/${requestId}/conversa?userId=${currentUser().id}`, {}, () => {
         const request = find(db.requests, +requestId);
         if (!request || request.status !== "confirmed") throw new Error("conversation unavailable");
         const offer = find(db.offers, request.offerId);
@@ -96,7 +152,7 @@ const Api = (() => {
         };
       }),
     sendMessage: (requestId, text) =>
-      call(`/solicitacoes/${requestId}/conversa`, { method: "POST", body: JSON.stringify({ text }) }, () => {
+      call(`/solicitacoes/${requestId}/conversa`, { method: "POST", body: JSON.stringify({ userId: currentUser().id, text }) }, () => {
         const request = find(db.requests, +requestId);
         if (!request || request.status !== "confirmed") throw new Error("conversation unavailable");
         const message = String(text || "").trim();
@@ -110,6 +166,17 @@ const Api = (() => {
         chat.messages.push(sent);
         return sent;
       }),
-    snapshot: () => call("/minhas-caronas", {}, () => db),
+    deleteConversation: (requestId) =>
+      call(`/solicitacoes/${requestId}/conversa?userId=${currentUser().id}`, { method: "DELETE" }, () => {
+        const id = Number(requestId);
+        if (!Number.isSafeInteger(id) || id <= 0) throw new Error("invalid conversation id");
+        db.chats = db.chats.filter((chat) => Number(chat.requestId) !== id);
+        return true;
+      }),
+    snapshot: () => {
+      const user = currentUser();
+      if (!user || !user.id) throw new Error("Sessão de usuário indisponível.");
+      return call(`/minhas-caronas?userId=${user.id}`, {}, () => db);
+    },
   };
 })();

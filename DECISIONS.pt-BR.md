@@ -43,7 +43,7 @@ Copiem o modelo abaixo sempre que precisarem de uma entrada nova.
 - **Alternativas consideradas:** Rodar verificações manualmente antes de aprovar PRs.
 - **Motivo:** Garante a qualidade do código, impede que código quebrado entre na `main` e atende aos requisitos obrigatórios de CI/CD desde o início do projeto.
 
-## 25/11/2026 — Origem livre para as caronas
+j## 25/11/2026 — Origem livre para as caronas
 
 - **Decisão:** Permitir que o usuário informe a origem em texto livre no cadastro, na oferta e na busca de caronas; a busca usa correspondência parcial sem diferenciar maiúsculas e minúsculas.
 - **Alternativas consideradas:** Restringir a origem a uma lista fixa de bairros de Canoas ou adicionar um serviço externo de busca de locais.

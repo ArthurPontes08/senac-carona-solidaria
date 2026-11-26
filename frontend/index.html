@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Vai Junto · Carona Solidária</title>
-    <link rel="icon" type="image/png" href="img/logo-vai-junto.png" />
+    <link rel="icon" type="image/png" href="img/fav.png" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <div id="offline" class="banner" role="status" hidden>Você está sem conexão. Mostrando as últimas informações salvas.</div>
     <div class="app">
       <aside class="sidebar" aria-label="Menu principal">
-        <img class="brand-logo" src="img/logo-vai-junto.png" alt="Vai Junto · Carona Solidária" />
+        <img class="brand-logo" src="img/logo.png" alt="Vai Junto · Carona Solidária" />
         <nav>
           <button class="nav-item" data-view="dashboard">
             <span aria-hidden="true">▦</span>
@@ -46,6 +46,7 @@
               <button class="avatar-btn" id="profileBtn" aria-haspopup="true" aria-expanded="false" aria-label="Menu do perfil"><span class="avatar" id="avatar">?</span></button>
               <div class="menu" id="profileMenu" hidden>
                 <p id="profileName" class="menu-name"></p>
+                <button class="menu-item" id="editProfile">Editar perfil</button>
                 <button class="menu-item" id="simError">Simular falha de conexão</button>
                 <button class="menu-item" id="resetDemo">Reiniciar demonstração</button>
               </div>
@@ -56,9 +57,14 @@
           <section id="view-dashboard" class="view"></section>
           <section id="view-search" class="view" hidden>
             <form id="searchForm" class="filters" novalidate>
+              <label class="keyword-filter">
+                Buscar por palavra-chave
+                <input id="fQuery" type="search" placeholder="Ex.: Niterói, Rafael ou estação" autocomplete="off" />
+              </label>
               <label>
                 Dia
-                <input type="date" id="fDate" />
+                <input type="date" id="fDate" max="9999-12-31" />
+                <span class="err"></span>
               </label>
               <label>
                 Região de origem
@@ -77,6 +83,7 @@
                 </select>
               </label>
               <button class="btn btn-primary" type="submit">Buscar</button>
+              <button class="btn btn-neutral" id="resetSearch" type="button">Limpar filtros</button>
             </form>
             <div id="searchResults" class="grid" aria-live="polite"></div>
           </section>
@@ -98,7 +105,7 @@
         <p class="muted">Pedimos poucos dados, só para aproximar pessoas da comunidade Senac Canoas. Telefone e endereço nunca aparecem antes da confirmação.</p>
         <label>
           Nome
-          <input name="name" required placeholder="Java Lima de Python" />
+          <input name="name" required placeholder="João Cenerelli" />
           <span class="err"></span>
         </label>
         <label>
@@ -127,6 +134,30 @@
       </form>
     </dialog>
 
+    <dialog id="dlg-profile" class="modal modal-sm" aria-labelledby="t-profile">
+      <form id="profileForm" novalidate>
+        <h2 id="t-profile">Editar perfil</h2>
+        <div class="profile-preview">
+          <span id="profilePreview" class="avatar profile-avatar" aria-hidden="true">?</span>
+          <span id="profilePreviewName" class="menu-name">Seu nome</span>
+        </div>
+        <label>
+          Nome
+          <input id="profileNameInput" name="name" maxlength="80" required autocomplete="name" />
+          <span class="err"></span>
+        </label>
+        <label>
+          Foto de perfil
+          <input id="profilePhoto" type="file" accept="image/*" />
+        </label>
+        <p class="muted">Escolha uma imagem do seu computador. Ela será ajustada e salva neste navegador.</p>
+        <div class="actions">
+          <button type="button" class="btn btn-neutral" data-close>Cancelar</button>
+          <button class="btn btn-primary" type="submit">Salvar alterações</button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog id="dlg-publish" class="modal" aria-labelledby="t-pub">
       <form id="publishForm" novalidate>
         <h2 id="t-pub">Oferecer carona</h2>
@@ -142,7 +173,7 @@
           </label>
           <label>
             Data
-            <input type="date" name="date" required />
+            <input type="date" name="date" max="9999-12-31" required />
             <span class="err"></span>
           </label>
           <label>
@@ -199,7 +230,10 @@
 
     <dialog id="dlg-chat" class="modal chat-modal" aria-labelledby="t-chat">
       <form id="chatForm">
-        <h2 id="t-chat">Conversa com <span id="chatPartner"></span></h2>
+        <h2 id="t-chat">
+          Conversa com
+          <span id="chatPartner"></span>
+        </h2>
         <p id="chatRide" class="muted"></p>
         <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="Mensagens da conversa"></div>
         <label>
@@ -207,6 +241,7 @@
           <textarea name="message" rows="2" maxlength="500" required placeholder="Escreva uma mensagem..."></textarea>
         </label>
         <div class="actions">
+          <button type="button" class="btn btn-danger" id="deleteChat">Apagar conversa</button>
           <button type="button" class="btn btn-neutral" data-close>Fechar</button>
           <button class="btn btn-primary" type="submit">Enviar</button>
         </div>
@@ -224,6 +259,7 @@
       </form>
     </dialog>
 
+    <button class="btn btn-danger reset-benchmark" id="resetBenchmark" type="button" aria-label="Resetar os dados do benchmark">Resetar benchmark</button>
     <div id="toasts" class="toasts" aria-live="polite" role="status"></div>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>

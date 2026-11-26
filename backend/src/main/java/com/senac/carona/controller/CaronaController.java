@@ -1,5 +1,6 @@
 package com.senac.carona.controller;
 
+import com.senac.carona.dto.AtualizarPerfilRequest;
 import com.senac.carona.dto.CadastroUsuarioRequest;
 import com.senac.carona.dto.CriarOfertaRequest;
 import com.senac.carona.dto.MinhaContaSnapshotResponse;
@@ -47,6 +48,13 @@ public class CaronaController {
         return ResponseEntity.ok(usuarios);
     }
 
+    @PatchMapping("/usuarios/{id}")
+    public ResponseEntity<UsuarioResponse> atualizarPerfil(
+            @PathVariable Long id, @RequestBody AtualizarPerfilRequest request) {
+        Usuario atualizado = caronaService.atualizarPerfil(id, request.getName(), request.getPhoto());
+        return ResponseEntity.ok(UsuarioResponse.from(atualizado));
+    }
+
     @GetMapping("/usuarios/{id}/minhas-caronas")
     public ResponseEntity<MinhasCaronasResponse> minhasCaronas(@PathVariable Long id) {
         return ResponseEntity.ok(caronaService.minhasCaronas(id));
@@ -76,8 +84,10 @@ public class CaronaController {
             @RequestParam(required = false) String data,
             @RequestParam(required = false) String regiao,
             @RequestParam(required = false) String horario,
-            @RequestParam(required = false) Integer vagas) {
-        List<Carona> ofertas = caronaService.buscarOfertas(data, regiao, horario, vagas);
+            @RequestParam(required = false) Integer vagas,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long userId) {
+        List<Carona> ofertas = caronaService.buscarOfertas(data, regiao, horario, vagas, q, userId);
         Map<Long, Integer> compatibilidade = caronaService
                 .recomendarCaronas(data, regiao, horario).stream()
                 .collect(Collectors.toMap(
