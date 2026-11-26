@@ -1,5 +1,6 @@
 package com.senac.carona.service;
 
+import com.senac.carona.dto.MinhaContaSnapshotResponse;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -14,8 +15,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -175,6 +178,33 @@ class CaronaServiceTest {
                 () -> service.buscarOfertas(null, null, "25:00", 1));
         assertThrows(IllegalArgumentException.class,
                 () -> service.buscarOfertas(null, null, null, 0));
+    }
+
+    @Test
+    void snapshotUsaFormatoDoFrontendEMarcaSolicitacoesProprias() {
+        Usuario atual = usuario(1L, "Usuário atual", "atual@senacrs.com.br", "AMBOS");
+        Usuario outroPassageiro = usuario(2L, "Outro passageiro",
+                "passageiro@senacrs.com.br", "BUSCA");
+        Carona oferecida = carona(10L, 1L, 3, 2, "ABERTA");
+        Carona solicitada = carona(20L, 3L, 3, 2, "ABERTA");
+        SolicitacaoCarona minhaSolicitacao = solicitacao(100L, 20L, 1L, "PENDENTE");
+        SolicitacaoCarona recebida = solicitacao(101L, 10L, 2L, "PENDENTE");
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(atual));
+        when(usuarioRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(atual, outroPassageiro));
+        when(caronaRepository.findByMotoristaId(1L)).thenReturn(List.of(oferecida));
+        when(caronaRepository.findAllById(List.of(20L))).thenReturn(List.of(solicitada));
+        when(solicitacaoRepository.findByPassageiroId(1L)).thenReturn(List.of(minhaSolicitacao));
+        when(solicitacaoRepository.findByCaronaIdIn(List.of(10L))).thenReturn(List.of(recebida));
+
+        MinhaContaSnapshotResponse snapshot = service.snapshot(1L);
+
+        assertEquals(2, snapshot.getOffers().size());
+        assertTrue(snapshot.getOffers().get(0).isMine());
+        assertFalse(snapshot.getOffers().get(1).isMine());
+        assertEquals(2, snapshot.getRequests().size());
+        assertTrue(snapshot.getRequests().get(0).isMine());
+        assertFalse(snapshot.getRequests().get(1).isMine());
+        assertEquals("pending", snapshot.getRequests().get(0).getStatus());
     }
 
     @Test

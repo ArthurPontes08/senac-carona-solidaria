@@ -2,6 +2,7 @@ package com.senac.carona.controller;
 
 import com.senac.carona.dto.CadastroUsuarioRequest;
 import com.senac.carona.dto.CriarOfertaRequest;
+import com.senac.carona.dto.MinhaContaSnapshotResponse;
 import com.senac.carona.dto.MinhasCaronasResponse;
 import com.senac.carona.dto.OfertaResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
@@ -51,6 +52,12 @@ public class CaronaController {
         return ResponseEntity.ok(caronaService.minhasCaronas(id));
     }
 
+    @GetMapping("/minhas-caronas")
+    public ResponseEntity<MinhaContaSnapshotResponse> snapshot(
+            @RequestParam Long userId) {
+        return ResponseEntity.ok(caronaService.snapshot(userId));
+    }
+
     @GetMapping("/caronas")
     public ResponseEntity<List<Carona>> listarCaronas(
             @RequestParam(required = false) String data,
@@ -88,7 +95,7 @@ public class CaronaController {
             @RequestBody CriarOfertaRequest request) {
         Carona criada = caronaService.publicarCarona(request.toCarona());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(OfertaResponse.from(criada, 100));
+                .body(OfertaResponse.from(criada, 100, true));
     }
 
     @PostMapping("/ofertas/{id}/solicitacoes")

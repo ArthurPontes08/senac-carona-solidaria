@@ -17,6 +17,8 @@ public interface SolicitacaoCaronaRepository extends JpaRepository<SolicitacaoCa
 
     List<SolicitacaoCarona> findByCaronaId(Long caronaId);
 
+    List<SolicitacaoCarona> findByCaronaIdIn(Collection<Long> caronaIds);
+
     List<SolicitacaoCarona> findByPassageiroId(Long passageiroId);
 
     boolean existsByCaronaIdAndPassageiroIdAndStatusIn(

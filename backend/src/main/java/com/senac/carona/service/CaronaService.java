@@ -1,7 +1,10 @@
 package com.senac.carona.service;
 
 import com.senac.carona.dto.MinhasCaronasResponse;
+import com.senac.carona.dto.MinhaContaSnapshotResponse;
+import com.senac.carona.dto.OfertaResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
+import com.senac.carona.dto.SolicitacaoResponse;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -426,6 +429,68 @@ public class CaronaService {
         List<SolicitacaoCarona> pedidas = solicitacaoCaronaRepository.findByPassageiroId(usuarioId);
 
         return new MinhasCaronasResponse(oferecidas, pedidas);
+    }
+
+    @Transactional(readOnly = true)
+    public MinhaContaSnapshotResponse snapshot(Long usuarioId) {
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("userId é obrigatório.");
+        }
+        Usuario usuario = buscarUsuarioPorId(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+
+        List<Carona> oferecidas = caronaRepository.findByMotoristaId(usuarioId);
+        List<SolicitacaoCarona> solicitacoesPedidas =
+                solicitacaoCaronaRepository.findByPassageiroId(usuarioId);
+        List<Long> idsOferecidas = oferecidas.stream().map(Carona::getId).toList();
+        List<SolicitacaoCarona> solicitacoesRecebidas = idsOferecidas.isEmpty()
+                ? List.of() : solicitacaoCaronaRepository.findByCaronaIdIn(idsOferecidas);
+
+        Map<Long, Carona> caronasPorId = new LinkedHashMap<>();
+        oferecidas.forEach(carona -> caronasPorId.put(carona.getId(), carona));
+        List<Long> idsCaronasSolicitadas = solicitacoesPedidas.stream()
+                .map(SolicitacaoCarona::getCaronaId)
+                .filter(id -> !caronasPorId.containsKey(id))
+                .distinct()
+                .toList();
+        caronaRepository.findAllById(idsCaronasSolicitadas)
+                .forEach(carona -> caronasPorId.putIfAbsent(carona.getId(), carona));
+
+        Map<Long, SolicitacaoCarona> solicitacoesPorId = new LinkedHashMap<>();
+        solicitacoesPedidas.forEach(s -> solicitacoesPorId.put(s.getId(), s));
+        solicitacoesRecebidas.forEach(s -> solicitacoesPorId.put(s.getId(), s));
+
+        List<Long> idsPassageiros = solicitacoesPorId.values().stream()
+                .map(SolicitacaoCarona::getPassageiroId)
+                .distinct()
+                .toList();
+        Map<Long, Usuario> passageirosPorId = new HashMap<>();
+        usuarioRepository.findAllById(idsPassageiros)
+                .forEach(passageiro -> passageirosPorId.put(passageiro.getId(), passageiro));
+        passageirosPorId.put(usuario.getId(), usuario);
+
+        List<OfertaResponse> ofertas = caronasPorId.values().stream()
+                .map(carona -> OfertaResponse.fromSnapshot(
+                        carona, usuarioId.equals(carona.getMotoristaId())))
+                .toList();
+        List<SolicitacaoResponse> solicitacoes = solicitacoesPorId.values().stream()
+                .map(solicitacao -> {
+                    Carona carona = caronasPorId.get(solicitacao.getCaronaId());
+                    if (carona == null) {
+                        throw new IllegalStateException(
+                                "Uma solicitação referencia uma carona inexistente.");
+                    }
+                    Usuario passageiro = passageirosPorId.get(solicitacao.getPassageiroId());
+                    if (passageiro == null) {
+                        throw new IllegalStateException(
+                                "Uma solicitação referencia um passageiro inexistente.");
+                    }
+                    return SolicitacaoResponse.from(solicitacao, carona, passageiro,
+                            usuarioId.equals(solicitacao.getPassageiroId()));
+                })
+                .toList();
+
+        return new MinhaContaSnapshotResponse(ofertas, solicitacoes);
     }
 
     @Transactional(readOnly = true)
