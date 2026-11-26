@@ -22,6 +22,9 @@ public class SolicitacaoCarona {
     @Column(name = "ponto_embarque", nullable = false)
     private String pontoEmbarque;
 
+    @Column(name = "mensagem", length = 140)
+    private String mensagem;
+
     @Column(nullable = false)
     private String status; // PENDENTE, CONFIRMADA, RECUSADA, CANCELADA
 
@@ -57,6 +60,9 @@ public class SolicitacaoCarona {
 
     public String getPontoEmbarque() { return pontoEmbarque; }
     public void setPontoEmbarque(String pontoEmbarque) { this.pontoEmbarque = pontoEmbarque; }
+
+    public String getMensagem() { return mensagem; }
+    public void setMensagem(String mensagem) { this.mensagem = mensagem; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
