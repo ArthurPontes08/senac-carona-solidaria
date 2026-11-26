@@ -1,7 +1,11 @@
 package com.senac.carona.service;
 
 import com.senac.carona.dto.MinhasCaronasResponse;
+import com.senac.carona.dto.MinhaContaSnapshotResponse;
+import com.senac.carona.dto.OfertaResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
+import com.senac.carona.dto.SolicitacaoResponse;
+import com.senac.carona.exception.AcessoNegadoException;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -308,15 +312,13 @@ public class CaronaService {
     }
 
     @Transactional
-    public SolicitacaoCarona responderSolicitacao(Long solicitacaoId, String acao) {
-        return responderSolicitacao(solicitacaoId, null, acao);
-    }
-
-    @Transactional
     public SolicitacaoCarona responderSolicitacao(
-            Long solicitacaoId, Long motoristaId, String acao) {
+            Long solicitacaoId, Long usuarioId, String acao) {
         if (solicitacaoId == null || solicitacaoId <= 0) {
             throw new IllegalArgumentException("SolicitacaoId é obrigatório.");
+        }
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("userId é obrigatório.");
         }
         Long caronaId = solicitacaoCaronaRepository.findCaronaIdById(solicitacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada."));
@@ -326,15 +328,15 @@ public class CaronaService {
         SolicitacaoCarona sol = solicitacaoCaronaRepository.findByIdForUpdate(solicitacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada."));
 
-        if (motoristaId != null && !motoristaId.equals(carona.getMotoristaId())) {
-            throw new IllegalArgumentException("Apenas o motorista desta carona pode responder à solicitação.");
-        }
-
         String decisao = acao == null ? "" : acao.toUpperCase().trim();
 
         switch (decisao) {
             case "ACEITAR":
             case "CONFIRMAR":
+                if (!usuarioId.equals(carona.getMotoristaId())) {
+                    throw new IllegalArgumentException(
+                            "Apenas o motorista desta carona pode responder à solicitação.");
+                }
                 if (!"PENDENTE".equalsIgnoreCase(sol.getStatus())) {
                     throw new IllegalStateException("Apenas solicitações pendentes podem ser confirmadas.");
                 }
@@ -352,6 +354,10 @@ public class CaronaService {
                 break;
 
             case "RECUSAR":
+                if (!usuarioId.equals(carona.getMotoristaId())) {
+                    throw new IllegalArgumentException(
+                            "Apenas o motorista desta carona pode responder à solicitação.");
+                }
                 if (!"PENDENTE".equalsIgnoreCase(sol.getStatus())) {
                     throw new IllegalStateException("Apenas solicitações pendentes podem ser recusadas.");
                 }
@@ -360,6 +366,11 @@ public class CaronaService {
                 break;
 
             case "CANCELAR":
+                if (!usuarioId.equals(carona.getMotoristaId())
+                        && !usuarioId.equals(sol.getPassageiroId())) {
+                    throw new IllegalArgumentException(
+                            "Apenas o motorista ou o passageiro desta solicitação pode cancelá-la.");
+                }
                 if (!Set.of("PENDENTE", "CONFIRMADA").contains(sol.getStatus().toUpperCase())) {
                     throw new IllegalStateException("Esta solicitação já está encerrada e não pode ser cancelada.");
                 }
@@ -429,12 +440,82 @@ public class CaronaService {
     }
 
     @Transactional(readOnly = true)
-    public List<SolicitacaoCarona> listarSolicitacoesPorCarona(Long caronaId) {
+    public MinhaContaSnapshotResponse snapshot(Long usuarioId) {
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("userId é obrigatório.");
+        }
+        Usuario usuario = buscarUsuarioPorId(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+
+        List<Carona> oferecidas = caronaRepository.findByMotoristaId(usuarioId);
+        List<SolicitacaoCarona> solicitacoesPedidas =
+                solicitacaoCaronaRepository.findByPassageiroId(usuarioId);
+        List<Long> idsOferecidas = oferecidas.stream().map(Carona::getId).toList();
+        List<SolicitacaoCarona> solicitacoesRecebidas = idsOferecidas.isEmpty()
+                ? List.of() : solicitacaoCaronaRepository.findByCaronaIdIn(idsOferecidas);
+
+        Map<Long, Carona> caronasPorId = new LinkedHashMap<>();
+        oferecidas.forEach(carona -> caronasPorId.put(carona.getId(), carona));
+        List<Long> idsCaronasSolicitadas = solicitacoesPedidas.stream()
+                .map(SolicitacaoCarona::getCaronaId)
+                .filter(id -> !caronasPorId.containsKey(id))
+                .distinct()
+                .toList();
+        caronaRepository.findAllById(idsCaronasSolicitadas)
+                .forEach(carona -> caronasPorId.putIfAbsent(carona.getId(), carona));
+
+        Map<Long, SolicitacaoCarona> solicitacoesPorId = new LinkedHashMap<>();
+        solicitacoesPedidas.forEach(s -> solicitacoesPorId.put(s.getId(), s));
+        solicitacoesRecebidas.forEach(s -> solicitacoesPorId.put(s.getId(), s));
+
+        List<Long> idsPassageiros = solicitacoesPorId.values().stream()
+                .map(SolicitacaoCarona::getPassageiroId)
+                .distinct()
+                .toList();
+        Map<Long, Usuario> passageirosPorId = new HashMap<>();
+        usuarioRepository.findAllById(idsPassageiros)
+                .forEach(passageiro -> passageirosPorId.put(passageiro.getId(), passageiro));
+        passageirosPorId.put(usuario.getId(), usuario);
+
+        List<OfertaResponse> ofertas = caronasPorId.values().stream()
+                .map(carona -> OfertaResponse.fromSnapshot(
+                        carona, usuarioId.equals(carona.getMotoristaId())))
+                .toList();
+        List<SolicitacaoResponse> solicitacoes = solicitacoesPorId.values().stream()
+                .map(solicitacao -> {
+                    Carona carona = caronasPorId.get(solicitacao.getCaronaId());
+                    if (carona == null) {
+                        throw new IllegalStateException(
+                                "Uma solicitação referencia uma carona inexistente.");
+                    }
+                    Usuario passageiro = passageirosPorId.get(solicitacao.getPassageiroId());
+                    if (passageiro == null) {
+                        throw new IllegalStateException(
+                                "Uma solicitação referencia um passageiro inexistente.");
+                    }
+                    return SolicitacaoResponse.from(solicitacao, carona, passageiro,
+                            usuarioId.equals(solicitacao.getPassageiroId()));
+                })
+                .toList();
+
+        return new MinhaContaSnapshotResponse(ofertas, solicitacoes);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SolicitacaoCarona> listarSolicitacoesPorCarona(
+            Long caronaId, Long usuarioId) {
         if (caronaId == null || caronaId <= 0) {
             throw new IllegalArgumentException("CaronaId é obrigatório.");
         }
-        buscarCaronaPorId(caronaId)
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("userId é obrigatório.");
+        }
+        Carona carona = buscarCaronaPorId(caronaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
+        if (!usuarioId.equals(carona.getMotoristaId())) {
+            throw new AcessoNegadoException(
+                    "Apenas o motorista desta carona pode listar as solicitações.");
+        }
         return solicitacaoCaronaRepository.findByCaronaId(caronaId);
     }
 
