@@ -1,4 +1,4 @@
-# CARONA SOLIDÁRIA | Vida no campus e comunidade.
+# VAI JUNTO | Carona Solidária — Vida no campus e comunidade.
 
 [English](README.md) · **Português (Brasil)**
 
@@ -8,9 +8,21 @@
 - **Tech Lead:** Arthur
 - **Responsável pela apresentação:** João
 - **Integrantes:**
-  - Arthur | GitHub
-  - Lívia | GitHub
-  - João Cenerelli | GitHub
+  - João Cenerelli | Front-end com HTML, CSS e JavaScript, responsável por UI/UX | GitHub
+  - Arthur | Back-end | GitHub
+  - Lívia | Banco de dados | GitHub
+
+### Responsabilidades detalhadas
+
+- **João Cenerelli:** responsável pela implementação completa do front-end em HTML, CSS e JavaScript e pela UI/UX do produto. A escolha considera o maior domínio de João nessas tecnologias e a necessidade de manter a interface visual consistente.
+- **Arthur:** responsável pelo back-end completo, incluindo API, regras de negócio, serviços e integração com o front-end.
+- **Lívia:** responsável pelo banco de dados, incluindo modelagem das entidades, relacionamentos, consultas e integração dos dados com o back-end.
+
+As áreas podem ser revisadas em conjunto, mas esta divisão define a responsabilidade principal de cada integrante durante o desenvolvimento do MVP.
+
+Toda a documentação será feita pelos três integrantes de forma simultânea, utilizando Google Docs para edição compartilhada em tempo real. Os textos concluídos serão registrados no repositório nas versões em inglês e português.
+
+A prioridade visual será a versão desktop. Responsividade será implementada somente se houver tempo após concluir o fluxo essencial do MVP.
 
 ## Tema / área
 
@@ -28,13 +40,17 @@ O usuário pode cadastrar-se, oferecer ou procurar caronas, visualizar opções 
 
 A aplicação permite que alunos e funcionários do Senac Canoas ofereçam e encontrem caronas entre pessoas da comunidade, possibilitando a publicação e busca de trajetos, solicitação e aprovação de vagas, além do gerenciamento das caronas em um único ambiente. O MVP contempla cadastro de usuários, publicação de ofertas, busca, solicitações, aprovação ou recusa, cancelamentos e acompanhamento das caronas, priorizando um fluxo simples, funcional e seguro.
 
+O usuário pode informar qualquer local de origem, como bairro, cidade ou endereço; a busca de caronas aceita correspondências parciais.
+
+O front-end também oferece uma interface básica de conversa para solicitações de carona confirmadas. Na demonstração atual, as mensagens ficam salvas no navegador e não são sincronizadas entre usuários ou dispositivos diferentes.
+
 **O que não entra no MVP:**
 - Pagamentos
 - Rastreamento em tempo real
 - Marketplace de transporte
 - Sistema complexo de avaliações
 - Denúncias avançadas
-- Chat interno completo
+- Chat compartilhado entre sessões de usuários ou dispositivos diferentes
 - Algoritmo sofisticado de rotas
 - Caronas abertas para pessoas de fora da comunidade Senac
 
@@ -93,6 +109,16 @@ O repositório utiliza **GitHub Actions** (`.github/workflows/ci.yml`), executad
 1. **Build:** Compila o projeto Java (`./mvnw clean compile`) e valida os arquivos principais do front-end.
 2. **Lint:** Executa verificações de estilo e sintaxe de código.
 3. **Testes:** Roda os testes automatizados por camada (`./mvnw test`).
+
+## Conventional Commits
+
+Use o formato `<tipo>(<escopo>): <descrição curta>` nas mensagens de commit. Os tipos aceitos são `feat` (nova funcionalidade), `fix` (correção de bug), `docs` (documentação), `style` (formatação sem mudança de comportamento), `refactor` (organização do código sem funcionalidade nova ou correção), `test` (testes), `chore` (manutenção) e `ci` (CI/CD).
+
+Exemplos:
+- `feat(chat): adiciona interface de conversa para caronas confirmadas`
+- `fix(api): corrige validação do cadastro`
+- `docs(readme): descreve como rodar o projeto localmente`
+- `ci(actions): adiciona job de lint no workflow`
 
 ## Deploy
 

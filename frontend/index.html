@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vai Junto · Carona Solidária</title>
+    <link rel="icon" type="image/png" href="img/logo-vai-junto.png" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="offline" class="banner" role="status" hidden>Você está sem conexão. Mostrando as últimas informações salvas.</div>
+    <div class="app">
+      <aside class="sidebar" aria-label="Menu principal">
+        <img class="brand-logo" src="img/logo-vai-junto.png" alt="Vai Junto · Carona Solidária" />
+        <nav>
+          <button class="nav-item" data-view="dashboard">
+            <span aria-hidden="true">▦</span>
+            Início
+          </button>
+          <button class="nav-item" data-view="search">
+            <span aria-hidden="true">⌕</span>
+            Buscar caronas
+          </button>
+          <button class="nav-item" data-view="requests">
+            <span aria-hidden="true">✉</span>
+            Solicitações
+            <b id="reqCount" class="count" hidden>0</b>
+          </button>
+          <button class="nav-item" data-view="rides">
+            <span aria-hidden="true">☰</span>
+            Minhas caronas
+          </button>
+        </nav>
+        <p class="sidebar-note">Ambiente exclusivo da comunidade Senac Canoas. Dados de contato só aparecem após a confirmação.</p>
+      </aside>
+      <div class="main">
+        <header class="topbar">
+          <h1 id="pageTitle">Início</h1>
+          <div class="topbar-right">
+            <span class="chip chip-ok" title="Seu vínculo institucional foi confirmado">
+              <span aria-hidden="true">✓</span>
+              Comunidade Senac
+            </span>
+            <button class="btn btn-primary" data-open="publish">+ Oferecer carona</button>
+            <div class="menu-wrap">
+              <button class="avatar-btn" id="profileBtn" aria-haspopup="true" aria-expanded="false" aria-label="Menu do perfil"><span class="avatar" id="avatar">?</span></button>
+              <div class="menu" id="profileMenu" hidden>
+                <p id="profileName" class="menu-name"></p>
+                <button class="menu-item" id="simError">Simular falha de conexão</button>
+                <button class="menu-item" id="resetDemo">Reiniciar demonstração</button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main id="content" class="content" tabindex="-1">
+          <section id="view-dashboard" class="view"></section>
+          <section id="view-search" class="view" hidden>
+            <form id="searchForm" class="filters" novalidate>
+              <label>
+                Dia
+                <input type="date" id="fDate" />
+              </label>
+              <label>
+                Região de origem
+                <input id="fRegion" type="text" placeholder="Digite qualquer lugar" autocomplete="off" />
+              </label>
+              <label>
+                Horário a partir de
+                <input type="time" id="fTime" />
+              </label>
+              <label>
+                Vagas mínimas
+                <select id="fSeats">
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                </select>
+              </label>
+              <button class="btn btn-primary" type="submit">Buscar</button>
+            </form>
+            <div id="searchResults" class="grid" aria-live="polite"></div>
+          </section>
+          <section id="view-requests" class="view" hidden></section>
+          <section id="view-rides" class="view" hidden>
+            <div class="tabs" role="tablist">
+              <button role="tab" class="tab" data-tab="offered" aria-selected="true">Oferecidas por mim</button>
+              <button role="tab" class="tab" data-tab="requested" aria-selected="false">Solicitadas por mim</button>
+            </div>
+            <div id="ridesTable"></div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <dialog id="dlg-onboard" class="modal" aria-labelledby="t-onboard">
+      <form id="onboardForm" novalidate>
+        <h2 id="t-onboard">Bem-vindo(a) à Carona Solidária</h2>
+        <p class="muted">Pedimos poucos dados, só para aproximar pessoas da comunidade Senac Canoas. Telefone e endereço nunca aparecem antes da confirmação.</p>
+        <label>
+          Nome
+          <input name="name" required placeholder="Java Lima de Python" />
+          <span class="err"></span>
+        </label>
+        <label>
+          E-mail institucional
+          <input name="email" type="email" required placeholder="nome@senacrs.edu.br" />
+          <span class="err"></span>
+        </label>
+        <label>
+          Seu perfil
+          <select name="role">
+            <option value="both">Ofereço e preciso de carona</option>
+            <option value="driver">Ofereço carona</option>
+            <option value="rider">Preciso de carona</option>
+          </select>
+        </label>
+        <label>
+          Bairro de origem
+          <input name="region" type="text" required placeholder="Ex.: Bairro, cidade ou endereço" autocomplete="address-level2" />
+          <span class="err"></span>
+        </label>
+        <label>
+          Destino
+          <input value="Campus Senac Canoas" disabled />
+        </label>
+        <div class="actions"><button class="btn btn-primary" type="submit">Entrar na comunidade</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="dlg-publish" class="modal" aria-labelledby="t-pub">
+      <form id="publishForm" novalidate>
+        <h2 id="t-pub">Oferecer carona</h2>
+        <div class="row2">
+          <label>
+            Região de origem
+            <input name="origin" type="text" required placeholder="Digite seu bairro, cidade ou endereço" autocomplete="street-address" />
+            <span class="err"></span>
+          </label>
+          <label>
+            Destino
+            <input value="Campus Senac Canoas" disabled />
+          </label>
+          <label>
+            Data
+            <input type="date" name="date" required />
+            <span class="err"></span>
+          </label>
+          <label>
+            Horário de saída
+            <input type="time" name="time" required />
+            <span class="err"></span>
+          </label>
+          <label>
+            Vagas
+            <input type="number" name="seats" min="1" max="4" value="2" required />
+            <span class="err"></span>
+          </label>
+          <label>
+            Ponto de referência aproximado
+            <input name="ref" required placeholder="Ex.: Em frente à praça central" />
+            <span class="err"></span>
+          </label>
+        </div>
+        <label>
+          Observações (opcional)
+          <textarea name="notes" rows="2" placeholder="Ex.: Saio pontualmente, volto às 22h."></textarea>
+        </label>
+        <p class="note-safe">
+          <span aria-hidden="true">🛈</span>
+          Só a região e o ponto aproximado ficam visíveis. O endereço exato é combinado após a confirmação.
+        </p>
+        <div id="pubSummary" class="summary" aria-live="polite"></div>
+        <div class="actions">
+          <button type="button" class="btn btn-neutral" data-close>Cancelar</button>
+          <button class="btn btn-primary" type="submit">Publicar oferta</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlg-request" class="modal" aria-labelledby="t-req">
+      <form id="requestForm">
+        <h2 id="t-req">Solicitar vaga</h2>
+        <p id="reqInfo" class="summary"></p>
+        <label>
+          Mensagem para a pessoa que dirige (opcional)
+          <textarea name="msg" rows="2" maxlength="140" placeholder="Ex.: Posso esperar na esquina da praça."></textarea>
+        </label>
+        <p class="muted">
+          Sua solicitação ficará
+          <b>pendente</b>
+          até a resposta. Dados de contato só aparecem após a confirmação.
+        </p>
+        <div class="actions">
+          <button type="button" class="btn btn-neutral" data-close>Voltar</button>
+          <button class="btn btn-primary" type="submit">Enviar solicitação</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlg-chat" class="modal chat-modal" aria-labelledby="t-chat">
+      <form id="chatForm">
+        <h2 id="t-chat">Conversa com <span id="chatPartner"></span></h2>
+        <p id="chatRide" class="muted"></p>
+        <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="Mensagens da conversa"></div>
+        <label>
+          Sua mensagem
+          <textarea name="message" rows="2" maxlength="500" required placeholder="Escreva uma mensagem..."></textarea>
+        </label>
+        <div class="actions">
+          <button type="button" class="btn btn-neutral" data-close>Fechar</button>
+          <button class="btn btn-primary" type="submit">Enviar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlg-confirm" class="modal modal-sm" aria-labelledby="t-conf">
+      <form method="dialog">
+        <h2 id="t-conf"></h2>
+        <p id="confText" class="muted"></p>
+        <div class="actions">
+          <button value="no" class="btn btn-neutral">Voltar</button>
+          <button value="yes" id="confYes" class="btn btn-danger">Confirmar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toasts" class="toasts" aria-live="polite" role="status"></div>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
