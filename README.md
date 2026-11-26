@@ -42,7 +42,7 @@ The application allows students and staff from Senac Canoas to offer and find ri
 
 Users can enter any origin location, including a neighborhood, city, or address; ride search supports partial matches.
 
-The front end also provides a basic conversation interface for confirmed ride requests. In the current demo, messages are stored in the browser and are not synchronized between different users or devices.
+The backend provides JPA-backed conversations for confirmed ride requests. The front end still uses a local mock by default, so it must switch to the API and send the current `userId` before messages are shared across users or devices.
 
 **What is not included in the MVP:**
 - Payments
@@ -73,6 +73,8 @@ The user registration endpoint accepts an omitted or blank phone number and stor
 `GET /api/minhas-caronas?userId={id}` returns the front-end snapshot shape with `offers` and `requests`, including English status values and `mine` flags. The front end must pass the registered user's ID. No authentication is implemented, so this client-supplied ID is context only and does not verify identity.
 
 `PATCH /api/solicitacoes/{id}` accepts `{"userId": 7, "action": "accept"}` (also `refuse` or `cancel`). Only the ride's driver can accept or refuse; either the driver or the requesting passenger can cancel. The legacy `/responder` route requires `motoristaId`. These IDs are ownership checks within the API, not authentication.
+
+The chat uses `GET /api/solicitacoes/{id}/conversa?userId={id}` and `POST /api/solicitacoes/{id}/conversa` with `{"userId": 7, "text": "..."}`. Only the driver and passenger of a confirmed request may read or send messages; text is limited to 500 characters. The database migration should create `mensagens_chat` with `id BIGSERIAL`, `solicitacao_id BIGINT`, `remetente_id BIGINT`, `texto VARCHAR(500)`, and `criado_em TIMESTAMPTZ`, plus foreign keys to `solicitacoes_carona(id)` and `usuarios(id)` and an index on `(solicitacao_id, criado_em)`.
 
 ## Folder structure
 

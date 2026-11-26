@@ -30,7 +30,7 @@ A aplicação permite que alunos e funcionários do Senac Canoas ofereçam e enc
 
 O usuário pode informar qualquer local de origem, como bairro, cidade ou endereço; a busca de caronas aceita correspondências parciais.
 
-O front-end também oferece uma interface básica de conversa para solicitações de carona confirmadas. Na demonstração atual, as mensagens ficam salvas no navegador e não são sincronizadas entre usuários ou dispositivos diferentes.
+O backend oferece conversas persistidas via JPA para solicitações confirmadas. O front-end ainda usa um mock local por padrão; João precisa conectá-lo à API e enviar o `userId` para que as mensagens sejam compartilhadas entre usuários e dispositivos.
 
 **O que não entra no MVP:**
 - Pagamentos
@@ -61,6 +61,8 @@ O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicita�
 `GET /api/minhas-caronas?userId={id}` retorna o formato de snapshot do front-end, com `offers` e `requests`, estados em inglês e indicadores `mine`. O front-end precisa enviar o ID do usuário cadastrado. Como não há autenticação, esse ID enviado pelo cliente serve apenas como contexto e não comprova a identidade.
 
 `PATCH /api/solicitacoes/{id}` recebe `{"userId": 7, "action": "accept"}` (também aceita `refuse` ou `cancel`). Somente o motorista pode aceitar ou recusar; o motorista ou o passageiro solicitante pode cancelar. A rota legada `/responder` exige `motoristaId`. Esses IDs são verificações de propriedade dentro da API, não autenticação.
+
+O chat usa `GET /api/solicitacoes/{id}/conversa?userId={id}` e `POST /api/solicitacoes/{id}/conversa` com `{"userId": 7, "text": "..."}`. Somente o motorista e o passageiro de uma solicitação confirmada podem ler ou enviar mensagens; o texto pode ter até 500 caracteres. A migration do banco deve criar `mensagens_chat` com `id BIGSERIAL`, `solicitacao_id BIGINT`, `remetente_id BIGINT`, `texto VARCHAR(500)` e `criado_em TIMESTAMPTZ`, além de chaves estrangeiras para `solicitacoes_carona(id)` e `usuarios(id)` e um índice em `(solicitacao_id, criado_em)`.
 
 ## Estrutura de pastas
 
