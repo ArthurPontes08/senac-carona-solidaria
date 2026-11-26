@@ -1,5 +1,7 @@
 package com.senac.carona.service;
 
+import com.senac.carona.dto.MinhaContaSnapshotResponse;
+import com.senac.carona.exception.AcessoNegadoException;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -14,8 +16,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -178,6 +182,33 @@ class CaronaServiceTest {
     }
 
     @Test
+    void snapshotUsaFormatoDoFrontendEMarcaSolicitacoesProprias() {
+        Usuario atual = usuario(1L, "Usuário atual", "atual@senacrs.com.br", "AMBOS");
+        Usuario outroPassageiro = usuario(2L, "Outro passageiro",
+                "passageiro@senacrs.com.br", "BUSCA");
+        Carona oferecida = carona(10L, 1L, 3, 2, "ABERTA");
+        Carona solicitada = carona(20L, 3L, 3, 2, "ABERTA");
+        SolicitacaoCarona minhaSolicitacao = solicitacao(100L, 20L, 1L, "PENDENTE");
+        SolicitacaoCarona recebida = solicitacao(101L, 10L, 2L, "PENDENTE");
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(atual));
+        when(usuarioRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(atual, outroPassageiro));
+        when(caronaRepository.findByMotoristaId(1L)).thenReturn(List.of(oferecida));
+        when(caronaRepository.findAllById(List.of(20L))).thenReturn(List.of(solicitada));
+        when(solicitacaoRepository.findByPassageiroId(1L)).thenReturn(List.of(minhaSolicitacao));
+        when(solicitacaoRepository.findByCaronaIdIn(List.of(10L))).thenReturn(List.of(recebida));
+
+        MinhaContaSnapshotResponse snapshot = service.snapshot(1L);
+
+        assertEquals(2, snapshot.getOffers().size());
+        assertTrue(snapshot.getOffers().get(0).isMine());
+        assertFalse(snapshot.getOffers().get(1).isMine());
+        assertEquals(2, snapshot.getRequests().size());
+        assertTrue(snapshot.getRequests().get(0).isMine());
+        assertFalse(snapshot.getRequests().get(1).isMine());
+        assertEquals("pending", snapshot.getRequests().get(0).getStatus());
+    }
+
+    @Test
     void naoPermiteMotoristaSolicitarNaPropriaCarona() {
         when(caronaRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(carona(1L, 1L, 3, 3, "ABERTA")));
@@ -194,6 +225,50 @@ class CaronaServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> service.responderSolicitacao(10L, 2L, "CONFIRMAR"));
+    }
+
+    @Test
+    void passageiroPodeCancelarSuaSolicitacaoConfirmada() {
+        Carona carona = carona(1L, 1L, 3, 2, "ABERTA");
+        SolicitacaoCarona solicitacao = solicitacao(10L, 1L, 3L, "CONFIRMADA");
+        prepararSolicitacao(carona, solicitacao);
+        when(solicitacaoRepository.save(any(SolicitacaoCarona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(caronaRepository.save(any(Carona.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        SolicitacaoCarona cancelada = service.responderSolicitacao(10L, 3L, "CANCELAR");
+
+        assertEquals("CANCELADA", cancelada.getStatus());
+        assertEquals(3, carona.getVagasDisponiveis());
+    }
+
+    @Test
+    void terceiroNaoPodeCancelarSolicitacao() {
+        Carona carona = carona(1L, 1L, 3, 3, "ABERTA");
+        SolicitacaoCarona solicitacao = solicitacao(10L, 1L, 3L, "PENDENTE");
+        prepararSolicitacao(carona, solicitacao);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.responderSolicitacao(10L, 99L, "CANCELAR"));
+        verify(solicitacaoRepository, never()).save(any(SolicitacaoCarona.class));
+    }
+
+    @Test
+    void exigeUsuarioParaResponderSolicitacao() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.responderSolicitacao(10L, null, "RECUSAR"));
+    }
+
+    @Test
+    void apenasMotoristaPodeListarSolicitacoesDaCarona() {
+        when(caronaRepository.findById(1L))
+                .thenReturn(Optional.of(carona(1L, 7L, 3, 3, "ABERTA")));
+        when(solicitacaoRepository.findByCaronaId(1L)).thenReturn(List.of());
+
+        assertEquals(List.of(), service.listarSolicitacoesPorCarona(1L, 7L));
+        assertThrows(AcessoNegadoException.class,
+                () -> service.listarSolicitacoesPorCarona(1L, 8L));
     }
 
     @Test

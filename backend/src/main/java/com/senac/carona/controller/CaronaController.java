@@ -2,9 +2,11 @@ package com.senac.carona.controller;
 
 import com.senac.carona.dto.CadastroUsuarioRequest;
 import com.senac.carona.dto.CriarOfertaRequest;
+import com.senac.carona.dto.MinhaContaSnapshotResponse;
 import com.senac.carona.dto.MinhasCaronasResponse;
 import com.senac.carona.dto.OfertaResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
+import com.senac.carona.dto.ResponderSolicitacaoRequest;
 import com.senac.carona.dto.SolicitarOfertaRequest;
 import com.senac.carona.dto.SolicitacaoResponse;
 import com.senac.carona.dto.UsuarioResponse;
@@ -22,7 +24,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
 public class CaronaController {
 
     private final CaronaService caronaService;
@@ -49,6 +50,12 @@ public class CaronaController {
     @GetMapping("/usuarios/{id}/minhas-caronas")
     public ResponseEntity<MinhasCaronasResponse> minhasCaronas(@PathVariable Long id) {
         return ResponseEntity.ok(caronaService.minhasCaronas(id));
+    }
+
+    @GetMapping("/minhas-caronas")
+    public ResponseEntity<MinhaContaSnapshotResponse> snapshot(
+            @RequestParam Long userId) {
+        return ResponseEntity.ok(caronaService.snapshot(userId));
     }
 
     @GetMapping("/caronas")
@@ -88,7 +95,7 @@ public class CaronaController {
             @RequestBody CriarOfertaRequest request) {
         Carona criada = caronaService.publicarCarona(request.toCarona());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(OfertaResponse.from(criada, 100));
+                .body(OfertaResponse.from(criada, 100, true));
     }
 
     @PostMapping("/ofertas/{id}/solicitacoes")
@@ -97,12 +104,8 @@ public class CaronaController {
         Long passageiroId = request.getPassengerId();
         SolicitacaoCarona criada = caronaService.solicitarVaga(
                 id, passageiroId, null, request.getMsg());
-        Carona carona = caronaService.buscarCaronaPorId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
-        Usuario passageiro = caronaService.buscarUsuarioPorId(passageiroId)
-                .orElseThrow(() -> new IllegalArgumentException("Passageiro não encontrado."));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(SolicitacaoResponse.from(criada, carona, passageiro, true));
+                .body(respostaSolicitacao(criada, passageiroId));
     }
 
     @GetMapping("/caronas/recomendadas")
@@ -141,17 +144,37 @@ public class CaronaController {
     }
 
     @GetMapping("/caronas/{id}/solicitacoes")
-    public ResponseEntity<List<SolicitacaoCarona>> listarSolicitacoes(@PathVariable Long id) {
-        return ResponseEntity.ok(caronaService.listarSolicitacoesPorCarona(id));
+    public ResponseEntity<List<SolicitacaoResponse>> listarSolicitacoes(
+            @PathVariable Long id, @RequestParam Long userId) {
+        Carona carona = caronaService.buscarCaronaPorId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
+        List<SolicitacaoResponse> solicitacoes = caronaService
+                .listarSolicitacoesPorCarona(id, userId).stream()
+                .map(solicitacao -> {
+                    Usuario passageiro = caronaService.buscarUsuarioPorId(solicitacao.getPassageiroId())
+                            .orElseThrow(() -> new IllegalStateException(
+                                    "Passageiro vinculado à solicitação não encontrado."));
+                    return SolicitacaoResponse.from(solicitacao, carona, passageiro, false);
+                })
+                .toList();
+        return ResponseEntity.ok(solicitacoes);
     }
 
     @PatchMapping("/solicitacoes/{id}/responder")
     public ResponseEntity<SolicitacaoCarona> responderSolicitacao(
             @PathVariable Long id,
             @RequestParam String acao,
-            @RequestParam(required = false) Long motoristaId) {
+            @RequestParam Long motoristaId) {
         SolicitacaoCarona atualizada = caronaService.responderSolicitacao(id, motoristaId, acao);
         return ResponseEntity.ok(atualizada);
+    }
+
+    @PatchMapping("/solicitacoes/{id}")
+    public ResponseEntity<SolicitacaoResponse> responderSolicitacao(
+            @PathVariable Long id, @RequestBody ResponderSolicitacaoRequest request) {
+        SolicitacaoCarona atualizada = caronaService.responderSolicitacao(
+                id, request.getUserId(), request.toAcao());
+        return ResponseEntity.ok(respostaSolicitacao(atualizada, request.getUserId()));
     }
 
     @PatchMapping("/caronas/{id}/cancelar")
@@ -159,5 +182,16 @@ public class CaronaController {
             @PathVariable Long id,
             @RequestParam Long motoristaId) {
         return ResponseEntity.ok(caronaService.cancelarCarona(id, motoristaId));
+    }
+
+    private SolicitacaoResponse respostaSolicitacao(
+            SolicitacaoCarona solicitacao, Long userId) {
+        Carona carona = caronaService.buscarCaronaPorId(solicitacao.getCaronaId())
+                .orElseThrow(() -> new IllegalArgumentException("Carona não encontrada."));
+        Usuario passageiro = caronaService.buscarUsuarioPorId(solicitacao.getPassageiroId())
+                .orElseThrow(() -> new IllegalArgumentException("Passageiro não encontrado."));
+        return SolicitacaoResponse.from(
+                solicitacao, carona, passageiro,
+                userId.equals(solicitacao.getPassageiroId()));
     }
 }
