@@ -56,7 +56,9 @@ The front end also provides a basic conversation interface for confirmed ride re
 
 ## Stack
 
-Java 17 with Spring Boot (Spring Web) and Maven are used for the back-end, and pure HTML5, CSS3, and Vanilla JavaScript are used for the front-end. We have not yet chosen which database we will use.
+Java 17 with Spring Boot, Spring Data JPA, and Maven are used for the back end. PostgreSQL is the configured database. The front end uses pure HTML5, CSS3, and Vanilla JavaScript.
+
+The PostgreSQL connection is configured through environment variables: `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. The local database must be created before starting the application. Hibernate currently uses `ddl-auto=update` by default; this is a development convenience, not a versioned database migration. The main ride flows are still being connected to persistent storage.
 
 ## Folder structure
 
@@ -91,14 +93,32 @@ Java 17 with Spring Boot (Spring Web) and Maven are used for the back-end, and p
 ### Prerequisites
 - Java 17 (JDK)
 - Maven (or the included `./mvnw` wrapper)
+- PostgreSQL, with a local database created
 - Modern web browser (Chrome, Edge, Firefox)
 
 ### Back-end
+
+Set the connection variables in the same terminal session used to start the application. Do not commit real credentials.
+
+PowerShell:
+```powershell
+cd backend
+$env:DB_URL = "jdbc:postgresql://localhost:5432/carona_solidaria"
+$env:DB_USERNAME = "your_postgres_user"
+$env:DB_PASSWORD = "your_postgres_password"
+.\mvnw.cmd spring-boot:run
+```
+
+Linux/macOS:
 ```bash
 cd backend
+export DB_URL="jdbc:postgresql://localhost:5432/carona_solidaria"
+export DB_USERNAME="your_postgres_user"
+export DB_PASSWORD="your_postgres_password"
 ./mvnw spring-boot:run
 ```
-The API will be available at `http://localhost:8080`.
+
+The API will be available at `http://localhost:8080`. `DB_DDL_AUTO` can override the Hibernate schema mode; it defaults to `update`. `DB_SHOW_SQL` controls SQL logging and defaults to `false`.
 
 ### Front-end
 Open the `frontend/index.html` file directly in your browser or use the **Live Server** extension in VS Code.
