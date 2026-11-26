@@ -42,7 +42,7 @@ The application allows students and staff from Senac Canoas to offer and find ri
 
 Users can enter any origin location, including a neighborhood, city, or address; ride search supports partial matches.
 
-The front end also provides a basic conversation interface for confirmed ride requests. In the current demo, messages are stored in the browser and are not synchronized between different users or devices.
+The backend provides JPA-backed conversations for confirmed ride requests. The front end still uses a local mock by default, so it must switch to the API and send the current `userId` before messages are shared across users or devices.
 
 **What is not included in the MVP:**
 - Payments
@@ -56,7 +56,31 @@ The front end also provides a basic conversation interface for confirmed ride re
 
 ## Stack
 
-Java 17 with Spring Boot (Spring Web) and Maven are used for the back-end, and pure HTML5, CSS3, and Vanilla JavaScript are used for the front-end. We have not yet chosen which database we will use.
+Java 17 with Spring Boot, Spring Data JPA, and Maven are used for the back end. PostgreSQL is the configured database. The front end uses pure HTML5, CSS3, and Vanilla JavaScript.
+
+The PostgreSQL connection is configured through environment variables: `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. The local database must be created before starting the application. Hibernate currently uses `ddl-auto=update` by default; this is a development convenience, not a versioned database migration. The main service now uses Spring Data JPA repositories to persist users, rides, and ride requests. PostgreSQL integration still needs to be verified against the team's database schema.
+
+API CORS is restricted to `http://localhost:5500` and `http://127.0.0.1:5500` by default. Set `CORS_ALLOWED_ORIGINS` to a comma-separated list when serving the front end from another trusted origin.
+
+The user registration endpoint accepts an omitted or blank phone number and stores it as `null`; when provided, the phone number must use the accepted format.
+
+`SolicitacaoCaronaRepository` provides JPA operations and queries for ride requests by ride, passenger, and status, and is used by `CaronaService`. Seat-changing operations run in transactions and lock the corresponding ride row. The backend no longer seeds demo users and rides at startup; the front end still uses a local mock by default, and its request flow still needs to send the passenger ID.
+
+`POST /api/usuarios` accepts the front-end fields `name`, `email`, `role` (`both`, `driver`, or `rider`), and `region`; it responds with `id`, `name`, `email`, `role`, and `region`. Portuguese request field names are also accepted for compatibility. Phone is optional and is not included in user responses or listings.
+
+`GET /api/ofertas` accepts optional `data`, `regiao`, `horario` (`HH:mm`, earliest departure), and `vagas` (minimum available seats) filters. It returns offers with front-end field names such as `driver`, `origin`, `destination`, `date`, `time`, `seats`, `ref`, `summary`, and `match`. `POST /api/ofertas` accepts `driverId`, `origin`, `date`, `time`, `seats`, `ref`, and optional `notes`; `destination` defaults to `Campus Senac Canoas`. `driverId` is required because the backend cannot infer the current user without authentication.
+
+`POST /api/ofertas/{id}/solicitacoes` requires `passengerId` and accepts an optional `msg` of up to 140 characters. The request message is stored in the nullable `mensagem VARCHAR(140)` column of `solicitacoes_carona`. The database schema/migration must include this column; Hibernate `update` can create it in local development, but is not a substitute for a versioned migration.
+
+`GET /api/minhas-caronas?userId={id}` returns the front-end snapshot shape with `offers` and `requests`, including English status values and `mine` flags. The front end must pass the registered user's ID. No authentication is implemented, so this client-supplied ID is context only and does not verify identity.
+
+`PATCH /api/solicitacoes/{id}` accepts `{"userId": 7, "action": "accept"}` (also `refuse` or `cancel`). Only the ride's driver can accept or refuse; either the driver or the requesting passenger can cancel. The legacy `/responder` route requires `motoristaId`. These IDs are ownership checks within the API, not authentication.
+
+`GET /api/caronas/{id}/solicitacoes?userId={id}` is restricted to the ride's driver and returns a response DTO that omits the driver's phone number. Other user IDs receive HTTP 403. The supplied ID is not verified by an authentication system.
+
+The chat uses `GET /api/solicitacoes/{id}/conversa?userId={id}` and `POST /api/solicitacoes/{id}/conversa` with `{"userId": 7, "text": "..."}`. Only the driver and passenger of a confirmed request may read or send messages; text is limited to 500 characters. The database migration should create `mensagens_chat` with `id BIGSERIAL`, `solicitacao_id BIGINT`, `remetente_id BIGINT`, `texto VARCHAR(500)`, and `criado_em TIMESTAMPTZ`, plus foreign keys to `solicitacoes_carona(id)` and `usuarios(id)` and an index on `(solicitacao_id, criado_em)`.
+
+API errors use the JSON shape `{"erro":"..."}`: invalid input returns 400, denied access returns 403, state or data conflicts return 409, and database access failures return 503. Database error details are not returned to clients.
 
 ## Folder structure
 
@@ -91,17 +115,35 @@ Java 17 with Spring Boot (Spring Web) and Maven are used for the back-end, and p
 ### Prerequisites
 - Java 17 (JDK)
 - Maven (or the included `./mvnw` wrapper)
+- PostgreSQL, with a local database created
 - Modern web browser (Chrome, Edge, Firefox)
 
 ### Back-end
+
+Set the connection variables in the same terminal session used to start the application. Do not commit real credentials.
+
+PowerShell:
+```powershell
+cd backend
+$env:DB_URL = "jdbc:postgresql://localhost:5432/carona_solidaria"
+$env:DB_USERNAME = "your_postgres_user"
+$env:DB_PASSWORD = "your_postgres_password"
+.\mvnw.cmd spring-boot:run
+```
+
+Linux/macOS:
 ```bash
 cd backend
+export DB_URL="jdbc:postgresql://localhost:5432/carona_solidaria"
+export DB_USERNAME="your_postgres_user"
+export DB_PASSWORD="your_postgres_password"
 ./mvnw spring-boot:run
 ```
-The API will be available at `http://localhost:8080`.
+
+The API will be available at `http://localhost:8080`. `DB_DDL_AUTO` can override the Hibernate schema mode; it defaults to `update`. `DB_SHOW_SQL` controls SQL logging and defaults to `false`.
 
 ### Front-end
-Open the `frontend/index.html` file directly in your browser or use the **Live Server** extension in VS Code.
+Open the `frontend/index.html` file directly for the local mock, or use the **Live Server** extension in VS Code. Use Live Server when connecting to the API; browsers give `file://` pages a `null` origin, which is intentionally not allowed by the backend CORS policy.
 
 ## CI/CD
 
