@@ -124,7 +124,9 @@ function renderRides() {
             .map((r) => r.who)
             .join(", ") || "Ninguém ainda";
         const chats = requests.filter((r) => r.offerId === o.id && r.status === "confirmed").map((r) => chatButton(r.id)).join("");
-        return `<tr><td>${esc(o.origin)}</td><td>Senac Canoas</td><td>${fmtDate(o.date)}</td><td>${o.time}</td><td>${esc(p)}</td><td>${o.seats}</td><td>${badge(o.seats ? "open" : "full")}</td><td><div class="table-actions">${chats}</div></td></tr>`;
+        const status = o.status || (o.seats ? "open" : "full");
+        const cancel = status === "cancelled" ? "" : `<button class="btn btn-danger" data-cancel-offer="${o.id}">Cancelar oferta</button>`;
+        return `<tr><td>${esc(o.origin)}</td><td>Senac Canoas</td><td>${fmtDate(o.date)}</td><td>${o.time}</td><td>${esc(p)}</td><td>${o.seats}</td><td>${badge(status)}</td><td><div class="table-actions">${chats}${cancel}</div></td></tr>`;
       });
   else
     rows = requests
@@ -262,6 +264,11 @@ function bind() {
         $("#chatForm").elements.message.focus();
       } catch (error) {
         UI.toast(failureMessage(error, "Não foi possível abrir esta conversa."), true);
+      }
+    }
+    if (t.dataset.cancelOffer) {
+      if (await UI.confirm("Cancelar esta oferta?", "As solicitações ativas desta carona também serão canceladas.", "Cancelar oferta")) {
+        runAction(t, () => Api.cancelOffer(t.dataset.cancelOffer), "Oferta de carona cancelada.");
       }
     }
     if (t.dataset.act) {
