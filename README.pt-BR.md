@@ -46,7 +46,7 @@ O backend oferece conversas persistidas via JPA para solicitações confirmadas.
 
 Java 17 com Spring Boot, Spring Data JPA e Maven são utilizados no back-end. PostgreSQL é o banco de dados configurado. O front-end usa HTML5, CSS3 e JavaScript puro.
 
-A conexão com o PostgreSQL é configurada pelas variáveis de ambiente `DB_URL`, `DB_USERNAME` e `DB_PASSWORD`. O banco local precisa ser criado antes de iniciar a aplicação. O Hibernate usa `ddl-auto=update` por padrão neste momento; isso facilita o desenvolvimento, mas não substitui migrations versionadas. O service principal agora usa repositories Spring Data JPA para persistir usuários, caronas e solicitações. Ainda é necessário verificar a integração PostgreSQL com o schema da equipe.
+A conexão com o PostgreSQL é configurada pelas variáveis de ambiente `DB_URL`, `DB_USERNAME` e `DB_PASSWORD`. O banco local precisa ser criado antes de iniciar a aplicação. O Hibernate usa `ddl-auto=update` por padrão neste momento; isso facilita o desenvolvimento, mas não substitui migrations versionadas. O service principal usa repositories Spring Data JPA para persistir usuários, caronas, solicitações e mensagens. A conexão real ainda deve ser validada na instância PostgreSQL de cada equipe.
 
 Por padrão, o CORS da API permite somente `http://localhost:5500` e `http://127.0.0.1:5500`. Defina `CORS_ALLOWED_ORIGINS` com uma lista separada por vírgulas se o front-end for servido por outra origem confiável.
 
@@ -56,7 +56,7 @@ O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicita�
 
 `POST /api/usuarios` aceita os campos do front-end `name`, `email`, `role` (`both`, `driver` ou `rider`) e `region`; a resposta contém `id`, `name`, `email`, `role` e `region`. Os nomes dos campos em português também são aceitos para compatibilidade. O telefone é opcional e não aparece nas respostas nem na listagem de usuários.
 
-`GET /api/ofertas` aceita os filtros opcionais `data`, `regiao`, `horario` (`HH:mm`, horário mínimo de saída) e `vagas` (mínimo de vagas disponíveis). A resposta usa campos do front-end como `driver`, `origin`, `destination`, `date`, `time`, `seats`, `ref`, `summary` e `match`. `POST /api/ofertas` recebe `driverId`, `origin`, `date`, `time`, `seats`, `ref` e `notes` opcional; se `destination` não for enviado, usa `Campus Senac Canoas`. `driverId` é obrigatório porque o backend não consegue inferir o usuário atual sem autenticação.
+`GET /api/ofertas` aceita os filtros opcionais `data`, `regiao`, `horario` (`HH:mm`, horário mínimo de saída) e `vagas` (mínimo de vagas disponíveis). A resposta usa campos do front-end como `driver`, `origin`, `destination`, `date`, `time`, `seats`, `ref`, `summary`, `match` e `status` (`open`, `full` ou `cancelled`). `POST /api/ofertas` recebe `driverId`, `origin`, `date`, `time`, `seats`, `ref` e `notes` opcional; se `destination` não for enviado, usa `Campus Senac Canoas`. `driverId` é obrigatório porque o backend não consegue inferir o usuário atual sem autenticação.
 
 `POST /api/ofertas/{id}/solicitacoes` exige `passengerId` e aceita `msg` opcional com até 140 caracteres. A mensagem é salva na coluna anulável `mensagem VARCHAR(140)` da tabela `solicitacoes_carona`. O repositório ainda não inclui migrations versionadas; o `ddl-auto=update` do Hibernate cria ou atualiza o schema de desenvolvimento, mas não substitui um processo de migrations revisado para produção.
 
@@ -108,7 +108,7 @@ Os erros da API usam o JSON `{"erro":"..."}`: entrada inválida retorna 400, ace
 
 ### Back-end
 
-Defina as variáveis de conexão no mesmo terminal em que iniciará a aplicação. Não faça commit de credenciais reais.
+No Windows, verifique se o serviço do PostgreSQL está em execução (por exemplo, no aplicativo **Serviços**) e crie o banco uma vez pelo terminal: `psql -U postgres -h localhost -p 5432 -c "CREATE DATABASE carona_solidaria;"`, usando a conta correta do PostgreSQL. Defina as variáveis de conexão no mesmo terminal em que iniciará a aplicação. Não faça commit de credenciais reais.
 
 PowerShell:
 ```powershell
