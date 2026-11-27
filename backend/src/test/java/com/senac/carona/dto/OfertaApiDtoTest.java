@@ -47,5 +47,16 @@ class OfertaApiDtoTest {
         assertTrue(json.contains("\"seats\":2"));
         assertTrue(json.contains("\"ref\":\"Praça central\""));
         assertTrue(json.contains("\"match\":92"));
+        assertTrue(json.contains("\"status\":\"open\""));
+    }
+
+    @Test
+    void respostaDaOfertaTraduzStatusCanceladoParaInterface() throws Exception {
+        Carona carona = new Carona(11L, 7L, "Joana", "ALUNO",
+                "Centro", "Campus Senac Canoas", "2027-01-15",
+                "18:30", "Praça central", 3, "CANCELADA", null);
+        String json = new ObjectMapper().writeValueAsString(OfertaResponse.fromSnapshot(carona, true));
+
+        assertTrue(json.contains("\"status\":\"cancelled\""));
     }
 }

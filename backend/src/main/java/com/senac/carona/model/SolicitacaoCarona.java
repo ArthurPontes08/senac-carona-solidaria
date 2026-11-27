@@ -1,5 +1,6 @@
 package com.senac.carona.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -13,8 +14,20 @@ public class SolicitacaoCarona {
     @Column(name = "carona_id", nullable = false)
     private Long caronaId;
 
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "carona_id", insertable = false, updatable = false,
+            foreignKey = @ForeignKey(name = "fk_solicitacoes_carona"))
+    private Carona carona;
+
     @Column(name = "passageiro_id", nullable = false)
     private Long passageiroId;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "passageiro_id", insertable = false, updatable = false,
+            foreignKey = @ForeignKey(name = "fk_solicitacoes_passageiro"))
+    private Usuario passageiro;
 
     @Column(name = "passageiro_nome", nullable = false)
     private String passageiroNome;

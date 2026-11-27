@@ -137,6 +137,13 @@ const Api = (() => {
         db.offers.push(n);
         return n;
       }),
+    cancelOffer: (offerId) =>
+      call(`/caronas/${offerId}/cancelar?motoristaId=${currentUser().id}`, { method: "PATCH" }, () => {
+        const offer = find(db.offers, Number(offerId));
+        if (!offer || !offer.mine) throw new Error("offer unavailable");
+        offer.status = "cancelled";
+        return offer;
+      }),
     requestSeat: (offerId, msg) =>
       call(`/ofertas/${offerId}/solicitacoes`, { method: "POST", body: JSON.stringify({ passengerId: currentUser().id, msg }) }, () => {
         const o = find(db.offers, offerId);

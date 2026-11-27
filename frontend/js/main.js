@@ -123,8 +123,13 @@ function renderRides() {
             .filter((r) => r.offerId === o.id && r.status === "confirmed")
             .map((r) => r.who)
             .join(", ") || "Ninguém ainda";
-        const chats = requests.filter((r) => r.offerId === o.id && r.status === "confirmed").map((r) => chatButton(r.id)).join("");
-        return `<tr><td>${esc(o.origin)}</td><td>Senac Canoas</td><td>${fmtDate(o.date)}</td><td>${o.time}</td><td>${esc(p)}</td><td>${o.seats}</td><td>${badge(o.seats ? "open" : "full")}</td><td><div class="table-actions">${chats}</div></td></tr>`;
+        const chats = requests
+          .filter((r) => r.offerId === o.id && r.status === "confirmed")
+          .map((r) => chatButton(r.id))
+          .join("");
+        const status = o.status || (o.seats ? "open" : "full");
+        const cancel = status === "cancelled" ? "" : `<button class="btn btn-danger" data-cancel-offer="${o.id}">Cancelar oferta</button>`;
+        return `<tr><td>${esc(o.origin)}</td><td>Senac Canoas</td><td>${fmtDate(o.date)}</td><td>${o.time}</td><td>${esc(p)}</td><td>${o.seats}</td><td>${badge(status)}</td><td><div class="table-actions">${chats}${cancel}</div></td></tr>`;
       });
   else
     rows = requests
@@ -199,13 +204,7 @@ function renderChat() {
   const { partner, ride, messages } = State.chat;
   $("#chatPartner").textContent = partner;
   $("#chatRide").textContent = ride;
-  $("#chatMessages").innerHTML = messages.length
-    ? messages
-        .map(
-          (m) => `<article class="chat-message${m.mine ? " mine" : ""}"><p>${esc(m.text)}</p><span class="chat-message-meta">${esc(m.sender)} · ${new Date(m.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span></article>`,
-        )
-        .join("")
-    : '<p class="muted">Conversa iniciada. Envie uma mensagem para combinar os detalhes da carona.</p>';
+  $("#chatMessages").innerHTML = messages.length ? messages.map((m) => `<article class="chat-message${m.mine ? " mine" : ""}"><p>${esc(m.text)}</p><span class="chat-message-meta">${esc(m.sender)} · ${new Date(m.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span></article>`).join("") : '<p class="muted">Conversa iniciada. Envie uma mensagem para combinar os detalhes da carona.</p>';
   $("#chatMessages").scrollTop = $("#chatMessages").scrollHeight;
 }
 
@@ -269,6 +268,11 @@ function bind() {
         $("#chatForm").elements.message.focus();
       } catch (error) {
         UI.toast(failureMessage(error, "Não foi possível abrir esta conversa."), true);
+      }
+    }
+    if (t.dataset.cancelOffer) {
+      if (await UI.confirm("Cancelar esta oferta?", "As solicitações ativas desta carona também serão canceladas.", "Cancelar oferta")) {
+        runAction(t, () => Api.cancelOffer(t.dataset.cancelOffer), "Oferta de carona cancelada.");
       }
     }
     if (t.dataset.act) {
@@ -394,43 +398,28 @@ function bind() {
   $("#onboardForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const el = e.target.elements;
-    const ok = [
-      req(el.name, "Informe seu nome."),
-      UI.field(el.email, /^\S+@\S+\.\S+$/.test(el.email.value) ? "" : "Use seu e-mail institucional."),
-      UI.field(el.password, el.password.value.length >= 8 && el.password.value.length <= 128 ? "" : "Use uma senha de 8 a 128 caracteres."),
-      req(el.region, "Informe seu bairro de origem."),
-    ].every(Boolean);
+    const email = el.email.value.trim();
+    const isSenacEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]*senac[A-Za-z0-9.-]*\.[A-Za-z]{2,}$/i.test(email);
+    const ok = [req(el.name, "Informe seu nome."), UI.field(el.email, isSenacEmail ? "" : "Use um e-mail institucional da comunidade Senac."), req(el.region, "Informe seu bairro de origem.")].every(Boolean);
     if (!ok) return;
+    $("#onboardError").hidden = true;
     try {
-      const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email: el.email.value, password: el.password.value, role: el.role.value, region: el.region.value }));
+      const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email, role: el.role.value, region: el.region.value }));
       $("#dlg-onboard").close();
       $("#onboardForm").reset();
       setUser(u);
       UI.toast("Cadastro concluído. Bem-vindo(a)!");
       load();
     } catch (error) {
-      UI.toast(failureMessage(error, "Não foi possível concluir o cadastro."), true);
+      const message = failureMessage(error, "Não foi possível concluir o cadastro.");
+      $("#onboardError").textContent = message;
+      $("#onboardError").hidden = false;
     }
   });
-  $("#loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const el = e.target.elements;
-    const ok = [
-      UI.field(el.email, /^\S+@\S+\.\S+$/.test(el.email.value) ? "" : "Informe um e-mail válido."),
-      req(el.password, "Informe sua senha."),
-    ].every(Boolean);
-    if (!ok) return;
-    try {
-      const user = await UI.busy(e.submitter, () => Api.login({ email: el.email.value, password: el.password.value }));
-      $("#dlg-login").close();
-      $("#loginForm").reset();
-      setUser(user);
-      load();
-    } catch (error) {
-      UI.toast(failureMessage(error, "Não foi possível entrar. Verifique sua conexão e tente novamente."), true);
-    }
+  $("#onboardForm").addEventListener("input", () => {
+    $("#onboardError").textContent = "";
+    $("#onboardError").hidden = true;
   });
-  $("#dlg-login").addEventListener("cancel", (e) => e.preventDefault());
   $("#dlg-onboard").addEventListener("cancel", (e) => e.preventDefault());
   const pb = $("#profileBtn");
   pb.addEventListener("click", () => {
@@ -540,7 +529,15 @@ function renderAvatar(element, user) {
     element.replaceChildren(image);
     return;
   }
-  const initials = String(user.name || "?").trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "?";
+  const initials =
+    String(user.name || "?")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase() || "?";
   element.textContent = initials;
 }
 function imageToDataUrl(file) {

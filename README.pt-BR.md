@@ -30,7 +30,7 @@ A aplicação permite que alunos e funcionários do Senac Canoas ofereçam e enc
 
 O usuário pode informar qualquer local de origem, como bairro, cidade ou endereço; a busca de caronas aceita correspondências parciais.
 
-O backend oferece conversas persistidas via JPA para solicitações confirmadas. O front-end ainda usa um mock local por padrão; João precisa conectá-lo à API e enviar o `userId` para que as mensagens sejam compartilhadas entre usuários e dispositivos.
+O backend oferece conversas persistidas via JPA para solicitações confirmadas. O front-end está em modo API (`MOCK: false`); o `localStorage` mantém somente a sessão do usuário no navegador, não ofertas, solicitações ou mensagens. A API não tem mecanismo de login/autenticação, então o ID de usuário enviado pelo cliente serve apenas como contexto de propriedade.
 
 **O que não entra no MVP:**
 - Pagamentos
@@ -38,7 +38,7 @@ O backend oferece conversas persistidas via JPA para solicitações confirmadas.
 - Marketplace de transporte
 - Sistema complexo de avaliações
 - Denúncias avançadas
-- Chat compartilhado entre sessões de usuários ou dispositivos diferentes
+- Autenticação completa e recuperação de conta
 - Algoritmo sofisticado de rotas
 - Caronas abertas para pessoas de fora da comunidade Senac
 
@@ -46,21 +46,21 @@ O backend oferece conversas persistidas via JPA para solicitações confirmadas.
 
 Java 17 com Spring Boot, Spring Data JPA e Maven são utilizados no back-end. PostgreSQL é o banco de dados configurado. O front-end usa HTML5, CSS3 e JavaScript puro.
 
-A conexão com o PostgreSQL é configurada pelas variáveis de ambiente `DB_URL`, `DB_USERNAME` e `DB_PASSWORD`. O banco local precisa ser criado antes de iniciar a aplicação. O Hibernate usa `ddl-auto=update` por padrão neste momento; isso facilita o desenvolvimento, mas não substitui migrations versionadas. O service principal agora usa repositories Spring Data JPA para persistir usuários, caronas e solicitações. Ainda é necessário verificar a integração PostgreSQL com o schema da equipe.
+A conexão com o PostgreSQL é configurada pelas variáveis de ambiente `DB_URL`, `DB_USERNAME` e `DB_PASSWORD`. O banco local precisa ser criado antes de iniciar a aplicação. O Hibernate usa `ddl-auto=update` por padrão neste momento; isso facilita o desenvolvimento, mas não substitui migrations versionadas. O service principal usa repositories Spring Data JPA para persistir usuários, caronas, solicitações e mensagens. A conexão real ainda deve ser validada na instância PostgreSQL de cada equipe.
 
 Por padrão, o CORS da API permite somente `http://localhost:5500` e `http://127.0.0.1:5500`. Defina `CORS_ALLOWED_ORIGINS` com uma lista separada por vírgulas se o front-end for servido por outra origem confiável.
 
 O endpoint de cadastro aceita telefone ausente ou em branco e o armazena como `null`; quando informado, o telefone precisa seguir o formato aceito.
 
-O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicitações por carona, passageiro e status, e é usado pelo `CaronaService`. As operações que alteram vagas rodam em transações e bloqueiam a linha da carona correspondente. O backend não cria mais usuários e caronas de demonstração ao iniciar; o front-end continua usando um mock local por padrão, e ainda precisa enviar o ID do passageiro ao solicitar uma vaga.
+O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicitações por carona, passageiro e status, e é usado pelo `CaronaService`. As operações que alteram vagas rodam em transações e bloqueiam a linha da carona correspondente. O backend não cria usuários ou caronas de demonstração ao iniciar. O front-end está em modo API (`MOCK: false`); o `localStorage` mantém somente a sessão do usuário no navegador, não ofertas, solicitações ou mensagens. A API não tem mecanismo de login/autenticação, então o ID de usuário enviado pelo cliente serve apenas como contexto de propriedade.
 
 Ao abrir o site sem sessão, o usuário vê primeiro o modal de login e pode alternar para o cadastro. `POST /api/usuarios` aceita `name`, `email`, `password`, `role` (`both`, `driver` ou `rider`) e `region`; senhas de 8 a 128 caracteres são armazenadas com hash PBKDF2. `POST /api/usuarios/login` recebe `email` e `password` e retorna os dados públicos do usuário; credenciais inválidas retornam HTTP 401. O campo `senha_hash` é adicionado pelo Hibernate, mas usuários já existentes não têm senha: é necessário provisionar uma senha para essas contas antes do primeiro login. Senhas nunca são incluídas nas respostas.
 
 Os nomes dos campos em português também são aceitos no cadastro para compatibilidade. O telefone é opcional e não aparece nas respostas nem na listagem de usuários.
 
-`GET /api/ofertas` aceita os filtros opcionais `data`, `regiao`, `horario` (`HH:mm`, horário mínimo de saída) e `vagas` (mínimo de vagas disponíveis). A resposta usa campos do front-end como `driver`, `origin`, `destination`, `date`, `time`, `seats`, `ref`, `summary` e `match`. `POST /api/ofertas` recebe `driverId`, `origin`, `date`, `time`, `seats`, `ref` e `notes` opcional; se `destination` não for enviado, usa `Campus Senac Canoas`. `driverId` é obrigatório porque o backend não consegue inferir o usuário atual sem autenticação.
+`GET /api/ofertas` aceita os filtros opcionais `data`, `regiao`, `horario` (`HH:mm`, horário mínimo de saída) e `vagas` (mínimo de vagas disponíveis). A resposta usa campos do front-end como `driver`, `origin`, `destination`, `date`, `time`, `seats`, `ref`, `summary`, `match` e `status` (`open`, `full` ou `cancelled`). `POST /api/ofertas` recebe `driverId`, `origin`, `date`, `time`, `seats`, `ref` e `notes` opcional; se `destination` não for enviado, usa `Campus Senac Canoas`. `driverId` é obrigatório porque o backend não consegue inferir o usuário atual sem autenticação.
 
-`POST /api/ofertas/{id}/solicitacoes` exige `passengerId` e aceita `msg` opcional com até 140 caracteres. A mensagem é salva na coluna anulável `mensagem VARCHAR(140)` da tabela `solicitacoes_carona`. O schema/migration do banco precisa incluir essa coluna; o `update` do Hibernate pode criá-la no desenvolvimento local, mas não substitui uma migration versionada.
+`POST /api/ofertas/{id}/solicitacoes` exige `passengerId` e aceita `msg` opcional com até 140 caracteres. A mensagem é salva na coluna anulável `mensagem VARCHAR(140)` da tabela `solicitacoes_carona`. O repositório ainda não inclui migrations versionadas; o `ddl-auto=update` do Hibernate cria ou atualiza o schema de desenvolvimento, mas não substitui um processo de migrations revisado para produção.
 
 `GET /api/minhas-caronas?userId={id}` retorna o formato de snapshot do front-end, com `offers` e `requests`, estados em inglês e indicadores `mine`. O login verifica e-mail e senha, mas ainda não emite token nem protege as demais rotas; o ID enviado pelo cliente serve apenas como contexto e não comprova a identidade.
 
@@ -68,7 +68,7 @@ Os nomes dos campos em português também são aceitos no cadastro para compatib
 
 `GET /api/caronas/{id}/solicitacoes?userId={id}` é restrita ao motorista da carona e retorna um DTO que não inclui o telefone do motorista. Outros IDs recebem HTTP 403. O ID informado não é validado por um sistema de autenticação.
 
-O chat usa `GET /api/solicitacoes/{id}/conversa?userId={id}` e `POST /api/solicitacoes/{id}/conversa` com `{"userId": 7, "text": "..."}`. Somente o motorista e o passageiro de uma solicitação confirmada podem ler ou enviar mensagens; o texto pode ter até 500 caracteres. A migration do banco deve criar `mensagens_chat` com `id BIGSERIAL`, `solicitacao_id BIGINT`, `remetente_id BIGINT`, `texto VARCHAR(500)` e `criado_em TIMESTAMPTZ`, além de chaves estrangeiras para `solicitacoes_carona(id)` e `usuarios(id)` e um índice em `(solicitacao_id, criado_em)`.
+O chat usa `GET /api/solicitacoes/{id}/conversa?userId={id}` e `POST /api/solicitacoes/{id}/conversa` com `{"userId": 7, "text": "..."}`. Somente o motorista e o passageiro de uma solicitação confirmada podem ler ou enviar mensagens; o texto pode ter até 500 caracteres. O JPA mapeia as mensagens e as referências a solicitação, remetente, carona e motorista, declarando as chaves estrangeiras e o índice em `(solicitacao_id, criado_em)`. Com a configuração de desenvolvimento `ddl-auto=update`, o Hibernate aplica esses mapeamentos ao iniciar.
 
 Os erros da API usam o JSON `{"erro":"..."}`: entrada inválida retorna 400, acesso negado retorna 403, conflitos de estado ou dados retornam 409 e falhas de acesso ao banco retornam 503. Detalhes internos do banco não são enviados ao cliente.
 
@@ -110,7 +110,7 @@ Os erros da API usam o JSON `{"erro":"..."}`: entrada inválida retorna 400, ace
 
 ### Back-end
 
-Defina as variáveis de conexão no mesmo terminal em que iniciará a aplicação. Não faça commit de credenciais reais.
+No Windows, verifique se o serviço do PostgreSQL está em execução (por exemplo, no aplicativo **Serviços**) e crie o banco uma vez pelo terminal: `psql -U postgres -h localhost -p 5432 -c "CREATE DATABASE carona_solidaria;"`, usando a conta correta do PostgreSQL. Defina as variáveis de conexão no mesmo terminal em que iniciará a aplicação. Não faça commit de credenciais reais.
 
 PowerShell:
 ```powershell
@@ -118,6 +118,8 @@ cd backend
 $env:DB_URL = "jdbc:postgresql://localhost:5432/carona_solidaria"
 $env:DB_USERNAME = "seu_usuario_postgres"
 $env:DB_PASSWORD = "sua_senha_postgres"
+$env:DB_DDL_AUTO = "update"
+$env:DB_SHOW_SQL = "false"
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -127,13 +129,27 @@ cd backend
 export DB_URL="jdbc:postgresql://localhost:5432/carona_solidaria"
 export DB_USERNAME="seu_usuario_postgres"
 export DB_PASSWORD="sua_senha_postgres"
+export DB_DDL_AUTO="update"
+export DB_SHOW_SQL="false"
 ./mvnw spring-boot:run
 ```
 
 A API ficará disponível em `http://localhost:8080`. `DB_DDL_AUTO` pode sobrescrever o modo de schema do Hibernate; o padrão atual é `update`. `DB_SHOW_SQL` controla a exibição de SQL e o padrão é `false`.
 
+Os testes unitários usam repositories mockados e não exigem PostgreSQL ativo. Execute-os dentro de `backend/` com `.\mvnw.cmd test` no Windows ou `./mvnw test` no Linux/macOS. Esses testes não substituem um teste de integração conectado ao PostgreSQL.
+
 ### Front-end
-Abra `frontend/index.html` diretamente para usar o mock local ou utilize **Live Server** no VS Code. Para chamar a API, use o Live Server: o navegador trata páginas `file://` com origem `null`, que é intencionalmente bloqueada pela política CORS do backend.
+Mantenha o backend em execução, abra `frontend/index.html` no VS Code e selecione **Open with Live Server**. Use a porta padrão `5500`; as origens `http://127.0.0.1:5500` e `http://localhost:5500` são permitidas pelo CORS do backend. Não abra a página como `file://`, pois essa origem não é permitida. O frontend chama `http://localhost:8080/api` e não usa dados mockados por padrão.
+
+### Teste rápido ponta a ponta
+1. Inicie o PostgreSQL e crie o banco vazio `carona_solidaria` (por exemplo, com `psql -U postgres -h localhost -c "CREATE DATABASE carona_solidaria;"`).
+2. Inicie o backend com as variáveis de ambiente acima e aguarde o Spring Boot terminar a inicialização.
+3. Abra o frontend pelo Live Server e cadastre um usuário Senac com e-mail institucional válido.
+4. Publique uma oferta. Em outro perfil de navegador, cadastre um segundo usuário, busque a oferta e solicite uma vaga.
+5. Volte ao perfil do motorista e aceite a solicitação; atualize a página do passageiro para ver a confirmação. Abra a conversa por qualquer um dos lados e envie uma mensagem.
+6. Na tela **Minhas caronas** do motorista, teste cancelar a solicitação ou a oferta. O estado atualizado deve continuar após recarregar, pois fica armazenado no PostgreSQL.
+
+O frontend guarda o ID do usuário selecionado no `localStorage` daquele navegador; use perfis separados para testar os dois usuários. Isso não é autenticação e não deve ser considerado uma proteção de segurança em produção.
 
 ## CI/CD
 
