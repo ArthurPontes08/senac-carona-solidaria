@@ -2,6 +2,8 @@ package com.senac.carona.dto;
 
 import com.senac.carona.model.Carona;
 
+import java.util.Locale;
+
 public class OfertaResponse {
 
     private final Long id;
@@ -13,6 +15,7 @@ public class OfertaResponse {
     private final int seats;
     private final String ref;
     private final String summary;
+    private final String status;
     private final Integer match;
     private final boolean mine;
 
@@ -26,6 +29,7 @@ public class OfertaResponse {
         this.seats = carona.getVagasDisponiveis();
         this.ref = carona.getPontoEncontro();
         this.summary = carona.getOrigem() + " → " + carona.getDestino();
+        this.status = mapStatus(carona.getStatus());
         this.match = match;
         this.mine = mine;
     }
@@ -42,6 +46,18 @@ public class OfertaResponse {
         return new OfertaResponse(carona, null, mine);
     }
 
+    private static String mapStatus(String status) {
+        if (status == null) {
+            return null;
+        }
+        return switch (status.trim().toUpperCase(Locale.ROOT)) {
+            case "ABERTA" -> "open";
+            case "LOTADA" -> "full";
+            case "CANCELADA" -> "cancelled";
+            default -> status.toLowerCase(Locale.ROOT);
+        };
+    }
+
     public Long getId() { return id; }
     public String getDriver() { return driver; }
     public String getOrigin() { return origin; }
@@ -51,6 +67,7 @@ public class OfertaResponse {
     public int getSeats() { return seats; }
     public String getRef() { return ref; }
     public String getSummary() { return summary; }
+    public String getStatus() { return status; }
     public Integer getMatch() { return match; }
     public boolean isMine() { return mine; }
 }
