@@ -23,6 +23,16 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
+    void devolve401ParaCredenciaisInvalidas() {
+        ApiExceptionHandler handler = new ApiExceptionHandler();
+
+        ResponseEntity<?> response = handler.handleInvalidCredentials(
+                new CredenciaisInvalidasException());
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
     void devolve409SemDetalhesInternosParaConflitoDeDados() {
         ApiExceptionHandler handler = new ApiExceptionHandler();
 

@@ -6,6 +6,7 @@ import com.senac.carona.dto.OfertaResponse;
 import com.senac.carona.dto.RecomendacaoCaronaResponse;
 import com.senac.carona.dto.SolicitacaoResponse;
 import com.senac.carona.exception.AcessoNegadoException;
+import com.senac.carona.exception.CredenciaisInvalidasException;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -48,7 +49,7 @@ public class CaronaService {
     }
 
     @Transactional
-    public Usuario cadastrarUsuario(Usuario usuario) {
+    public Usuario cadastrarUsuario(Usuario usuario, String senha) {
         if (usuario == null) {
             throw new IllegalArgumentException("Os dados do usuário são obrigatórios.");
         }
@@ -58,6 +59,7 @@ public class CaronaService {
         if (usuario.getNome().trim().length() > 120) {
             throw new IllegalArgumentException("Nome deve ter no máximo 120 caracteres.");
         }
+        validarSenha(senha);
         if (usuario.getBairroOrigem() == null || usuario.getBairroOrigem().isBlank()) {
             throw new IllegalArgumentException("Bairro/região de origem é obrigatório.");
         }
@@ -90,10 +92,28 @@ public class CaronaService {
         usuario.setNome(usuario.getNome().trim());
         usuario.setBairroOrigem(usuario.getBairroOrigem().trim());
         usuario.setTelefone(telefone == null || telefone.isBlank() ? null : telefone.trim());
+        usuario.setSenhaHash(PasswordHasher.hash(senha));
         usuario.setId(null);
         usuario.setTipoVinculo(vinculo);
         usuario.setPerfil(perfil);
         return usuarioRepository.save(usuario);
+    }
+
+    @Transactional(readOnly = true)
+    public Usuario autenticarUsuario(String email, String senha) {
+        String emailNormalizado = email == null ? "" : email.trim();
+        Usuario usuario = usuarioRepository.findByEmailSenacIgnoreCase(emailNormalizado)
+                .orElseThrow(CredenciaisInvalidasException::new);
+        if (!PasswordHasher.matches(senha, usuario.getSenhaHash())) {
+            throw new CredenciaisInvalidasException();
+        }
+        return usuario;
+    }
+
+    private void validarSenha(String senha) {
+        if (senha == null || senha.length() < 8 || senha.length() > 128) {
+            throw new IllegalArgumentException("A senha deve ter entre 8 e 128 caracteres.");
+        }
     }
 
     @Transactional(readOnly = true)

@@ -47,6 +47,7 @@
               <div class="menu" id="profileMenu" hidden>
                 <p id="profileName" class="menu-name"></p>
                 <button class="menu-item" id="editProfile">Editar perfil</button>
+                <button class="menu-item" id="logout">Sair da conta</button>
                 <button class="menu-item" id="simError">Simular falha de conexão</button>
                 <button class="menu-item" id="resetDemo">Reiniciar demonstração</button>
               </div>
@@ -99,6 +100,25 @@
       </div>
     </div>
 
+    <dialog id="dlg-login" class="modal modal-sm" aria-labelledby="t-login">
+      <form id="loginForm" novalidate>
+        <h2 id="t-login">Entre na comunidade</h2>
+        <p class="muted">Acesse sua conta para encontrar ou oferecer caronas.</p>
+        <label>
+          E-mail institucional
+          <input name="email" type="email" required autocomplete="email" placeholder="nome@senacrs.edu.br" />
+          <span class="err"></span>
+        </label>
+        <label>
+          Senha
+          <input name="password" type="password" required autocomplete="current-password" />
+          <span class="err"></span>
+        </label>
+        <div class="actions"><button class="btn btn-primary" type="submit">Entrar</button></div>
+        <p class="auth-switch">Ainda não tem uma conta? <button class="link-button" type="button" data-auth-view="register">Cadastre-se</button></p>
+      </form>
+    </dialog>
+
     <dialog id="dlg-onboard" class="modal" aria-labelledby="t-onboard">
       <form id="onboardForm" novalidate>
         <h2 id="t-onboard">Bem-vindo(a) à Carona Solidária</h2>
@@ -112,6 +132,11 @@
         <label>
           E-mail institucional
           <input name="email" type="email" required placeholder="nome@senacrs.edu.br" />
+          <span class="err"></span>
+        </label>
+        <label>
+          Senha
+          <input name="password" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
           <span class="err"></span>
         </label>
         <label>
@@ -131,7 +156,8 @@
           Destino
           <input value="Campus Senac Canoas" disabled />
         </label>
-        <div class="actions"><button class="btn btn-primary" type="submit">Entrar na comunidade</button></div>
+        <div class="actions"><button class="btn btn-primary" type="submit">Criar conta</button></div>
+        <p class="auth-switch">Já tem uma conta? <button class="link-button" type="button" data-auth-view="login">Entre</button></p>
       </form>
     </dialog>
 

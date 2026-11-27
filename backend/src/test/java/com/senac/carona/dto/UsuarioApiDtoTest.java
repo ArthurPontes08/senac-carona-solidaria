@@ -54,9 +54,11 @@ class UsuarioApiDtoTest {
     void respostaUsaCamposDoContratoDoFrontendSemExporTelefone() throws Exception {
         Usuario usuario = new Usuario(7L, "Joana", "joana@senacrs.edu.br",
                 "ALUNO", "BUSCA", "Centro", "(51) 90000-0000");
+        usuario.setSenhaHash("pbkdf2$210000$c2FsdA==$aGFzaA==");
 
         UsuarioResponse response = UsuarioResponse.from(usuario);
         String json = new ObjectMapper().writeValueAsString(response);
+        String entityJson = new ObjectMapper().writeValueAsString(usuario);
 
         assertEquals(7L, response.getId());
         assertEquals("Joana", response.getName());
@@ -66,5 +68,7 @@ class UsuarioApiDtoTest {
         assertTrue(json.contains("\"name\":\"Joana\""));
         assertFalse(json.contains("telefone"));
         assertFalse(json.contains("phone"));
+        assertFalse(entityJson.contains("senha_hash"));
+        assertFalse(entityJson.contains("pbkdf2$"));
     }
 }

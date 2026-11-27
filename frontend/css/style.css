@@ -465,6 +465,20 @@ input:disabled {
   flex-direction: column;
   gap: var(--s3);
 }
+.auth-switch {
+  text-align: center;
+  color: var(--muted);
+}
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--brand-d);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
 .row2 {
   display: grid;
   grid-template-columns: 1fr 1fr;

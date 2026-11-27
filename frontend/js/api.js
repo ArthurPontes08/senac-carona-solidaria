@@ -74,6 +74,13 @@ const Api = (() => {
       localStorage.removeItem("cs-session");
       db = seed();
     },
+    logout() {
+      localStorage.removeItem("cs-session");
+      if (CONFIG.MOCK) {
+        db.me = null;
+        save();
+      }
+    },
     clearBenchmark() {
       if (!CONFIG.MOCK) throw new Error("O reset do benchmark só está disponível no modo de demonstração local.");
       db = { me: db.me, offers: [], requests: [], chats: [] };
@@ -82,7 +89,18 @@ const Api = (() => {
     },
     session: currentUser,
     register: async (u) => {
-      const user = await call("/usuarios", { method: "POST", body: JSON.stringify(u) }, () => (db.me = { ...u, id: Date.now(), photo: "" }));
+      const user = await call("/usuarios", { method: "POST", body: JSON.stringify(u) }, () => {
+        const profile = { ...u };
+        delete profile.password;
+        db.me = { ...profile, id: Date.now(), photo: "" };
+        return db.me;
+      });
+      return saveSession(user);
+    },
+    login: async (credentials) => {
+      const user = await call("/usuarios/login", { method: "POST", body: JSON.stringify(credentials) }, () => {
+        throw new Error("Login não disponível no modo de demonstração.");
+      });
       return saveSession(user);
     },
     updateProfile: (profile) =>

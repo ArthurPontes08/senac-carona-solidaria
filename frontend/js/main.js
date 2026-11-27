@@ -123,7 +123,10 @@ function renderRides() {
             .filter((r) => r.offerId === o.id && r.status === "confirmed")
             .map((r) => r.who)
             .join(", ") || "Ninguém ainda";
-        const chats = requests.filter((r) => r.offerId === o.id && r.status === "confirmed").map((r) => chatButton(r.id)).join("");
+        const chats = requests
+          .filter((r) => r.offerId === o.id && r.status === "confirmed")
+          .map((r) => chatButton(r.id))
+          .join("");
         const status = o.status || (o.seats ? "open" : "full");
         const cancel = status === "cancelled" ? "" : `<button class="btn btn-danger" data-cancel-offer="${o.id}">Cancelar oferta</button>`;
         return `<tr><td>${esc(o.origin)}</td><td>Senac Canoas</td><td>${fmtDate(o.date)}</td><td>${o.time}</td><td>${esc(p)}</td><td>${o.seats}</td><td>${badge(status)}</td><td><div class="table-actions">${chats}${cancel}</div></td></tr>`;
@@ -201,13 +204,7 @@ function renderChat() {
   const { partner, ride, messages } = State.chat;
   $("#chatPartner").textContent = partner;
   $("#chatRide").textContent = ride;
-  $("#chatMessages").innerHTML = messages.length
-    ? messages
-        .map(
-          (m) => `<article class="chat-message${m.mine ? " mine" : ""}"><p>${esc(m.text)}</p><span class="chat-message-meta">${esc(m.sender)} · ${new Date(m.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span></article>`,
-        )
-        .join("")
-    : '<p class="muted">Conversa iniciada. Envie uma mensagem para combinar os detalhes da carona.</p>';
+  $("#chatMessages").innerHTML = messages.length ? messages.map((m) => `<article class="chat-message${m.mine ? " mine" : ""}"><p>${esc(m.text)}</p><span class="chat-message-meta">${esc(m.sender)} · ${new Date(m.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span></article>`).join("") : '<p class="muted">Conversa iniciada. Envie uma mensagem para combinar os detalhes da carona.</p>';
   $("#chatMessages").scrollTop = $("#chatMessages").scrollHeight;
 }
 
@@ -239,6 +236,13 @@ function bind() {
   document.addEventListener("click", async (e) => {
     const t = e.target.closest("button");
     if (!t) return;
+    if (t.dataset.authView) {
+      const login = t.dataset.authView === "login";
+      (login ? $("#dlg-onboard") : $("#dlg-login")).close();
+      const dialog = login ? $("#dlg-login") : $("#dlg-onboard");
+      dialog.showModal();
+      dialog.querySelector('input[type="email"], input[name="name"]').focus();
+    }
     if (t.dataset.view) go(t.dataset.view);
     if (t.dataset.go) go(t.dataset.go);
     if (t.dataset.open) {
@@ -396,16 +400,13 @@ function bind() {
     const el = e.target.elements;
     const email = el.email.value.trim();
     const isSenacEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]*senac[A-Za-z0-9.-]*\.[A-Za-z]{2,}$/i.test(email);
-    const ok = [
-      req(el.name, "Informe seu nome."),
-      UI.field(el.email, isSenacEmail ? "" : "Use um e-mail institucional da comunidade Senac."),
-      req(el.region, "Informe seu bairro de origem."),
-    ].every(Boolean);
+    const ok = [req(el.name, "Informe seu nome."), UI.field(el.email, isSenacEmail ? "" : "Use um e-mail institucional da comunidade Senac."), req(el.region, "Informe seu bairro de origem.")].every(Boolean);
     if (!ok) return;
     $("#onboardError").hidden = true;
     try {
       const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email, role: el.role.value, region: el.region.value }));
       $("#dlg-onboard").close();
+      $("#onboardForm").reset();
       setUser(u);
       UI.toast("Cadastro concluído. Bem-vindo(a)!");
       load();
@@ -438,6 +439,10 @@ function bind() {
     pb.setAttribute("aria-expanded", "false");
     $("#dlg-profile").showModal();
     $("#profileNameInput").focus();
+  });
+  $("#logout").addEventListener("click", () => {
+    Api.logout();
+    location.reload();
   });
   $("#profileNameInput").addEventListener("input", (e) => {
     const name = e.currentTarget.value.trim() || "Seu nome";
@@ -524,7 +529,15 @@ function renderAvatar(element, user) {
     element.replaceChildren(image);
     return;
   }
-  const initials = String(user.name || "?").trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "?";
+  const initials =
+    String(user.name || "?")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase() || "?";
   element.textContent = initials;
 }
 function imageToDataUrl(file) {
@@ -577,4 +590,7 @@ const u = Api.session();
 if (u) {
   setUser(u);
   load();
-} else $("#dlg-onboard").showModal();
+} else {
+  $("#dlg-login").showModal();
+  $("#loginForm").elements.email.focus();
+}
