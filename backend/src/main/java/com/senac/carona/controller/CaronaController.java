@@ -3,6 +3,7 @@ package com.senac.carona.controller;
 import com.senac.carona.dto.AtualizarPerfilRequest;
 import com.senac.carona.dto.CadastroUsuarioRequest;
 import com.senac.carona.dto.CriarOfertaRequest;
+import com.senac.carona.dto.LoginUsuarioRequest;
 import com.senac.carona.dto.MinhaContaSnapshotResponse;
 import com.senac.carona.dto.MinhasCaronasResponse;
 import com.senac.carona.dto.OfertaResponse;
@@ -36,8 +37,15 @@ public class CaronaController {
     @PostMapping("/usuarios")
     public ResponseEntity<UsuarioResponse> cadastrarUsuario(
             @RequestBody CadastroUsuarioRequest request) {
-        Usuario salvo = caronaService.cadastrarUsuario(request.toUsuario());
+        Usuario salvo = caronaService.cadastrarUsuario(request.toUsuario(), request.getPassword());
         return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.from(salvo));
+    }
+
+    @PostMapping("/usuarios/login")
+    public ResponseEntity<UsuarioResponse> autenticarUsuario(
+            @RequestBody LoginUsuarioRequest request) {
+        Usuario usuario = caronaService.autenticarUsuario(request.getEmail(), request.getPassword());
+        return ResponseEntity.ok(UsuarioResponse.from(usuario));
     }
 
     @GetMapping("/usuarios")

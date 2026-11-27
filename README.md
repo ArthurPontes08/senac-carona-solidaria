@@ -66,13 +66,15 @@ The user registration endpoint accepts an omitted or blank phone number and stor
 
 `SolicitacaoCaronaRepository` provides JPA operations and queries for ride requests by ride, passenger, and status, and is used by `CaronaService`. Seat-changing operations run in transactions and lock the corresponding ride row. The backend no longer seeds demo users and rides at startup; the front end still uses a local mock by default, and its request flow still needs to send the passenger ID.
 
-`POST /api/usuarios` accepts the front-end fields `name`, `email`, `role` (`both`, `driver`, or `rider`), and `region`; it responds with `id`, `name`, `email`, `role`, and `region`. Portuguese request field names are also accepted for compatibility. Phone is optional and is not included in user responses or listings.
+When the site opens without a session, users first see the login modal and can switch to registration. `POST /api/usuarios` accepts `name`, `email`, `password`, `role` (`both`, `driver`, or `rider`), and `region`; passwords from 8 to 128 characters are stored as PBKDF2 hashes. `POST /api/usuarios/login` accepts `email` and `password` and returns the user's public data; invalid credentials return HTTP 401. Hibernate adds the `senha_hash` column, but existing users do not have a password yet, so a password must be provisioned for those accounts before their first login. Passwords are never included in responses.
+
+Portuguese registration field names are also accepted for compatibility. Phone is optional and is not included in user responses or listings.
 
 `GET /api/ofertas` accepts optional `data`, `regiao`, `horario` (`HH:mm`, earliest departure), and `vagas` (minimum available seats) filters. It returns offers with front-end field names such as `driver`, `origin`, `destination`, `date`, `time`, `seats`, `ref`, `summary`, and `match`. `POST /api/ofertas` accepts `driverId`, `origin`, `date`, `time`, `seats`, `ref`, and optional `notes`; `destination` defaults to `Campus Senac Canoas`. `driverId` is required because the backend cannot infer the current user without authentication.
 
 `POST /api/ofertas/{id}/solicitacoes` requires `passengerId` and accepts an optional `msg` of up to 140 characters. The request message is stored in the nullable `mensagem VARCHAR(140)` column of `solicitacoes_carona`. The database schema/migration must include this column; Hibernate `update` can create it in local development, but is not a substitute for a versioned migration.
 
-`GET /api/minhas-caronas?userId={id}` returns the front-end snapshot shape with `offers` and `requests`, including English status values and `mine` flags. The front end must pass the registered user's ID. No authentication is implemented, so this client-supplied ID is context only and does not verify identity.
+`GET /api/minhas-caronas?userId={id}` returns the front-end snapshot shape with `offers` and `requests`, including English status values and `mine` flags. Login verifies the email and password, but does not issue a token or protect the other routes; this client-supplied ID is context only and does not verify identity.
 
 `PATCH /api/solicitacoes/{id}` accepts `{"userId": 7, "action": "accept"}` (also `refuse` or `cancel`). Only the ride's driver can accept or refuse; either the driver or the requesting passenger can cancel. The legacy `/responder` route requires `motoristaId`. These IDs are ownership checks within the API, not authentication.
 

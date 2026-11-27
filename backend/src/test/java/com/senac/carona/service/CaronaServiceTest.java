@@ -2,6 +2,7 @@ package com.senac.carona.service;
 
 import com.senac.carona.dto.MinhaContaSnapshotResponse;
 import com.senac.carona.exception.AcessoNegadoException;
+import com.senac.carona.exception.CredenciaisInvalidasException;
 import com.senac.carona.model.Carona;
 import com.senac.carona.model.SolicitacaoCarona;
 import com.senac.carona.model.Usuario;
@@ -47,7 +48,7 @@ class CaronaServiceTest {
         when(usuarioRepository.existsByEmailSenacIgnoreCase(email)).thenReturn(true);
         Usuario duplicado = usuario(null, "Outro Usuário", email, "BUSCA");
 
-        assertThrows(IllegalArgumentException.class, () -> service.cadastrarUsuario(duplicado));
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrarUsuario(duplicado, "senhaSegura123"));
         verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 
@@ -63,11 +64,35 @@ class CaronaServiceTest {
             return salvo;
         });
 
-        Usuario salvo = service.cadastrarUsuario(novoUsuario);
+        Usuario salvo = service.cadastrarUsuario(novoUsuario, "senhaSegura123");
 
         assertEquals(7L, salvo.getId());
         assertEquals("Arthur Pontes", salvo.getNome());
         assertEquals("arthur.pontes@senacrs.com.br", salvo.getEmailSenac());
+        assertTrue(PasswordHasher.matches("senhaSegura123", salvo.getSenhaHash()));
+        assertFalse(salvo.getSenhaHash().contains("senhaSegura123"));
+    }
+
+    @Test
+    void autenticaUsuarioComEmailSemDiferenciarMaiusculas() {
+        Usuario existente = usuario(7L, "Arthur Pontes", "arthur.pontes@senacrs.com.br", "AMBOS");
+        existente.setSenhaHash(PasswordHasher.hash("senhaSegura123"));
+        when(usuarioRepository.findByEmailSenacIgnoreCase("ARTHUR.PONTES@SENACRS.COM.BR"))
+                .thenReturn(Optional.of(existente));
+
+        Usuario autenticado = service.autenticarUsuario(" ARTHUR.PONTES@SENACRS.COM.BR ", "senhaSegura123");
+
+        assertEquals(7L, autenticado.getId());
+    }
+
+    @Test
+    void rejeitaSenhaIncorretaEContaLegadaSemSenha() {
+        Usuario existente = usuario(7L, "Arthur Pontes", "arthur.pontes@senacrs.com.br", "AMBOS");
+        when(usuarioRepository.findByEmailSenacIgnoreCase("arthur.pontes@senacrs.com.br"))
+                .thenReturn(Optional.of(existente));
+
+        assertThrows(CredenciaisInvalidasException.class,
+                () -> service.autenticarUsuario("arthur.pontes@senacrs.com.br", "senhaSegura123"));
     }
 
     @Test
@@ -104,7 +129,7 @@ class CaronaServiceTest {
         when(usuarioRepository.save(any(Usuario.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        Usuario salvo = service.cadastrarUsuario(novoUsuario);
+        Usuario salvo = service.cadastrarUsuario(novoUsuario, "senhaSegura123");
 
         assertNull(salvo.getTelefone());
         verify(usuarioRepository).save(novoUsuario);
@@ -117,7 +142,17 @@ class CaronaServiceTest {
         when(usuarioRepository.existsByEmailSenacIgnoreCase("arthur.pontes@senacrs.com.br"))
                 .thenReturn(false);
 
-        assertThrows(IllegalArgumentException.class, () -> service.cadastrarUsuario(novoUsuario));
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrarUsuario(novoUsuario, "senhaSegura123"));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    void rejeitaSenhaCurtaNoCadastro() {
+        Usuario novoUsuario = usuario(null, "Arthur Pontes", "arthur.pontes@senacrs.com.br", "AMBOS");
+        when(usuarioRepository.existsByEmailSenacIgnoreCase("arthur.pontes@senacrs.com.br"))
+                .thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrarUsuario(novoUsuario, "curta"));
         verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 

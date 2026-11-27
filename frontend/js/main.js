@@ -237,6 +237,13 @@ function bind() {
   document.addEventListener("click", async (e) => {
     const t = e.target.closest("button");
     if (!t) return;
+    if (t.dataset.authView) {
+      const login = t.dataset.authView === "login";
+      (login ? $("#dlg-onboard") : $("#dlg-login")).close();
+      const dialog = login ? $("#dlg-login") : $("#dlg-onboard");
+      dialog.showModal();
+      dialog.querySelector('input[type="email"], input[name="name"]').focus();
+    }
     if (t.dataset.view) go(t.dataset.view);
     if (t.dataset.go) go(t.dataset.go);
     if (t.dataset.open) {
@@ -387,11 +394,17 @@ function bind() {
   $("#onboardForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const el = e.target.elements;
-    const ok = [req(el.name, "Informe seu nome."), UI.field(el.email, /^\S+@\S+\.\S+$/.test(el.email.value) ? "" : "Use seu e-mail institucional."), req(el.region, "Informe seu bairro de origem.")].every(Boolean);
+    const ok = [
+      req(el.name, "Informe seu nome."),
+      UI.field(el.email, /^\S+@\S+\.\S+$/.test(el.email.value) ? "" : "Use seu e-mail institucional."),
+      UI.field(el.password, el.password.value.length >= 8 && el.password.value.length <= 128 ? "" : "Use uma senha de 8 a 128 caracteres."),
+      req(el.region, "Informe seu bairro de origem."),
+    ].every(Boolean);
     if (!ok) return;
     try {
-      const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email: el.email.value, role: el.role.value, region: el.region.value }));
+      const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email: el.email.value, password: el.password.value, role: el.role.value, region: el.region.value }));
       $("#dlg-onboard").close();
+      $("#onboardForm").reset();
       setUser(u);
       UI.toast("Cadastro concluído. Bem-vindo(a)!");
       load();
@@ -399,6 +412,25 @@ function bind() {
       UI.toast(failureMessage(error, "Não foi possível concluir o cadastro."), true);
     }
   });
+  $("#loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const el = e.target.elements;
+    const ok = [
+      UI.field(el.email, /^\S+@\S+\.\S+$/.test(el.email.value) ? "" : "Informe um e-mail válido."),
+      req(el.password, "Informe sua senha."),
+    ].every(Boolean);
+    if (!ok) return;
+    try {
+      const user = await UI.busy(e.submitter, () => Api.login({ email: el.email.value, password: el.password.value }));
+      $("#dlg-login").close();
+      $("#loginForm").reset();
+      setUser(user);
+      load();
+    } catch (error) {
+      UI.toast(failureMessage(error, "Não foi possível entrar. Verifique sua conexão e tente novamente."), true);
+    }
+  });
+  $("#dlg-login").addEventListener("cancel", (e) => e.preventDefault());
   $("#dlg-onboard").addEventListener("cancel", (e) => e.preventDefault());
   const pb = $("#profileBtn");
   pb.addEventListener("click", () => {
@@ -418,6 +450,10 @@ function bind() {
     pb.setAttribute("aria-expanded", "false");
     $("#dlg-profile").showModal();
     $("#profileNameInput").focus();
+  });
+  $("#logout").addEventListener("click", () => {
+    Api.logout();
+    location.reload();
   });
   $("#profileNameInput").addEventListener("input", (e) => {
     const name = e.currentTarget.value.trim() || "Seu nome";
@@ -557,4 +593,7 @@ const u = Api.session();
 if (u) {
   setUser(u);
   load();
-} else $("#dlg-onboard").showModal();
+} else {
+  $("#dlg-login").showModal();
+  $("#loginForm").elements.email.focus();
+}

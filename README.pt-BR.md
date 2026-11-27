@@ -54,13 +54,15 @@ O endpoint de cadastro aceita telefone ausente ou em branco e o armazena como `n
 
 O `SolicitacaoCaronaRepository` oferece operações JPA e consultas de solicitações por carona, passageiro e status, e é usado pelo `CaronaService`. As operações que alteram vagas rodam em transações e bloqueiam a linha da carona correspondente. O backend não cria mais usuários e caronas de demonstração ao iniciar; o front-end continua usando um mock local por padrão, e ainda precisa enviar o ID do passageiro ao solicitar uma vaga.
 
-`POST /api/usuarios` aceita os campos do front-end `name`, `email`, `role` (`both`, `driver` ou `rider`) e `region`; a resposta contém `id`, `name`, `email`, `role` e `region`. Os nomes dos campos em português também são aceitos para compatibilidade. O telefone é opcional e não aparece nas respostas nem na listagem de usuários.
+Ao abrir o site sem sessão, o usuário vê primeiro o modal de login e pode alternar para o cadastro. `POST /api/usuarios` aceita `name`, `email`, `password`, `role` (`both`, `driver` ou `rider`) e `region`; senhas de 8 a 128 caracteres são armazenadas com hash PBKDF2. `POST /api/usuarios/login` recebe `email` e `password` e retorna os dados públicos do usuário; credenciais inválidas retornam HTTP 401. O campo `senha_hash` é adicionado pelo Hibernate, mas usuários já existentes não têm senha: é necessário provisionar uma senha para essas contas antes do primeiro login. Senhas nunca são incluídas nas respostas.
+
+Os nomes dos campos em português também são aceitos no cadastro para compatibilidade. O telefone é opcional e não aparece nas respostas nem na listagem de usuários.
 
 `GET /api/ofertas` aceita os filtros opcionais `data`, `regiao`, `horario` (`HH:mm`, horário mínimo de saída) e `vagas` (mínimo de vagas disponíveis). A resposta usa campos do front-end como `driver`, `origin`, `destination`, `date`, `time`, `seats`, `ref`, `summary` e `match`. `POST /api/ofertas` recebe `driverId`, `origin`, `date`, `time`, `seats`, `ref` e `notes` opcional; se `destination` não for enviado, usa `Campus Senac Canoas`. `driverId` é obrigatório porque o backend não consegue inferir o usuário atual sem autenticação.
 
 `POST /api/ofertas/{id}/solicitacoes` exige `passengerId` e aceita `msg` opcional com até 140 caracteres. A mensagem é salva na coluna anulável `mensagem VARCHAR(140)` da tabela `solicitacoes_carona`. O schema/migration do banco precisa incluir essa coluna; o `update` do Hibernate pode criá-la no desenvolvimento local, mas não substitui uma migration versionada.
 
-`GET /api/minhas-caronas?userId={id}` retorna o formato de snapshot do front-end, com `offers` e `requests`, estados em inglês e indicadores `mine`. O front-end precisa enviar o ID do usuário cadastrado. Como não há autenticação, esse ID enviado pelo cliente serve apenas como contexto e não comprova a identidade.
+`GET /api/minhas-caronas?userId={id}` retorna o formato de snapshot do front-end, com `offers` e `requests`, estados em inglês e indicadores `mine`. O login verifica e-mail e senha, mas ainda não emite token nem protege as demais rotas; o ID enviado pelo cliente serve apenas como contexto e não comprova a identidade.
 
 `PATCH /api/solicitacoes/{id}` recebe `{"userId": 7, "action": "accept"}` (também aceita `refuse` ou `cancel`). Somente o motorista pode aceitar ou recusar; o motorista ou o passageiro solicitante pode cancelar. A rota legada `/responder` exige `motoristaId`. Esses IDs são verificações de propriedade dentro da API, não autenticação.
 

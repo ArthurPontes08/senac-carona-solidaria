@@ -1,5 +1,7 @@
 package com.senac.carona.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -15,6 +17,9 @@ public class Usuario {
 
     @Column(name = "email_senac", nullable = false, unique = true)
     private String emailSenac;
+
+    @Column(name = "senha_hash", length = 255)
+    private String senhaHash;
 
     @Column(name = "tipo_vinculo")
     private String tipoVinculo; // ALUNO ou FUNCIONARIO
@@ -53,6 +58,10 @@ public class Usuario {
 
     public String getEmailSenac() { return emailSenac; }
     public void setEmailSenac(String emailSenac) { this.emailSenac = emailSenac; }
+
+    @JsonIgnore
+    public String getSenhaHash() { return senhaHash; }
+    public void setSenhaHash(String senhaHash) { this.senhaHash = senhaHash; }
 
     public String getTipoVinculo() { return tipoVinculo; }
     public void setTipoVinculo(String tipoVinculo) { this.tipoVinculo = tipoVinculo; }
