@@ -387,17 +387,30 @@ function bind() {
   $("#onboardForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const el = e.target.elements;
-    const ok = [req(el.name, "Informe seu nome."), UI.field(el.email, /^\S+@\S+\.\S+$/.test(el.email.value) ? "" : "Use seu e-mail institucional."), req(el.region, "Informe seu bairro de origem.")].every(Boolean);
+    const email = el.email.value.trim();
+    const isSenacEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]*senac[A-Za-z0-9.-]*\.[A-Za-z]{2,}$/i.test(email);
+    const ok = [
+      req(el.name, "Informe seu nome."),
+      UI.field(el.email, isSenacEmail ? "" : "Use um e-mail institucional da comunidade Senac."),
+      req(el.region, "Informe seu bairro de origem."),
+    ].every(Boolean);
     if (!ok) return;
+    $("#onboardError").hidden = true;
     try {
-      const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email: el.email.value, role: el.role.value, region: el.region.value }));
+      const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email, role: el.role.value, region: el.region.value }));
       $("#dlg-onboard").close();
       setUser(u);
       UI.toast("Cadastro concluído. Bem-vindo(a)!");
       load();
     } catch (error) {
-      UI.toast(failureMessage(error, "Não foi possível concluir o cadastro."), true);
+      const message = failureMessage(error, "Não foi possível concluir o cadastro.");
+      $("#onboardError").textContent = message;
+      $("#onboardError").hidden = false;
     }
+  });
+  $("#onboardForm").addEventListener("input", () => {
+    $("#onboardError").textContent = "";
+    $("#onboardError").hidden = true;
   });
   $("#dlg-onboard").addEventListener("cancel", (e) => e.preventDefault());
   const pb = $("#profileBtn");
