@@ -146,7 +146,7 @@ export DB_SHOW_SQL="false"
 ./mvnw spring-boot:run
 ```
 
-The API will be available at `http://localhost:8080`. `DB_DDL_AUTO` can override the Hibernate schema mode; it defaults to `update`. `DB_SHOW_SQL` controls SQL logging and defaults to `false`.
+The API will be available at `http://localhost:8080` by default. The server uses the `PORT` environment variable when provided (as on Render). `DB_DDL_AUTO` can override the Hibernate schema mode; it defaults to `update`. `DB_SHOW_SQL` controls SQL logging and defaults to `false`.
 
 On Windows, make sure the PostgreSQL service is running (for example, in **Services**) and create the database once with `psql -U postgres -h localhost -p 5432 -c "CREATE DATABASE carona_solidaria;"`, using the correct PostgreSQL account. The unit tests use mocked repositories and do not require a running database. Run them from `backend/` with `.\mvnw.cmd test` on Windows or `./mvnw test` on Linux/macOS; they do not replace a live PostgreSQL integration test.
 
