@@ -28,13 +28,10 @@ jobs:
       - name: Permissão Maven Wrapper
         run: chmod +x mvnw
 
-      - name: 1. Build (Compilação)
+      - name: Compilação
         run: ./mvnw clean compile
 
-      - name: 2. Lint (Qualidade de código)
-        run: ./mvnw checkstyle:check || echo "Checkstyle será ativado no pom.xml"
-
-      - name: 3. Testes Automatizados
+      - name: Testes automatizados
         run: ./mvnw test
 
   frontend-ci:
@@ -53,11 +50,9 @@ jobs:
         with:
           node-version: '20'
 
-      - name: 1. Build / Verificação de arquivos
-        run: test -f index.html && echo "index.html encontrado!"
-
-      - name: 2. Lint (ESLint / HTMLHint)
-        run: echo "Lint do frontend pronto para configuração"
-
-      - name: 3. Testes Automatizados
-        run: echo "Testes do frontend prontos para configuração"
+      - name: Verificar arquivos e sintaxe JavaScript
+        run: |
+          test -f index.html
+          node --check js/api.js
+          node --check js/main.js
+          node --test
