@@ -1,7 +1,16 @@
 package com.senac.carona.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "solicitacoes_carona")
@@ -18,6 +27,7 @@ public class SolicitacaoCarona {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "carona_id", insertable = false, updatable = false,
             foreignKey = @ForeignKey(name = "fk_solicitacoes_carona"))
+    @SuppressWarnings("unused")
     private Carona carona;
 
     @Column(name = "passageiro_id", nullable = false)
@@ -27,6 +37,7 @@ public class SolicitacaoCarona {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "passageiro_id", insertable = false, updatable = false,
             foreignKey = @ForeignKey(name = "fk_solicitacoes_passageiro"))
+    @SuppressWarnings("unused")
     private Usuario passageiro;
 
     @Column(name = "passageiro_nome", nullable = false)
