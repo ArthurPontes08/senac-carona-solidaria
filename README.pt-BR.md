@@ -153,7 +153,7 @@ O frontend guarda o ID do usuário selecionado no `localStorage` daquele navegad
 
 ## CI/CD
 
-O repositório utiliza **GitHub Actions** (`.github/workflows/ci.yml`) em todo Pull Request e push na `main`. O job do backend executa compilação limpa pelo Maven e os testes unitários. O job do front-end verifica `index.html` e a sintaxe de `js/api.js` e `js/main.js` com Node.js. Ainda não há testes de comportamento do front-end nem teste de integração conectado ao banco de dados.
+O repositório utiliza **GitHub Actions** (`.github/workflows/ci.yml`) em todo Pull Request e push na `main`. O job do backend executa compilação limpa pelo Maven e os testes unitários. O job do front-end verifica `index.html`, a sintaxe JavaScript e os testes do Node.js em `frontend/tests`. Esses testes não substituem um fluxo ponta a ponta no navegador nem um teste de integração conectado ao banco de dados.
 
 ## Conventional Commits
 

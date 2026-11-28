@@ -165,7 +165,7 @@ The front end stores the selected user ID in that browser's `localStorage`; use 
 
 ## CI/CD
 
-The repository uses **GitHub Actions** (`.github/workflows/ci.yml`) on every Pull Request and push to `main`. The backend job runs a clean Maven compile and unit tests. The front-end job verifies `index.html` and checks the syntax of `js/api.js` and `js/main.js` with Node.js. There is not yet a front-end behavior test suite or a database-backed integration test.
+The repository uses **GitHub Actions** (`.github/workflows/ci.yml`) on every Pull Request and push to `main`. The backend job runs a clean Maven compile and unit tests. The front-end job verifies `index.html`, checks JavaScript syntax, and runs Node's built-in tests under `frontend/tests`. These tests do not replace a browser end-to-end suite or a database-backed integration test.
 
 ## Conventional Commits
 
