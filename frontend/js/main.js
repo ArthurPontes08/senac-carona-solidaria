@@ -400,11 +400,16 @@ function bind() {
     const el = e.target.elements;
     const email = el.email.value.trim();
     const isSenacEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]*senac[A-Za-z0-9.-]*\.[A-Za-z]{2,}$/i.test(email);
-    const ok = [req(el.name, "Informe seu nome."), UI.field(el.email, isSenacEmail ? "" : "Use um e-mail institucional da comunidade Senac."), req(el.region, "Informe seu bairro de origem.")].every(Boolean);
+    const ok = [
+      req(el.name, "Informe seu nome."),
+      UI.field(el.email, isSenacEmail ? "" : "Use um e-mail institucional da comunidade Senac."),
+      UI.field(el.password, el.password.value.length >= 8 && el.password.value.length <= 128 ? "" : "Use uma senha de 8 a 128 caracteres."),
+      req(el.region, "Informe seu bairro de origem."),
+    ].every(Boolean);
     if (!ok) return;
     $("#onboardError").hidden = true;
     try {
-      const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email, role: el.role.value, region: el.region.value }));
+      const u = await UI.busy(e.submitter, () => Api.register({ name: el.name.value, email, password: el.password.value, role: el.role.value, region: el.region.value }));
       $("#dlg-onboard").close();
       $("#onboardForm").reset();
       setUser(u);
@@ -420,6 +425,28 @@ function bind() {
     $("#onboardError").textContent = "";
     $("#onboardError").hidden = true;
   });
+  $("#loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const el = form.elements;
+    const email = el.email.value.trim();
+    const ok = [
+      UI.field(el.email, /^\S+@\S+\.\S+$/.test(email) ? "" : "Informe um e-mail válido."),
+      req(el.password, "Informe sua senha."),
+    ].every(Boolean);
+    if (!ok) return;
+    try {
+      const user = await UI.busy(e.submitter, () => Api.login({ email, password: el.password.value }));
+      $("#dlg-login").close();
+      form.reset();
+      $$(".valid", form).forEach((input) => input.classList.remove("valid"));
+      setUser(user);
+      load();
+    } catch (error) {
+      UI.toast(failureMessage(error, "Não foi possível entrar. Verifique sua conexão e tente novamente."), true);
+    }
+  });
+  $("#dlg-login").addEventListener("cancel", (e) => e.preventDefault());
   $("#dlg-onboard").addEventListener("cancel", (e) => e.preventDefault());
   const pb = $("#profileBtn");
   pb.addEventListener("click", () => {
