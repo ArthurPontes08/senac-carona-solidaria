@@ -165,10 +165,7 @@ The front end stores the selected user ID in that browser's `localStorage`; use 
 
 ## CI/CD
 
-The repository uses **GitHub Actions** (`.github/workflows/ci.yml`), which runs automatically on every Pull Request and push to `main`. It executes two jobs (`backend-ci` and `frontend-ci`) covering:
-1. **Build:** Compiles the Java project (`./mvnw clean compile`) and validates front-end entry files.
-2. **Lint:** Runs code style and syntax checks.
-3. **Tests:** Runs automated unit/layer tests (`./mvnw test`).
+The repository uses **GitHub Actions** (`.github/workflows/ci.yml`) on every Pull Request and push to `main`. The backend job runs a clean Maven compile and unit tests. The front-end job verifies `index.html` and checks the syntax of `js/api.js` and `js/main.js` with Node.js. There is not yet a front-end behavior test suite or a database-backed integration test.
 
 ## Conventional Commits
 

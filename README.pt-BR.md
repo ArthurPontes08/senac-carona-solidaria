@@ -153,10 +153,7 @@ O frontend guarda o ID do usuário selecionado no `localStorage` daquele navegad
 
 ## CI/CD
 
-O repositório utiliza **GitHub Actions** (`.github/workflows/ci.yml`), executado automaticamente em todo Pull Request e em todo push na `main`. A pipeline roda dois jobs (`backend-ci` e `frontend-ci`) contemplando:
-1. **Build:** Compila o projeto Java (`./mvnw clean compile`) e valida os arquivos principais do front-end.
-2. **Lint:** Executa verificações de estilo e sintaxe de código.
-3. **Testes:** Roda os testes automatizados por camada (`./mvnw test`).
+O repositório utiliza **GitHub Actions** (`.github/workflows/ci.yml`) em todo Pull Request e push na `main`. O job do backend executa compilação limpa pelo Maven e os testes unitários. O job do front-end verifica `index.html` e a sintaxe de `js/api.js` e `js/main.js` com Node.js. Ainda não há testes de comportamento do front-end nem teste de integração conectado ao banco de dados.
 
 ## Conventional Commits
 
