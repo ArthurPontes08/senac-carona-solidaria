@@ -134,7 +134,7 @@ export DB_SHOW_SQL="false"
 ./mvnw spring-boot:run
 ```
 
-A API ficará disponível em `http://localhost:8080`. `DB_DDL_AUTO` pode sobrescrever o modo de schema do Hibernate; o padrão atual é `update`. `DB_SHOW_SQL` controla a exibição de SQL e o padrão é `false`.
+A API ficará disponível em `http://localhost:8080` por padrão. Quando definida, a aplicação usa a variável de ambiente `PORT` (como no Render). `DB_DDL_AUTO` pode sobrescrever o modo de schema do Hibernate; o padrão atual é `update`. `DB_SHOW_SQL` controla a exibição de SQL e o padrão é `false`.
 
 Os testes unitários usam repositories mockados e não exigem PostgreSQL ativo. Execute-os dentro de `backend/` com `.\mvnw.cmd test` no Windows ou `./mvnw test` no Linux/macOS. Esses testes não substituem um teste de integração conectado ao PostgreSQL.
 
