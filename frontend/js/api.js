@@ -1,5 +1,10 @@
 const Api = (() => {
-  const CONFIG = { BASE: "http://localhost:8080/api", MOCK: false, DELAY: 700, fail: false };
+  const CONFIG = {
+    BASE: (window.VAIJUNTO_CONFIG && window.VAIJUNTO_CONFIG.apiBase) || "http://localhost:8080/api",
+    MOCK: false,
+    DELAY: 700,
+    fail: false,
+  };
   const iso = (n) => {
     const d = new Date();
     d.setDate(d.getDate() + n);

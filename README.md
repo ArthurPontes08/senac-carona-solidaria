@@ -182,7 +182,11 @@ Examples:
 
 ## Deploy
 
-Automatic cloud deployment is not configured; the MVP runs locally for demonstration purposes.
+The repository does not include a Render Blueprint, so it will not create or replace existing services. For a manually configured Render deployment:
+
+- Set the backend's `DB_URL` to the PostgreSQL JDBC URL and provide `DB_USERNAME`, `DB_PASSWORD`, and `CORS_ALLOWED_ORIGINS` in the Render dashboard. The CORS value must be the exact front-end origin. The application uses Render's `PORT` automatically. `DB_DDL_AUTO` currently defaults to `update`; this is not a substitute for reviewed database migrations.
+- Configure the front-end Static Site with root directory `frontend`, build command `node scripts/generate-config.mjs`, and publish directory `.`. Set `API_BASE_URL` to the public backend URL ending in `/api` (for example, `https://<backend-domain>/api`). This URL is public configuration, not a secret.
+- Keep database credentials in Render environment variables and local `.env` files; do not commit them.
 
 ## Links
 
