@@ -170,7 +170,11 @@ Exemplos:
 
 ## Deploy
 
-O deploy automático em nuvem não foi configurado; o MVP é executado localmente para fins de demonstração.
+O repositório não inclui um Render Blueprint, portanto não cria nem substitui serviços existentes. Para configurar manualmente no Render:
+
+- No serviço do backend, defina `DB_URL` como URL JDBC do PostgreSQL e configure `DB_USERNAME`, `DB_PASSWORD` e `CORS_ALLOWED_ORIGINS` no painel do Render. O valor de CORS deve ser exatamente a origem do front-end. A aplicação usa automaticamente a variável `PORT` do Render. `DB_DDL_AUTO` usa `update` por padrão; isso não substitui migrations revisadas.
+- Configure o Static Site do front-end com diretório raiz `frontend`, comando de build `node scripts/generate-config.mjs` e diretório publicado `.`. Defina `API_BASE_URL` como a URL pública do backend terminada em `/api` (por exemplo, `https://<dominio-backend>/api`). Essa URL é configuração pública, não um segredo.
+- Mantenha as credenciais do banco nas variáveis de ambiente do Render e em arquivos `.env` locais; não faça commit delas.
 
 ## Links
 
